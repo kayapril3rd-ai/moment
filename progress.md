@@ -1,0 +1,37 @@
+# Progress: Che Product Context Initialization
+
+## 2026-05-20
+- Started context initialization task.
+- Loaded `planning-with-files` and `ui-ux-pro-max` skill instructions.
+- Confirmed uploaded ZIP exists at `C:\Users\hp\Downloads\che_product_json_pack_v2.zip`.
+- Created planning files: `task_plan.md`, `findings.md`, `progress.md`.
+- Extracted source ZIP to `docs/source/che_product_json_pack_v2/`.
+- Read UTF-8 source files 00-03 and captured initial persona/language findings.
+- Read source files 04-06 and captured scene/deep chat, relationship growth, and MVP architecture findings.
+- Tried `ui-ux-pro-max` CLI design-system search; script path was unavailable because installed skill contains placeholder files for `scripts`/`data`.
+- Continued UI/UX synthesis using the loaded `ui-ux-pro-max` rulebook content.
+- Created `AGENTS.md`.
+- Created `docs/PRODUCT_SPEC.md`, `docs/UI_GUIDE.md`, `docs/CONVERSATION_SYSTEM.md`, and `docs/IMPLEMENTATION_PLAN.md`.
+- Verified target docs and extracted source JSON files exist.
+- Read core docs for schema/stack analysis task.
+- Inspected project structure and confirmed current repo has documentation only, with no frontend app stack files yet.
+- Created `docs/DATA_SCHEMA.md`.
+- Started Phase 1 frontend scaffold after reading all core docs again.
+- Created Vite + React + TypeScript app scaffold and Today static UI component structure.
+- Added mock data, TypeScript types, time/schedule utility placeholders, and CSS design tokens.
+- Added `.gitkeep` files for empty `src/components/chat` and `src/components/schedule` directories.
+- Could not run `npm install` or `npm run dev` because local shell cannot execute `node.exe` and has no `npm` command available.
+- Applied Today static UI layout tuning: shortened Hero, limited recent moments to one item, refined scene cards, and changed the bottom schedule bar to explicit user/Che schedule copy.
+- Verified `npm run build` succeeds and dev server returns HTTP 200 at `http://127.0.0.1:5173/`.
+- Applied second Today UI hierarchy pass: removed visible top title/time header, moved period/location into Hero, added lightweight "一起走过" moment entry, softened overview cards, and made Hero a full scene-style visual entry.
+- Verified `npm run build` succeeds after the second UI pass and dev server still returns HTTP 200.
+- Applied Today density/fixed-bottom pass: reduced Hero CTA weight, tightened scene card height/thumb sizing/gaps, set bottom schedule bar to a fixed 72px capsule inside the app width, and kept 104px plus safe-area bottom padding for scroll content.
+- Verified `npm run build` succeeds and dev server still returns HTTP 200 after the density/fixed-bottom pass.
+- Restored "你和澈今天" to two side-by-side cards, moved the overlap back to a separate `shared-note` pill, and increased bottom content safe space to 112px plus safe area.
+- Verified `npm run build` succeeds and dev server still returns HTTP 200 after the overview restoration.
+- Implemented Phase 2 schedule drawer UI: bottom capsule opens a warm bottom drawer, segmented tabs switch between user plans and Che schedule, close button and scrim close the drawer, and invite action is placeholder-only.
+- Verified `npm run build` succeeds, local dev server returns HTTP 200, and the in-app browser can open/switch/close the drawer.
+- Fixed Hero CTA position by moving it to the Hero card's right-bottom corner and increased Today content bottom safe space to 160px so the fixed schedule capsule no longer overlaps content.
+- Verified `npm run build` succeeds, local dev server returns HTTP 200, and browser measurements show the Hero CTA is on the right with 160px content bottom padding.
+- Applied third Today UI micro-tuning: lightened Hero CTA into a small private capsule, replaced two overview cards with a single "day lines" card, and increased bottom safe padding to 120px plus safe-area.
+- Verified `npm run build` succeeds and dev server still returns HTTP 200 after the third UI pass.

@@ -1,0 +1,13 @@
+{
+  "project": "AI陪伴产品｜澈现实养成陪伴版",
+  "version": "MVP_v2_language_tuning",
+  "description": "最新对话整理版：重点补充澈的回答人设、自然语气、INFJ表达、场景闲聊、深入聊天、关系养成和MVP功能架构。",
+  "files": [
+    "01_che_character_profile_v2.json",
+    "02_che_language_rules_v2.json",
+    "03_response_examples_v2.json",
+    "04_scene_and_deep_chat_rules_v2.json",
+    "05_relationship_growth_rules_v2.json",
+    "06_mvp_architecture_and_prompts_v2.json"
+  ]
+}

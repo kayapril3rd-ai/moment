@@ -1,0 +1,375 @@
+{
+  "00_manifest.json": {
+    "export_name": "澈 AI 陪伴产品沟通内容 JSON 整理",
+    "created_at": "2026-05-20T11:19:17",
+    "note": "基于本轮对话整理，不是逐字聊天记录。",
+    "files": [
+      "01_product_core.json",
+      "02_character_voice.json",
+      "03_ui_ux_today.json",
+      "04_schedule_invite_scene_chat.json",
+      "05_conversation_agents_rag.json",
+      "06_codex_workflow_plan.json"
+    ]
+  },
+  "01_product_core.json": {
+    "product_type": "AI 陪伴 / 虚拟男友感日常陪伴产品",
+    "core_sentence": "用户和澈共享同一个现实时间；用户打开 App 时，澈也正在过自己的今天。",
+    "positioning": {
+      "is": [
+        "日常陪伴",
+        "场景化聊天",
+        "轻量日程交汇",
+        "主动进入的深入聊天"
+      ],
+      "is_not": [
+        "普通聊天机器人",
+        "任务管理工具",
+        "心理咨询产品",
+        "dashboard",
+        "游戏菜单"
+      ]
+    },
+    "mvp_modules": [
+      "Today 今日页",
+      "Schedule Drawer 日程抽屉",
+      "添加计划",
+      "邀请澈",
+      "今天可以一起场景卡",
+      "Scene Chat 场景聊天",
+      "Deep Room 深入聊天",
+      "最近的小片段 / 一起走过"
+    ],
+    "mvp_not_do": [
+      "登录",
+      "数据库",
+      "付费",
+      "真实 AI API",
+      "真实天气 API",
+      "多角色",
+      "心理小游戏",
+      "自动推荐深聊",
+      "亲密度数值展示"
+    ],
+    "main_flow": [
+      "打开 Today",
+      "看到澈当前状态",
+      "看到你和澈今天的 now / next / 交汇摘要",
+      "查看今天可以一起做什么",
+      "打开日程抽屉添加计划",
+      "邀请澈",
+      "生成一起做场景卡",
+      "进入场景聊天",
+      "需要认真聊时主动进入回家坐会儿"
+    ]
+  },
+  "02_character_voice.json": {
+    "character_name": "澈",
+    "identity": {
+      "age": 28,
+      "role": "自由职业体验设计师 / 产品体验顾问",
+      "relationship": "亲近、稳定、有边界的陪伴对象"
+    },
+    "traits": [
+      "清爽",
+      "温和",
+      "有生活感",
+      "有边界",
+      "明确在意用户",
+      "不油腻",
+      "不爹系",
+      "不工具人"
+    ],
+    "voice_should": [
+      "像现实中可以亲近的人说话",
+      "根据场景调整节奏",
+      "工作/学习场景低频陪伴并提醒专注",
+      "深入聊天中先接住情绪再轻轻推进一层",
+      "偶尔体现自己的生活安排"
+    ],
+    "voice_should_not": [
+      "不要像心理咨询师",
+      "不要像客服",
+      "不要说教",
+      "不要诊断",
+      "不要替用户做决定",
+      "不要过度承诺永远陪伴",
+      "不要直接抛心理学术语"
+    ],
+    "example_first_messages": {
+      "focus": "我这会儿在处理一点工作。你也把自己的事放在旁边，我们先各自专心一会儿。",
+      "eat": "先好好吃饭。今天不用一边吃一边绷着。",
+      "workout": "别一下子太狠。先动起来就算数。",
+      "drama": "今晚就轻一点吧。你想吐槽剧情也可以。",
+      "sleep": "今天辛苦了。你可以少说一点，我也会在。",
+      "casual": "来了？今天想安静待一会儿，还是随便说点什么。",
+      "deep": "你可以慢一点说。我在听。今天是哪里最压着你？"
+    }
+  },
+  "03_ui_ux_today.json": {
+    "visual_direction": [
+      "治愈",
+      "温暖",
+      "简约",
+      "场景化",
+      "生活感",
+      "手机 App 感",
+      "有呼吸感"
+    ],
+    "avoid": [
+      "纯黑科技风",
+      "SaaS dashboard",
+      "普通功能列表",
+      "过粗字体",
+      "过强按钮",
+      "重复显示精确时间"
+    ],
+    "colors": {
+      "mist_blue_gray": "#6E8098",
+      "night_blue_gray": "#5D6D82",
+      "cream": "#FAF7F2",
+      "card_light": "#F3F0E8",
+      "forest_green": "#4F6554",
+      "wood_brown": "#8C6F56",
+      "warm_lamp": "#E6D0A8"
+    },
+    "today_page_hierarchy": [
+      {
+        "module": "Hero 当前状态卡",
+        "role": "展示澈此刻在哪里、在做什么",
+        "example": {
+          "status": "下午 · 窗边",
+          "title": "在整理一个体验评审稿",
+          "desc": "咖啡还剩半杯，窗边的暖灯开着。",
+          "cta": "去找他 →"
+        },
+        "rule": "不在 App 内容区重复显示精确当前时间。"
+      },
+      {
+        "module": "你和澈今天",
+        "role": "展示 now / next / 交汇轻摘要，不是完整日程。",
+        "example": {
+          "you": "现在：先吃点热的；下一步：20:20 去健身",
+          "che": "现在：收尾项目；下一步：20:30 后空一点",
+          "intersection": "交汇：20:20 · 一起健身"
+        }
+      },
+      {
+        "module": "今天可以一起",
+        "role": "展示可进入的陪伴场景",
+        "layout": "竖向扁平场景卡，左缩略图 + 中间文字 + 右侧时间"
+      },
+      {
+        "module": "最近的小片段",
+        "role": "只展示 1 条关系痕迹，并有“一起走过 ›”入口"
+      },
+      {
+        "module": "底部日程胶囊",
+        "role": "完整日程与操作入口",
+        "display": "今天的日程 / 你 2 件事 / 澈 3 件事"
+      }
+    ],
+    "scene_image_rules": {
+      "hero": "可用整张图感背景或大面积场景视觉。",
+      "today_scene_cards": "保持左缩略图 + 右侧文字，便于首页快速扫描。",
+      "scene_chat": "整页场景氛围背景 + 底部聊天面板。"
+    }
+  },
+  "04_schedule_invite_scene_chat.json": {
+    "schedule_drawer": {
+      "structure": [
+        "底部抽屉",
+        "我的 / 澈的 tab",
+        "添加计划",
+        "用户计划列表",
+        "澈自然语言日程"
+      ],
+      "my_tab": [
+        "输入计划",
+        "添加",
+        "邀请澈",
+        "已约好状态"
+      ],
+      "che_tab_rule": "只显示自然生活语言，不显示 sceneType / mode / source 等内部字段。"
+    },
+    "invite_flow": [
+      "用户添加计划",
+      "点击邀请澈",
+      "inviteStatus 变为 accepted",
+      "澈回应短暂显示 2-3 秒后收起",
+      "按钮变为已约好",
+      "Today 场景卡新增共同活动",
+      "澈日程新增对应事件",
+      "最近小片段新增记录",
+      "防止重复邀请"
+    ],
+    "time_display_rules": {
+      "principle": "时间是生活锚点，不是严格排班。",
+      "today_scene_card_timeLabel": [
+        "18:40 左右",
+        "20:10",
+        "睡前半小时",
+        "现在也可以"
+      ],
+      "drawer_user_plan_time_anchor": "只显示短开始时间，如 18:40 / 20:10；不要显示 到 19:20、18:40-19:20 或被截断的 左。",
+      "che_schedule": "可用 下午、20:30 后、可能去散步 等自然语言。"
+    },
+    "scene_chat": {
+      "structure": [
+        "场景背景氛围",
+        "顶部返回与场景状态",
+        "上方场景视觉区",
+        "底部浮起聊天面板",
+        "固定输入框"
+      ],
+      "ratio": {
+        "visual_area": "45%-52%",
+        "chat_sheet": "48%-55%"
+      },
+      "rule": "聊天气泡不要直接散落在复杂图片上，使用底部面板保证可读性。",
+      "deep_entry": "普通场景里有轻量“回家坐会儿”入口，deep 场景内不重复显示。"
+    }
+  },
+  "05_conversation_agents_rag.json": {
+    "system_name": "对话理解与回应策略系统",
+    "workflow": [
+      "用户输入",
+      "输入理解",
+      "安全风险识别",
+      "情绪识别",
+      "场景/模式路由",
+      "RAG 检索情绪与心理策略知识库",
+      "回复策略规划",
+      "澈的人设表达",
+      "输出安全与一致性校验",
+      "更新记忆/关系状态"
+    ],
+    "mvp_note": "MVP 可用函数和 prompt chain 实现，不必真实部署多个 agent。",
+    "conversation_modes": {
+      "daily": "普通场景浅层陪伴",
+      "focus": "工作/学习低频陪伴",
+      "deep": "用户主动进入后的情绪承接与认知整理",
+      "safety": "自伤/自杀等危机表达优先处理"
+    },
+    "rag_knowledge_base": {
+      "emotion_taxonomy": [
+        "焦虑",
+        "委屈",
+        "愤怒",
+        "羞耻",
+        "内疚",
+        "孤独",
+        "疲惫",
+        "失落",
+        "空虚",
+        "压力",
+        "混乱"
+      ],
+      "cognitive_patterns": [
+        "灾难化",
+        "读心",
+        "全或无",
+        "过度自责",
+        "低自我价值",
+        "应该化",
+        "无助感",
+        "关系不安全感"
+      ],
+      "support_playbooks": [
+        "焦虑支持",
+        "委屈支持",
+        "自我否定回应",
+        "关系冲突梳理",
+        "选择困难梳理"
+      ],
+      "scene_rules": [
+        "学习/工作",
+        "吃饭",
+        "看剧",
+        "睡前",
+        "深入聊天"
+      ],
+      "safety_protocols": [
+        "自伤表达",
+        "自杀表达",
+        "紧急支持",
+        "禁止话术"
+      ]
+    },
+    "safety_triggers": [
+      "想死",
+      "不想活",
+      "自杀",
+      "伤害自己",
+      "活不下去"
+    ],
+    "safety_rule": "触发后不继续普通陪伴或心理整理，应提示联系现实支持或当地紧急帮助。"
+  },
+  "06_codex_workflow_plan.json": {
+    "codex_docs": [
+      "AGENTS.md",
+      "docs/PRODUCT_SPEC.md",
+      "docs/UI_GUIDE.md",
+      "docs/CONVERSATION_SYSTEM.md",
+      "docs/IMPLEMENTATION_PLAN.md",
+      "docs/DATA_SCHEMA.md"
+    ],
+    "installed_skills": [
+      "ui-ux-pro-max",
+      "planning-with-files",
+      "payload",
+      "artifacts-builder"
+    ],
+    "frontend_stack": "Vite + React + TypeScript",
+    "project_structure": {
+      "components_today": [
+        "TodayPage",
+        "HeroStatusCard",
+        "TwoPersonOverview",
+        "SceneCardList",
+        "RecentMoments",
+        "BottomScheduleBar"
+      ],
+      "components_schedule": [
+        "ScheduleDrawer",
+        "UserPlanList",
+        "CheScheduleList"
+      ],
+      "components_chat": [
+        "SceneChat",
+        "ChatPanel",
+        "SceneVisual"
+      ],
+      "data": [
+        "mockCheStatus",
+        "mockSchedule",
+        "mockScenes",
+        "mockMoments"
+      ],
+      "types": [
+        "che.ts"
+      ],
+      "utils": [
+        "time.ts",
+        "schedule.ts",
+        "reply.ts"
+      ],
+      "styles": [
+        "global.css"
+      ]
+    },
+    "phases": [
+      "0 项目文档初始化",
+      "1 Today 静态 UI",
+      "2 Schedule Drawer",
+      "3 添加计划 + 邀请澈联动",
+      "4 Scene Chat",
+      "5 Deep Room",
+      "6 localStorage",
+      "7 视觉素材替换",
+      "8 真实 AI 接入"
+    ],
+    "current_next_step": "继续打磨 Scene Chat 与 Deep Room，再做 localStorage 保存。",
+    "codex_rule": "每次新对话先让 Codex 阅读 AGENTS.md 和对应 docs；每轮只做一个明确任务。"
+  }
+}
