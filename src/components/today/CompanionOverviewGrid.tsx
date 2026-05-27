@@ -1,6 +1,6 @@
 // CompanionOverviewGrid renders the soft 2x2 summary for "you and Che today".
 // Keep this as a lightweight overview; detailed editing belongs in Arrange.
-import { ChatSoftIcon, CheStatusIcon, ClockSoftIcon, PlanCardIcon, SproutIcon } from '../icons/SoftIcons';
+import { ChatSoftIcon, CheStatusIcon, ClockSoftIcon, PlanCardIcon, SproutIcon } from '../icons';
 
 interface CompanionOverviewGridProps {
   companionshipTitle: string;

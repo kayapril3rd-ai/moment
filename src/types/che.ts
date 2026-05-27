@@ -47,11 +47,14 @@ export interface CheStatus {
 
 export interface UserPlan {
   id: string;
+  dateKey?: string;
+  sceneKey?: string;
   title: string;
   startTime: string;
   endTime: string | null;
   timeLabel?: string;
   timePrecision?: TimePrecision;
+  durationMinutes?: number;
   sceneType: SceneType;
   note: string;
   inviteStatus: InviteStatus;
@@ -63,6 +66,15 @@ export interface UserPlan {
 
 export interface CheScheduleItem {
   id: string;
+  dateKey?: string;
+  sceneKey?: string;
+  iconKey?: string;
+  actionLabel?: string;
+  status?: string;
+  cardImage?: string;
+  heroImage?: string;
+  cardFocus?: string;
+  heroFocus?: string;
   title: string;
   startTime: string;
   endTime: string | null;
@@ -103,6 +115,7 @@ export type DayRecordOwner = 'mine' | 'che';
 
 export interface DayRecord {
   id: string;
+  dateKey?: string;
   date?: string;
   owner?: DayRecordOwner;
   kind: DayRecordKind;

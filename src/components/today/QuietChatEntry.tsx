@@ -1,6 +1,6 @@
 // QuietChatEntry is the low-pressure Deep Room entrance below the hero.
 // It should feel like "come sit for a while", not a therapy or tool module.
-import { ArrowRightSoftIcon, DeepRoomIcon } from '../icons/SoftIcons';
+import { ArrowRightSoftIcon, DeepRoomIcon } from '../icons';
 
 interface QuietChatEntryProps {
   onOpen: () => void;

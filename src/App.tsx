@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react';
 import { SceneChat } from './components/chat/SceneChat';
 import { TogetherMoments } from './components/moments/TogetherMoments';
 import { TodayPage } from './components/today/TodayPage';
-import { mockRecentMoments } from './data/mockMoments';
-import { mockScenes } from './data/mockScenes';
+import { mockRecentMoments, mockScenes } from './data';
 import type { RecentMoment, SceneData, SceneType } from './types/che';
 
 type AppView = 'today' | 'scene' | 'moments';

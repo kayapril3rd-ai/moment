@@ -21,9 +21,7 @@ const clockTimeSearchPattern = /(\d{1,2}:\d{2})/;
 export function parsePlanInput(input: string): ParsedPlanInput | null {
   const normalized = input.trim().replace(/\s+/g, ' ');
 
-  if (!normalized) {
-    return null;
-  }
+  if (!normalized) return null;
 
   const match = normalized.match(clockTimePattern);
   const title = match ? match[2].trim() : normalized;
@@ -39,41 +37,21 @@ export function parsePlanInput(input: string): ParsedPlanInput | null {
 }
 
 export function inferSceneTypeFromPlan(text: string): SceneType {
-  if (/学习|工作|英语|复习|专注|写稿|看书|背单词/.test(text)) {
-    return 'study';
-  }
-
-  if (/健身|运动|跑步|练背|瑜伽|训练|散步|公园/.test(text)) {
-    return 'fitness';
-  }
-
-  if (/看剧|电影|动漫|综艺|追剧/.test(text)) {
-    return 'watch';
-  }
-
-  if (/吃饭|晚饭|午饭|早餐|夜宵|做饭|热的/.test(text)) {
-    return 'meal';
-  }
-
-  if (/睡觉|睡前|聊会儿|晚安/.test(text)) {
-    return 'sleep';
-  }
-
+  if (/学习|工作|英语|复习|专注|写稿|看书|背单词/.test(text)) return 'study';
+  if (/健身|运动|跑步|练背|瑜伽|训练|散步|公园/.test(text)) return 'fitness';
+  if (/看剧|电影|动漫|综艺|追剧/.test(text)) return 'watch';
+  if (/吃饭|晚饭|午饭|早餐|夜宵|做饭|热的/.test(text)) return 'meal';
+  if (/睡觉|睡前|聊会儿|晚安/.test(text)) return 'sleep';
   return 'idle';
 }
 
 export function createUserPlanFromInput(input: string, now = new Date()): UserPlan | null {
   const parsed = parsePlanInput(input);
-
-  if (!parsed) {
-    return null;
-  }
+  if (!parsed) return null;
 
   const stamp = now.toISOString();
-  const id = `plan-${now.getTime()}`;
-
   return {
-    id,
+    id: `plan-${now.getTime()}`,
     title: parsed.title,
     startTime: parsed.startTime,
     endTime: null,
@@ -90,32 +68,22 @@ export function createUserPlanFromInput(input: string, now = new Date()): UserPl
 
 export function getPlanTimeAnchor(plan: Pick<UserPlan, 'startTime' | 'timeLabel'>): string {
   const startTimeMatch = plan.startTime?.match(clockTimeSearchPattern);
-
-  if (startTimeMatch) {
-    return startTimeMatch[1];
-  }
+  if (startTimeMatch) return startTimeMatch[1];
 
   const labelMatch = plan.timeLabel?.match(clockTimeSearchPattern);
-
-  if (labelMatch) {
-    return labelMatch[1];
-  }
+  if (labelMatch) return labelMatch[1];
 
   const fallback = plan.timeLabel || plan.startTime || '时间待定';
-
   if (/睡前/.test(fallback)) return '睡前';
   if (/晚上|今晚|晚些/.test(fallback)) return '晚些时候';
   if (/下午/.test(fallback)) return '下午';
   if (/现在/.test(fallback)) return '现在';
   if (/待定/.test(fallback)) return '时间待定';
-
   return fallback.length > 5 ? '稍后' : fallback;
 }
 
 export function getPlanDurationLabel(plan: UserPlan): string {
-  if (plan.endTime && plan.startTime) {
-    return '一段时间';
-  }
+  if (plan.endTime && plan.startTime) return '一段时间';
 
   switch (plan.sceneType) {
     case 'study':
@@ -150,7 +118,6 @@ export function getCheInviteReply(plan: UserPlan): string {
 
 export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneCard {
   const timeLabel = getDisplayTimeLabel(plan);
-
   return {
     id: `scene-shared-${plan.id}`,
     sceneType: plan.sceneType,
@@ -168,7 +135,6 @@ export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneC
 
 export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
   const timeLabel = getDisplayTimeLabel(plan);
-
   return {
     id: `che-shared-${plan.id}`,
     title: getCheScheduleTitle(plan),

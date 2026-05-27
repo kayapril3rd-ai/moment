@@ -26,12 +26,12 @@ export const mockCheStatus: CheStatus = {
   detail: '咖啡还剩半杯，\n窗边的路灯开了。\n需要我帮你收尾一下吗？',
   outfit: '浅灰针织衫，头发刚吹干',
   availableScenes: ['study', 'watch', 'meal', 'fitness'],
-  updatedAt: '2026-05-24T14:20:00+08:00',
+  updatedAt: '2026-05-26T14:20:00+08:00',
 };
 
 export const userTodaySummary = {
-  title: '1 件待做 · 1 件已约好',
-  detail: '下一件：晚上吃点热的',
+  title: '1 待做 · 1 已约',
+  detail: '下个：吃点热的',
 };
 
 export const cheTodaySummary = {

@@ -69,7 +69,7 @@ export const mockScenes: SceneData[] = [
     isDeepEntry: false,
     mood: 'mist',
     textTone: 'light',
-    focalPoint: 'center 42%',
+    focalPoint: '58% 36%',
   },
   {
     id: 'meal',
@@ -78,13 +78,13 @@ export const mockScenes: SceneData[] = [
     conversationMode: 'scene',
     entryLabel: '一起吃点热的',
     setting: '厨房里有一点热气，锅里的汤还在小火滚着。',
-    cheStatusHint: '他在等咖喱饭收汁。',
+    cheStatusHint: '他在等你把饭收拾好。',
     starterMessage: '先好好吃饭。今天不用一边吃一边绷着。',
     allowedQuickReplies: ['看看吃什么', '简单一点', '晚点再吃'],
     isDeepEntry: false,
     mood: 'warm',
     textTone: 'light',
-    focalPoint: 'center',
+    focalPoint: '50% 38%',
   },
   {
     id: 'fitness',
@@ -99,7 +99,7 @@ export const mockScenes: SceneData[] = [
     isDeepEntry: false,
     mood: 'green',
     textTone: 'light',
-    focalPoint: 'center 45%',
+    focalPoint: '54% 32%',
   },
   {
     id: 'watch',
@@ -114,7 +114,7 @@ export const mockScenes: SceneData[] = [
     isDeepEntry: false,
     mood: 'mist',
     textTone: 'light',
-    focalPoint: 'center',
+    focalPoint: '52% 42%',
   },
   {
     id: 'sleep',
@@ -144,7 +144,7 @@ export const mockScenes: SceneData[] = [
     isDeepEntry: false,
     mood: 'mist',
     textTone: 'light',
-    focalPoint: 'center',
+    focalPoint: '56% 34%',
   },
   {
     id: 'deep_room',
@@ -159,6 +159,6 @@ export const mockScenes: SceneData[] = [
     isDeepEntry: true,
     mood: 'night',
     textTone: 'light',
-    focalPoint: 'center 40%',
+    focalPoint: '50% 40%',
   },
 ];

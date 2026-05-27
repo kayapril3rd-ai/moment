@@ -1,9 +1,9 @@
 // SceneCard renders one Today activity entry. The whole card is tappable.
-// Keep it scene-like and compact; avoid turning it into a task row.
+// The thumbnail follows the card scene and uses thumbFocus to preserve faces.
+import type { CSSProperties } from 'react';
 import type { SceneCard as SceneCardType } from '../../types/che';
-import { ArrowRightSoftIcon, DumbbellSoftIcon } from '../icons/SoftIcons';
-
-const exerciseImageUrl = new URL('../../../场景图/exercise.png', import.meta.url).href;
+import { getSceneImage } from '../../utils/sceneImages';
+import { FitnessIcon, MovieIcon, ParkIcon, StudyIcon } from '../icons';
 
 interface SceneCardProps {
   card: SceneCardType;
@@ -11,27 +11,33 @@ interface SceneCardProps {
 }
 
 export function SceneCard({ card, onSelect }: SceneCardProps) {
+  const image = getSceneImage(card.sceneType);
+
   return (
     <button className="scene-card" data-scene={card.sceneType} type="button" onClick={() => onSelect(card)}>
       <span className="scene-thumb" aria-hidden="true">
-        <img src={exerciseImageUrl} alt="" />
+        <img src={image.src} alt="" style={{ objectPosition: image.thumbFocus } as CSSProperties} />
       </span>
       <span className="scene-copy">
         <span className="scene-title-row">
           <span className="scene-title-icon" aria-hidden="true">
-            <DumbbellSoftIcon size={18} />
+            <SceneIcon sceneType={card.sceneType} />
           </span>
           <h3>{card.title}</h3>
         </span>
         <p>{card.description}</p>
         <time>{getSceneCardTag(card)}</time>
       </span>
-      <span className="scene-card-action">
-        进入
-        <ArrowRightSoftIcon size={17} aria-hidden="true" />
-      </span>
+      <span className="scene-card-action">进入</span>
     </button>
   );
+}
+
+function SceneIcon({ sceneType }: { sceneType: SceneCardType['sceneType'] }) {
+  if (sceneType === 'fitness') return <FitnessIcon size={24} />;
+  if (sceneType === 'study') return <StudyIcon size={24} />;
+  if (sceneType === 'watch') return <MovieIcon size={24} />;
+  return <ParkIcon size={24} />;
 }
 
 function getSceneCardTag(card: SceneCardType) {

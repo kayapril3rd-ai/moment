@@ -1,8 +1,6 @@
-// UserPlanList renders the manageable "我的" arrange tab.
-// Invite remains one tap and plan details still open through the existing sheet.
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import type { SceneType, UserPlan } from '../../types/che';
-import { CalendarSoftIcon, ClockSoftIcon, DumbbellSoftIcon, PlanCardIcon, SproutIcon } from '../icons/SoftIcons';
+import { CalendarSoftIcon, ClockSoftIcon, DumbbellSoftIcon, PlanCardIcon, SproutIcon } from '../icons';
 
 interface UserPlanListProps {
   plans: UserPlan[];
@@ -19,19 +17,15 @@ export function UserPlanList({ plans, onAddPlan, onInvite, onSelectPlan }: UserP
   const [visibleReplyIds, setVisibleReplyIds] = useState<Set<string>>(() => new Set());
   const replyTimers = useRef<number[]>([]);
 
-  useEffect(() => {
-    return () => replyTimers.current.forEach((timerId) => window.clearTimeout(timerId));
-  }, []);
+  useEffect(() => () => replyTimers.current.forEach((timerId) => window.clearTimeout(timerId)), []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const didAdd = onAddPlan(planInput);
-
     if (!didAdd) {
       setHint('先写一件想做的小事就好。');
       return;
     }
-
     setPlanInput('');
     setHint('');
   };
@@ -94,11 +88,13 @@ export function UserPlanList({ plans, onAddPlan, onInvite, onSelectPlan }: UserP
                 <span className="plan-icon" aria-hidden="true">
                   <PlanIcon sceneType={plan.sceneType} />
                 </span>
-                <strong>{getScheduleTimeLabel(plan)}</strong>
-                <small>
-                  {getScheduleDurationLabel(plan) ? <ClockSoftIcon size={14} aria-hidden="true" /> : null}
-                  {getScheduleDurationLabel(plan)}
-                </small>
+                <span className="plan-time-copy">
+                  <strong>{getScheduleTimeLabel(plan)}</strong>
+                  <small>
+                    {getScheduleDurationLabel(plan) ? <ClockSoftIcon size={14} aria-hidden="true" /> : null}
+                    {getScheduleDurationLabel(plan)}
+                  </small>
+                </span>
               </div>
 
               <span className="schedule-divider" aria-hidden="true" />
@@ -135,18 +131,8 @@ function getScheduleTimeLabel(plan: UserPlan): string {
 }
 
 function getScheduleDurationLabel(plan: UserPlan): string {
-  switch (plan.id) {
-    case 'focus-study':
-      return '60 分钟';
-    case 'walk':
-      return '45 分钟';
-    case 'movie':
-      return '90 分钟';
-    case 'workout':
-      return '';
-    default:
-      return plan.sceneType === 'meal' ? '40 分钟' : '45 分钟';
-  }
+  if (plan.durationMinutes) return `${plan.durationMinutes} 分钟`;
+  return '';
 }
 
 function PlanIcon({ sceneType }: { sceneType: SceneType }) {
@@ -159,7 +145,6 @@ function PlanIcon({ sceneType }: { sceneType: SceneType }) {
 function getPlanAction(plan: UserPlan): { label: string; kind: 'invite' | 'accepted' | 'scheduled' | 'active' | 'done' } {
   if (plan.status === 'done') return { label: '已完成', kind: 'done' };
   if (plan.status === 'active') return { label: '进行中', kind: 'active' };
-  if (plan.id === 'workout') return { label: '已安排', kind: 'scheduled' };
   if (plan.inviteStatus === 'accepted') return { label: '已约好', kind: 'accepted' };
   if (plan.status === 'accepted') return { label: '已安排', kind: 'scheduled' };
   return { label: '邀请澈', kind: 'invite' };

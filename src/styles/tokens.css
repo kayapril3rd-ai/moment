@@ -1,0 +1,73 @@
+﻿:root {
+  color-scheme: light;
+  --bg-app: #eef3ef;
+  --bg-soft: #f7faf7;
+  --bg-warm: #f8f5ee;
+  --surface: rgba(255, 255, 250, 0.72);
+  --surface-strong: rgba(255, 255, 250, 0.9);
+  --surface-mist: rgba(233, 241, 237, 0.76);
+  --surface-glass: rgba(245, 249, 247, 0.58);
+  --text-main: #1f302c;
+  --text-soft: #60736d;
+  --text-faint: #8b9994;
+  --text-inverse: #f8faf7;
+  --green-main: #41695b;
+  --green-dark: #2f5147;
+  --green-soft: #dce8e2;
+  --blue-mist: #d8e4ea;
+  --blue-gray: #8fa7b6;
+  --slate: #394b54;
+  --warm-light: #efcb78;
+  --wood-soft: #c9a57a;
+  --line-soft: rgba(47, 81, 71, 0.12);
+  --shadow-soft-color: rgba(31, 48, 44, 0.12);
+
+  --color-bg: var(--bg-app);
+  --color-bg-warm: var(--bg-warm);
+  --color-card: var(--surface);
+  --color-card-soft: var(--surface-mist);
+  --color-cream: var(--text-inverse);
+  --color-wood: var(--wood-soft);
+  --color-wood-soft: rgba(201, 165, 122, 0.45);
+  --color-forest: var(--green-main);
+  --color-forest-soft: var(--green-soft);
+  --color-blue-gray: var(--blue-mist);
+  --color-lamp: var(--warm-light);
+  --color-text: var(--text-main);
+  --color-text-soft: var(--text-soft);
+  --color-muted: var(--text-faint);
+  --color-divider: var(--line-soft);
+  --color-shadow: var(--shadow-soft-color);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.125rem;
+  --font-size-lg: 1.375rem;
+  --font-size-xl: 1.75rem;
+
+  --line-tight: 1.2;
+  --line-normal: 1.55;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --bottom-bar-height: 4.5rem;
+  --bottom-bar-offset: 0.875rem;
+  --bottom-content-safe-space: 7.75rem;
+  --scene-card-min-height: 6.25rem;
+  --scene-thumb-size: 4rem;
+
+  --radius-sm: 0.75rem;
+  --radius-card: 1.35rem;
+  --radius-pill: 999px;
+  --shadow-soft: 0 18px 42px var(--color-shadow);
+  --shadow-subtle: 0 10px 24px rgba(38, 50, 47, 0.08);
+}
+

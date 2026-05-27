@@ -12,7 +12,7 @@ interface SceneCardListProps {
 export function SceneCardList({ title, cards, onSelectScene }: SceneCardListProps) {
   const visibleCards = [...cards]
     .filter((card) => card.status !== 'disabled')
-    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .sort((a, b) => getCardPriority(a) - getCardPriority(b) || a.sortOrder - b.sortOrder)
     .slice(0, 1);
 
   return (
@@ -28,4 +28,12 @@ export function SceneCardList({ title, cards, onSelectScene }: SceneCardListProp
       </div>
     </section>
   );
+}
+
+function getCardPriority(card: SceneCardType): number {
+  if (card.status === 'active') return 0;
+  if (card.status === 'scheduled') return 1;
+  if (card.status === 'availableNow') return 2;
+  if (card.status === 'flexible') return 3;
+  return 4;
 }

@@ -1,9 +1,8 @@
 // HeroStatusCard shows where Che is right now, as a lived-in scene entry.
-// Change copy in src/data/mockCheStatus.ts; change the scene image reference here if the hero scene changes.
+// The scene image follows the current event through CheStatus.availableScenes[0].
 import type { CSSProperties } from 'react';
 import type { CheStatus, TodayCopy } from '../../types/che';
-
-const heroImageUrl = new URL('../../../场景图/work.png', import.meta.url).href;
+import { getSceneImage } from '../../utils/sceneImages';
 
 interface HeroStatusCardProps {
   status: CheStatus;
@@ -13,11 +12,18 @@ interface HeroStatusCardProps {
 }
 
 export function HeroStatusCard({ status, copy, actionLabel, onOpenScene }: HeroStatusCardProps) {
+  const sceneImage = getSceneImage(status.availableScenes[0]);
+
   return (
     <section
       className="hero-card"
       aria-labelledby="hero-status-title"
-      style={{ '--hero-image': `url(${heroImageUrl})` } as CSSProperties}
+      style={
+        {
+          '--hero-image': `url(${sceneImage.src})`,
+          '--hero-position': sceneImage.heroFocus,
+        } as CSSProperties
+      }
     >
       <div className="hero-visual" aria-hidden="true" />
       <div className="hero-content">

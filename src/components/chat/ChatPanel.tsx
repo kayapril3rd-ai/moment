@@ -2,6 +2,7 @@
 // No avatars are used; bubbles carry the conversation.
 import { FormEvent, useState } from 'react';
 import type { ChatMessage, SceneData } from '../../types/che';
+import { SendIcon } from '../icons';
 
 interface ChatPanelProps {
   scene: SceneData;
@@ -44,7 +45,7 @@ export function ChatPanel({ scene, messages, onSend }: ChatPanelProps) {
           onChange={(event) => setDraft(event.target.value)}
         />
         <button type="submit" aria-label="发送">
-          <span aria-hidden="true">↑</span>
+          <SendIcon size={20} aria-hidden="true" />
         </button>
       </form>
     </section>
