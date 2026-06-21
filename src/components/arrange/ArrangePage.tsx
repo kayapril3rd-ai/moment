@@ -1,7 +1,6 @@
-// ArrangePage owns the Arrange tab: plans for today/future and records for past days.
 import type { CheScheduleItem, DayRecord, UserPlan } from '../../types/che';
 import { useArrangeDateState } from '../../hooks/useArrangeDateState';
-import { AppLogoIcon, BellSoftIcon } from '../icons';
+import { CalendarSoftIcon } from '../icons';
 import { CheScheduleList } from '../schedule/CheScheduleList';
 import { UserPlanList } from '../schedule/UserPlanList';
 import { ArrangeDateStrip } from './ArrangeDateStrip';
@@ -12,7 +11,7 @@ interface ArrangePageProps {
   userPlans: UserPlan[];
   cheSchedule: CheScheduleItem[];
   dayRecords: DayRecord[];
-  onAddPlan: (input: string) => boolean;
+  onAddPlan: (input: string, selectedDateKey?: string) => boolean;
   onInvitePlan: (planId: string) => void;
   onSelectPlan: (plan: UserPlan) => void;
 }
@@ -46,15 +45,12 @@ export function ArrangePage({
   const visibleCheSchedule = cheSchedule.filter((item) => (item.dateKey ?? selectedDateKey) === selectedDateKey);
 
   return (
-    <section className="tab-page arrange-page schedule-page" aria-labelledby="arrange-title">
+    <section className="tab-page arrange-page schedule-page arrange-compact-page" aria-labelledby="arrange-title">
       <header className="schedule-header">
         <span className="schedule-brand">
-          <AppLogoIcon size={38} aria-hidden="true" />
-          <h1 id="arrange-title">澈</h1>
+          <CalendarSoftIcon className="schedule-title-icon" size={38} aria-hidden="true" />
+          <h1 id="arrange-title">安排</h1>
         </span>
-        <button className="schedule-bell" type="button" aria-label="轻提醒">
-          <BellSoftIcon size={24} aria-hidden="true" />
-        </button>
       </header>
 
       <ArrangeDateStrip
@@ -80,7 +76,7 @@ export function ArrangePage({
         <>
           <ArrangeSegmentedTabs activeTab={activeTab} onTabChange={setActiveTab} />
           {activeTab === 'mine' ? (
-            <UserPlanList plans={visibleUserPlans} onAddPlan={onAddPlan} onInvite={onInvitePlan} onSelectPlan={onSelectPlan} />
+            <UserPlanList plans={visibleUserPlans} selectedDateKey={selectedDateKey} onAddPlan={onAddPlan} onInvite={onInvitePlan} onSelectPlan={onSelectPlan} />
           ) : (
             <section className="che-arrange-panel" aria-labelledby="che-arrange-title">
               <h2 id="che-arrange-title" className="schedule-section-title">今日安排</h2>

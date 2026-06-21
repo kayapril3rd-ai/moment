@@ -52,7 +52,7 @@ export function ActivityDetail({
         <div className="activity-actions activity-actions-compact">
           {card.status === 'active' ? (
             <>
-              <button className="activity-action-primary" type="button" onClick={onBackToScene}>回到场景</button>
+              <button className="activity-action-primary" type="button" onClick={onBackToScene}>去找他</button>
               <button className="activity-action-secondary" type="button" onClick={onComplete}>标记完成</button>
               <button className="activity-action-secondary" type="button" onClick={onEdit}>修改安排</button>
             </>
@@ -100,7 +100,7 @@ function getStatusLabel(card: SceneCard): string {
 
 function getActivityDescription(card: SceneCard): string {
   if (card.status === 'active') {
-    return '你们已经开始了。可以回到场景里继续，也可以在结束后标记完成。';
+    return '你们已经开始了。可以去找他继续，也可以在结束后标记完成。';
   }
 
   if (card.status === 'completed') {

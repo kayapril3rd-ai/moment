@@ -1,6 +1,6 @@
-// CompanionOverviewGrid renders the soft 2x2 summary for "you and Che today".
-// Keep this as a lightweight overview; detailed editing belongs in Arrange.
-import { ChatSoftIcon, CheStatusIcon, ClockSoftIcon, PlanCardIcon, SproutIcon } from '../icons';
+import { CheStatusIcon, PlanCardIcon, SproutIcon, TodayBubbleIcon } from '../icons';
+
+const deepTalkCatIconUrl = new URL('../../assets/deep-talk-cat-cropped.png', import.meta.url).href;
 
 interface CompanionOverviewGridProps {
   companionshipTitle: string;
@@ -18,11 +18,16 @@ interface CompanionOverviewGridProps {
 }
 
 const overviewCards = [
-  { key: 'companionship', label: '今日相伴', Icon: ClockSoftIcon },
-  { key: 'deep', label: '安静聊聊', Icon: ChatSoftIcon },
+  { key: 'companionship', label: '今日相伴', Icon: TodayBubbleIcon },
+  { key: 'deep', label: '安静聊聊', Icon: null },
   { key: 'user', label: '我的计划', Icon: PlanCardIcon },
   { key: 'che', label: '澈的状态', Icon: CheStatusIcon },
 ] as const;
+
+function toShortHint(text: string) {
+  const normalized = text.replace(/\s+/g, '');
+  return normalized.length > 8 ? normalized.slice(0, 8) : normalized;
+}
 
 export function CompanionOverviewGrid({
   companionshipTitle,
@@ -54,12 +59,14 @@ export function CompanionOverviewGrid({
       <div className="companion-grid">
         {overviewCards.map(({ key, label, Icon }) => (
           <button className="companion-grid-card" type="button" key={key} onClick={data[key].onClick}>
-            <span className="overview-icon" aria-hidden="true">
-              <Icon size={20} />
+            <span className="summary-card-header">
+              <span className="overview-icon summary-card-icon" aria-hidden="true">
+                {Icon ? <Icon size={24} /> : <img className="deep-talk-cat-icon" src={deepTalkCatIconUrl} alt="" />}
+              </span>
+              <span className="card-label summary-card-title">{label}</span>
             </span>
-            <p className="card-label">{label}</p>
-            <h3>{data[key].value}</h3>
-            <p className="overview-detail">{data[key].desc}</p>
+            <h3 className={`summary-card-value ${data[key].value.includes('：') ? 'is-compact' : ''}`}>{data[key].value}</h3>
+            <p className="overview-detail summary-card-hint">{toShortHint(data[key].desc)}</p>
             <SproutIcon className="card-sprout" size={46} aria-hidden="true" />
           </button>
         ))}

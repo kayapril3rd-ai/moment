@@ -1,5 +1,3 @@
-// DayOverviewDrawer 负责首页“我的今天 / 澈的今天”的只读查看抽屉。
-// 它只做概览和查看；可编辑操作仍放在 schedule/ScheduleDrawer 和 PlanDetailSheet。
 import type { CheScheduleItem, UserPlan } from '../../types/che';
 import { getPlanTimeAnchor } from '../../utils/plan';
 
@@ -30,20 +28,27 @@ interface CheOverviewRow {
 }
 
 function getUserRows(plans: UserPlan[]) {
-  const active = plans
-    .filter((plan) => plan.status === 'active')
-    .map((plan) => createUserRow(plan, '◐', '进行中'));
-  const todo = plans
-    .filter((plan) => !plan.status || plan.status === 'todo')
-    .map((plan) => createUserRow(plan, '○'));
-  const accepted = plans
-    .filter((plan) => plan.inviteStatus === 'accepted' && plan.status !== 'active' && plan.status !== 'done' && plan.status !== 'cancelled')
-    .map((plan) => createUserRow(plan, '●', '澈已答应'));
-  const done = plans
+  const uniquePlans = dedupePlans(plans);
+  const done = uniquePlans
     .filter((plan) => plan.status === 'done')
     .map((plan) => createUserRow(plan, '✓'));
+  const accepted = uniquePlans
+    .filter((plan) => (plan.status === 'active' || plan.status === 'accepted' || plan.inviteStatus === 'accepted') && plan.status !== 'done' && plan.status !== 'cancelled')
+    .map((plan) => createUserRow(plan, '●', plan.status === 'active' ? '进行中' : '澈已答应'));
+  const todo = uniquePlans
+    .filter((plan) => (!plan.status || plan.status === 'todo') && plan.inviteStatus !== 'accepted')
+    .map((plan) => createUserRow(plan, '○'));
 
-  return { active, todo, accepted, done };
+  return { todo, accepted, done };
+}
+
+function dedupePlans(plans: UserPlan[]) {
+  const seenIds = new Set<string>();
+  return plans.filter((plan) => {
+    if (seenIds.has(plan.id)) return false;
+    seenIds.add(plan.id);
+    return true;
+  });
 }
 
 function createUserRow(plan: UserPlan, marker: string, note?: string): UserOverviewRow {
@@ -91,7 +96,6 @@ function UserOverviewList({ plans }: { plans: UserPlan[] }) {
 
   return (
     <>
-      <OverviewGroup title="进行中" rows={groups.active} />
       <OverviewGroup title="待做" rows={groups.todo} />
       <OverviewGroup title="已约好" rows={groups.accepted} />
       <OverviewGroup title="已完成" rows={groups.done} />

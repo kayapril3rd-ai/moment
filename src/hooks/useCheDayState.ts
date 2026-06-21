@@ -46,6 +46,7 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   const derivedState = useCheDayDerivedState({
     activeActivityId,
     activeStartedAt,
+    cheSchedule,
     dayRecords,
     now,
     sceneCards,
@@ -56,8 +57,8 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     onRecentMomentsChange(updater(recentMoments));
   };
 
-  const handleAddPlan = (input: string) => {
-    const nextPlan = createUserPlanFromInput(input);
+  const handleAddPlan = (input: string, selectedDateKey?: string) => {
+    const nextPlan = createUserPlanFromInput(input, new Date(), selectedDateKey);
     if (!nextPlan) return false;
     setUserPlans((currentPlans) => [nextPlan, ...currentPlans]);
     return true;
@@ -80,7 +81,6 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
 
     setSceneCards((currentCards) => {
       if (currentCards.some((card) => card.linkedPlanId === planId && card.status === 'scheduled')) return currentCards;
-
       const shiftedCards = currentCards.map((card) => ({ ...card, sortOrder: card.sortOrder + 1 }));
       if (currentCards.some((card) => card.linkedPlanId === planId)) {
         return shiftedCards.map((card) =>
@@ -138,9 +138,10 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     );
   };
 
-  const completeActivity = (card: SceneCard) => {
+  const completeActivity = (card: SceneCard, hasChat = false) => {
     const completedAt = new Date().toISOString();
     const completedCard = { ...card, status: 'completed' as const, timeLabel: '已完成', timePrecision: 'period' as const };
+    const startedAt = activeStartedAt;
 
     setSceneCards((currentCards) => currentCards.map((item) => (item.id === card.id ? completedCard : item)));
 
@@ -157,18 +158,14 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     }
 
     setCheSchedule((currentSchedule) =>
-      currentSchedule.map((item) =>
-        item.linkedPlanId === card.linkedPlanId && item.type === 'shared'
-          ? { ...item, detail: '这段一起做的事已经完成了。' }
-          : item,
-      ),
+      currentSchedule.filter((item) => item.id !== `che-active-${card.id}` && (!card.linkedPlanId || item.linkedPlanId !== card.linkedPlanId)),
     );
 
-    setDayRecords((currentRecords) => addUniqueRecord(currentRecords, createActivityRecord(card, activeStartedAt, completedAt)));
+    setDayRecords((currentRecords) => addUniqueRecord(currentRecords, createActivityRecord(card, startedAt, completedAt)));
     updateRecentMoments((currentMoments) =>
       addUniqueMoment(currentMoments, createMoment({
         id: `moment-completed-${card.id}`,
-        text: `你们完成了${card.title}。`,
+        text: hasChat ? getCompletedChatMomentText(card) : `你们完成了${card.title}。`,
         sourceScene: card.sceneType,
         linkedPlanId: card.linkedPlanId,
       })),
@@ -283,4 +280,21 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     updatePlan,
     userPlans,
   };
+}
+
+function getCompletedChatMomentText(card: SceneCard) {
+  switch (card.sceneType) {
+    case 'meal':
+      return '你们边吃饭边聊了几句，饭也好好吃完了。';
+    case 'fitness':
+      return '你们一起收了尾，他提醒你别忘了拉伸。';
+    case 'study':
+      return '你们安静陪了一段，也简单说了几句。';
+    case 'watch':
+      return '你们看完一段，也顺手聊了几句剧情。';
+    case 'deep_room':
+      return 'Deep Room 里那段话被好好收住了。';
+    default:
+      return `你们完成了${card.title}，也聊了几句。`;
+  }
 }

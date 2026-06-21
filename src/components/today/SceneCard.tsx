@@ -1,5 +1,5 @@
 // SceneCard renders one Today activity entry. The whole card is tappable.
-// The thumbnail follows the card scene and uses thumbFocus to preserve faces.
+// The thumbnail follows the card scene and uses cardFocus to preserve faces.
 import type { CSSProperties } from 'react';
 import type { SceneCard as SceneCardType } from '../../types/che';
 import { getSceneImage } from '../../utils/sceneImages';
@@ -16,7 +16,7 @@ export function SceneCard({ card, onSelect }: SceneCardProps) {
   return (
     <button className="scene-card" data-scene={card.sceneType} type="button" onClick={() => onSelect(card)}>
       <span className="scene-thumb" aria-hidden="true">
-        <img src={image.src} alt="" style={{ objectPosition: image.thumbFocus } as CSSProperties} />
+        <img src={image.cardImage} alt="" style={{ objectPosition: image.cardFocus } as CSSProperties} />
       </span>
       <span className="scene-copy">
         <span className="scene-title-row">

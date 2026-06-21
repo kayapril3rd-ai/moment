@@ -1,5 +1,5 @@
-// RecentMoments 负责展示最近的小片段，用具体记忆替代关系数值。
-// 后续改小片段文案请改 src/data/mockMoments.ts。
+// RecentMoments shows one lightweight shared memory on Today.
+// Edit the actual copy in src/data/mockMoments.ts.
 import type { RecentMoment } from '../../types/che';
 
 interface RecentMomentsProps {

@@ -3,6 +3,8 @@
 import type { ReactElement } from 'react';
 import { ArrangeIcon, MineIcon, TodayIcon, type IconProps } from '../icons';
 
+const todayNavIconUrl = new URL('../../assets/today-nav-bubble.png', import.meta.url).href;
+
 export type MainTab = 'today' | 'arrange' | 'mine';
 
 interface BottomNavProps {
@@ -28,7 +30,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           aria-current={activeTab === id ? 'page' : undefined}
         >
           <span className="bottom-nav-icon" aria-hidden="true">
-            <Icon size={23} />
+            {id === 'today' ? <img className="bottom-nav-image-icon" src={todayNavIconUrl} alt="" /> : <Icon size={23} />}
           </span>
           <span>{label}</span>
         </button>

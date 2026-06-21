@@ -3,12 +3,13 @@ import { SceneChat } from './components/chat/SceneChat';
 import { TogetherMoments } from './components/moments/TogetherMoments';
 import { TodayPage } from './components/today/TodayPage';
 import { mockRecentMoments, mockScenes } from './data';
+import { useUserProfile } from './hooks/useUserProfile';
 import type { RecentMoment, SceneData, SceneType } from './types/che';
 
 type AppView = 'today' | 'scene' | 'moments';
 
 interface SceneActions {
-  endActiveActivity: () => void;
+  endActiveActivity: (hasChat?: boolean) => void;
 }
 
 export default function App() {
@@ -17,8 +18,9 @@ export default function App() {
   const [currentSceneStartedAt, setCurrentSceneStartedAt] = useState<string | null>(null);
   const [recentMoments, setRecentMoments] = useState<RecentMoment[]>(mockRecentMoments);
   const [sceneActions, setSceneActions] = useState<SceneActions | null>(null);
+  const { userProfile, memoryItems, setUserProfile, setMemoryItems } = useUserProfile();
   const sceneById = useMemo(() => new Map(mockScenes.map((scene) => [scene.id, scene])), []);
-  const currentScene = sceneById.get(currentSceneType) ?? sceneById.get('idle') as SceneData;
+  const currentScene = sceneById.get(currentSceneType) ?? (sceneById.get('idle') as SceneData);
 
   const openScene = (sceneType: SceneType, activeStartedAt?: string | null) => {
     setCurrentSceneType(sceneType);
@@ -36,6 +38,10 @@ export default function App() {
           onRegisterSceneActions={setSceneActions}
           recentMoments={recentMoments}
           onRecentMomentsChange={setRecentMoments}
+          userProfile={userProfile}
+          memoryItems={memoryItems}
+          onUserProfileChange={setUserProfile}
+          onMemoryItemsChange={setMemoryItems}
         />
       </div>
 
@@ -44,11 +50,10 @@ export default function App() {
           scene={currentScene}
           activeStartedAt={currentSceneStartedAt}
           onBack={() => setView('today')}
-          onOpenDeep={() => openScene('deep_room')}
           onEndActivity={
             currentSceneStartedAt && !currentScene.isDeepEntry
-              ? () => {
-                  sceneActions?.endActiveActivity();
+              ? (hasChat?: boolean) => {
+                  sceneActions?.endActiveActivity(hasChat);
                   setCurrentSceneStartedAt(null);
                   setView('today');
                 }

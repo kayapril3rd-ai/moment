@@ -4,14 +4,15 @@ import { CalendarSoftIcon, ClockSoftIcon, DumbbellSoftIcon, PlanCardIcon, Sprout
 
 interface UserPlanListProps {
   plans: UserPlan[];
-  onAddPlan: (input: string) => boolean;
+  selectedDateKey?: string;
+  onAddPlan: (input: string, selectedDateKey?: string) => boolean;
   onInvite: (planId: string) => void;
   onSelectPlan: (plan: UserPlan) => void;
 }
 
 const replyVisibleMs = 2200;
 
-export function UserPlanList({ plans, onAddPlan, onInvite, onSelectPlan }: UserPlanListProps) {
+export function UserPlanList({ plans, selectedDateKey, onAddPlan, onInvite, onSelectPlan }: UserPlanListProps) {
   const [planInput, setPlanInput] = useState('');
   const [hint, setHint] = useState('');
   const [visibleReplyIds, setVisibleReplyIds] = useState<Set<string>>(() => new Set());
@@ -21,7 +22,7 @@ export function UserPlanList({ plans, onAddPlan, onInvite, onSelectPlan }: UserP
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const didAdd = onAddPlan(planInput);
+    const didAdd = onAddPlan(planInput, selectedDateKey);
     if (!didAdd) {
       setHint('先写一件想做的小事就好。');
       return;
@@ -65,14 +66,19 @@ export function UserPlanList({ plans, onAddPlan, onInvite, onSelectPlan }: UserP
       <h2 className="schedule-section-title">今日安排</h2>
 
       <div className="schedule-list my-schedule-list" aria-label="我的计划">
-        {plans.map((plan) => {
+        {plans.length === 0 ? (
+          <article className="arrange-empty-card">
+            <p>这一天还没有安排。</p>
+          </article>
+        ) : plans.map((plan) => {
           const isAccepted = plan.inviteStatus === 'accepted';
           const isReplyVisible = visibleReplyIds.has(plan.id) && Boolean(plan.inviteReply);
           const action = getPlanAction(plan);
+          const durationLabel = getScheduleDurationLabel(plan);
 
           return (
             <article
-              className="schedule-item user-schedule-item"
+              className="schedule-item user-schedule-item my-plan-card"
               key={plan.id}
               role="button"
               tabIndex={0}
@@ -84,29 +90,27 @@ export function UserPlanList({ plans, onAddPlan, onInvite, onSelectPlan }: UserP
                 }
               }}
             >
-              <div className="plan-time-block">
-                <span className="plan-icon" aria-hidden="true">
-                  <PlanIcon sceneType={plan.sceneType} />
-                </span>
-                <span className="plan-time-copy">
-                  <strong>{getScheduleTimeLabel(plan)}</strong>
-                  <small>
-                    {getScheduleDurationLabel(plan) ? <ClockSoftIcon size={14} aria-hidden="true" /> : null}
-                    {getScheduleDurationLabel(plan)}
+              <span className="plan-icon my-plan-icon" aria-hidden="true">
+                <PlanIcon sceneType={plan.sceneType} />
+              </span>
+              <span className="plan-time-copy my-plan-time">
+                <strong className="my-plan-time-main">{getScheduleTimeLabel(plan)}</strong>
+                {durationLabel ? (
+                  <small className="my-plan-duration">
+                    <ClockSoftIcon size={13} aria-hidden="true" />
+                    {durationLabel}
                   </small>
-                </span>
-              </div>
+                ) : null}
+              </span>
 
-              <span className="schedule-divider" aria-hidden="true" />
-
-              <div className="schedule-item-main">
-                <h3>{plan.title}</h3>
-                {plan.note ? <p>{plan.note}</p> : null}
-                {isReplyVisible ? <p className="invite-reply">{plan.inviteReply}</p> : null}
+              <div className="schedule-item-main my-plan-main">
+                <h3 className="my-plan-title">{plan.title}</h3>
+                {plan.note ? <p className="my-plan-desc">{plan.note}</p> : null}
+                {isReplyVisible ? <p className="invite-reply my-plan-desc">{plan.inviteReply}</p> : null}
               </div>
 
               <button
-                className={`invite-button is-${action.kind}`}
+                className={`invite-button my-plan-action is-${action.kind}`}
                 type="button"
                 disabled={isAccepted || plan.status === 'done' || plan.status === 'active'}
                 onClick={(event) => {

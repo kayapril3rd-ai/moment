@@ -5,7 +5,7 @@ export const todayCopy: TodayCopy = {
   headerTitle: '今天',
   currentTimeLabel: '当前时间',
   heroEyebrow: '他现在',
-  heroActionLabel: '去找他 →',
+  heroActionLabel: '去找他',
   overviewTitle: '你和澈今天',
   userOverviewTitle: '我的计划',
   cheOverviewTitle: '澈的状态',

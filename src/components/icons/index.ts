@@ -29,4 +29,5 @@ export {
   PlanCardIcon,
   SproutIcon,
   TodayBubbleIcon,
+  UserSoftIcon,
 } from './SoftIcons';

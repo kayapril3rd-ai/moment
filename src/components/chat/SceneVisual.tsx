@@ -1,5 +1,3 @@
-// SceneVisual renders the full-screen scene image and top controls.
-// Background image is always resolved from scene.id, so each event keeps its own scene.
 import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 import type { SceneData } from '../../types/che';
@@ -31,8 +29,8 @@ export function SceneVisual({ scene, activeStartedAt, onBack, onEndActivity }: S
       aria-labelledby="scene-chat-title"
       style={
         {
-          '--scene-image': `url(${image.src})`,
-          '--scene-position': image.heroFocus ?? scene.focalPoint ?? 'center center',
+          '--scene-image': `url("${scene.sceneImage ?? image.sceneImage}")`,
+          '--scene-position': scene.sceneFocus ?? image.sceneFocus ?? scene.focalPoint ?? 'center center',
         } as CSSProperties
       }
     >
@@ -40,17 +38,13 @@ export function SceneVisual({ scene, activeStartedAt, onBack, onEndActivity }: S
         <button className="scene-back-button" type="button" onClick={onBack} aria-label="返回">
           <BackIcon size={25} aria-hidden="true" />
         </button>
-        <span>{getSceneStatus(scene, activeStartedAt, now)}</span>
-        {onEndActivity ? (
-          <button className="scene-end-button" type="button" onClick={onEndActivity}>
-            结束这次
-          </button>
-        ) : null}
+        <span id="scene-chat-title">{getSceneStatus(scene, activeStartedAt, now)}</span>
+        <button className="scene-end-button" type="button" onClick={onEndActivity ?? onBack}>
+          结束
+        </button>
       </header>
 
-      <div className="scene-visual-copy">
-        <p>{scene.isDeepEntry ? 'Deep Room' : scene.shortTitle}</p>
-        <h1 id="scene-chat-title">{scene.title}</h1>
+      <div className="scene-visual-copy scene-caption">
         <span>{scene.cheStatusHint}</span>
       </div>
     </section>

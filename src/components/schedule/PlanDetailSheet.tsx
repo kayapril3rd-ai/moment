@@ -46,6 +46,7 @@ export function PlanDetailSheet({
       timeLabel: nextTime,
       timePrecision: inferTimePrecision(nextTime),
     });
+    onClose();
   };
 
   return (

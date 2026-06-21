@@ -1,5 +1,6 @@
 import type { ArrangeTab } from '../../hooks/useArrangeDateState';
 import type { DayRecord } from '../../types/che';
+import { SproutIcon } from '../icons';
 import { ArrangeSegmentedTabs } from './ArrangeSegmentedTabs';
 
 interface ArrangeRecordViewProps {
@@ -17,11 +18,9 @@ export function ArrangeRecordView({
   selectedMonthDay,
   onTabChange,
 }: ArrangeRecordViewProps) {
-  const emptyText = activeTab === 'mine' ? '这一天还没有你的活动记录。' : '这一天还没有澈的活动记录。';
-
   return (
     <section className="day-record-view" aria-labelledby="day-record-title">
-      <h2 id="day-record-title">{selectedMonthDay}的记录</h2>
+      <h2 className="sr-only" id="day-record-title">{selectedMonthDay}的记录</h2>
       <ArrangeSegmentedTabs activeTab={activeTab} onTabChange={onTabChange} />
 
       <div className="record-block">
@@ -29,17 +28,18 @@ export function ArrangeRecordView({
         <div className="record-timeline">
           {activityRecords.length > 0 ? (
             activityRecords.map((record) => (
-              <article className="record-timeline-row" key={record.id}>
-                <time>{record.timeLabel}</time>
-                <div>
-                  <strong>{record.title}</strong>
-                  <p>{record.summary}</p>
+              <article className="record-item" key={record.id}>
+                <time className="record-time">{record.timeLabel}</time>
+                <span className="record-dot" aria-hidden="true" />
+                <div className="record-main">
+                  <strong className="record-title">{record.title}</strong>
+                  <p className="record-desc">{record.summary}</p>
                 </div>
-                <span>{record.status === 'completed' ? '已完成' : '进行中'}</span>
+                <span className="record-status">{record.status === 'completed' ? '已完成' : '进行中'}</span>
               </article>
             ))
           ) : (
-            <p className="record-empty">{emptyText}</p>
+            <p className="record-empty">这一天还没有活动记录。</p>
           )}
         </div>
       </div>
@@ -48,15 +48,18 @@ export function ArrangeRecordView({
         <h3>聊天信件</h3>
         {letterRecords.length > 0 ? (
           letterRecords.map((letter) => (
-            <article className="record-letter-card" key={letter.id}>
-              <strong>{letter.title} · {letter.timeLabel}</strong>
-              <p>{letter.summary}</p>
-              {letter.detail ? <p>{letter.detail}</p> : null}
+            <article className="letter-card" key={letter.id}>
+              <div className="letter-copy">
+                <strong>{letter.title} · {letter.timeLabel}</strong>
+                <p>{letter.summary}</p>
+              </div>
+              <SproutIcon className="letter-illustration" size={128} aria-hidden="true" />
             </article>
           ))
         ) : (
-          <article className="record-letter-card">
-            <p>这一天没有收起新的信件。</p>
+          <article className="letter-card is-empty">
+            <p>这一天还没有留下信件。</p>
+            <SproutIcon className="letter-illustration" size={128} aria-hidden="true" />
           </article>
         )}
       </div>

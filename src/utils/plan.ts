@@ -6,8 +6,10 @@ import type {
   TimePrecision,
   UserPlan,
 } from '../types/che';
+import { toDateKey } from './date';
 
 export interface ParsedPlanInput {
+  dateKey: string;
   title: string;
   startTime: string;
   timeLabel: string;
@@ -15,43 +17,46 @@ export interface ParsedPlanInput {
   sceneType: SceneType;
 }
 
-const clockTimePattern = /^(\d{1,2}:\d{2})\s+(.+)$/;
-const clockTimeSearchPattern = /(\d{1,2}:\d{2})/;
+type SceneCategory = 'work' | 'fitness' | 'meal' | 'walk' | 'rest' | 'default';
 
-export function parsePlanInput(input: string): ParsedPlanInput | null {
+const clockTimeSearchPattern = /(\d{1,2}:\d{2})/;
+const cnNumber = '(?:一|二|两|三|四|五|六|七|八|九|十|十一|十二)';
+const periodWords = '(?:上午|中午|下午|晚上|夜里|晚些时候)';
+const timeWordPattern = new RegExp(`\\d{1,2}:\\d{2}|${periodWords}?\\s*(?:${cnNumber}|\\d{1,2})(?:点半|点)|${periodWords}`);
+
+export function parsePlanInput(input: string, now = new Date(), selectedDateKey = toDateKey(now)): ParsedPlanInput | null {
   const normalized = input.trim().replace(/\s+/g, ' ');
 
   if (!normalized) return null;
 
-  const match = normalized.match(clockTimePattern);
-  const title = match ? match[2].trim() : normalized;
-  const timeLabel = match ? match[1] : inferLooseTimeLabel(normalized);
+  const { dateKey, textWithoutDate } = extractDateKey(normalized, now, selectedDateKey);
+  const timeMatch = textWithoutDate.match(timeWordPattern);
+  const timeLabel = timeMatch ? timeMatch[0].replace(/\s+/g, '') : inferLooseTimeLabel(textWithoutDate);
+  const title = (timeMatch ? textWithoutDate.replace(timeMatch[0], '') : textWithoutDate).trim() || normalized;
+  const startTime = /^\d{1,2}:\d{2}$/.test(timeLabel) ? timeLabel : '';
 
   return {
+    dateKey,
     title,
-    startTime: match ? match[1] : '',
+    startTime,
     timeLabel,
-    timePrecision: match ? 'exact' : inferTimePrecision(timeLabel),
+    timePrecision: inferTimePrecision(timeLabel),
     sceneType: inferSceneTypeFromPlan(title),
   };
 }
 
 export function inferSceneTypeFromPlan(text: string): SceneType {
-  if (/学习|工作|英语|复习|专注|写稿|看书|背单词/.test(text)) return 'study';
-  if (/健身|运动|跑步|练背|瑜伽|训练|散步|公园/.test(text)) return 'fitness';
-  if (/看剧|电影|动漫|综艺|追剧/.test(text)) return 'watch';
-  if (/吃饭|晚饭|午饭|早餐|夜宵|做饭|热的/.test(text)) return 'meal';
-  if (/睡觉|睡前|聊会儿|晚安/.test(text)) return 'sleep';
-  return 'idle';
+  return sceneCategoryToSceneType(inferSceneCategory(text));
 }
 
-export function createUserPlanFromInput(input: string, now = new Date()): UserPlan | null {
-  const parsed = parsePlanInput(input);
+export function createUserPlanFromInput(input: string, now = new Date(), selectedDateKey?: string): UserPlan | null {
+  const parsed = parsePlanInput(input, now, selectedDateKey ?? toDateKey(now));
   if (!parsed) return null;
 
   const stamp = now.toISOString();
   return {
     id: `plan-${now.getTime()}`,
+    dateKey: parsed.dateKey,
     title: parsed.title,
     startTime: parsed.startTime,
     endTime: null,
@@ -63,6 +68,19 @@ export function createUserPlanFromInput(input: string, now = new Date()): UserPl
     status: 'todo',
     createdAt: stamp,
     updatedAt: stamp,
+  };
+}
+
+function extractDateKey(input: string, now: Date, selectedDateKey: string) {
+  const dateMatch = input.match(/今天|明天|后天/);
+  if (!dateMatch) return { dateKey: selectedDateKey, textWithoutDate: input };
+
+  const offsetMap: Record<string, number> = { 今天: 0, 明天: 1, 后天: 2 };
+  const date = new Date(now);
+  date.setDate(date.getDate() + offsetMap[dateMatch[0]]);
+  return {
+    dateKey: toDateKey(date),
+    textWithoutDate: input.replace(dateMatch[0], '').trim(),
   };
 }
 
@@ -118,9 +136,10 @@ export function getCheInviteReply(plan: UserPlan): string {
 
 export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneCard {
   const timeLabel = getDisplayTimeLabel(plan);
+  const sceneType = getPlanSceneType(plan);
   return {
     id: `scene-shared-${plan.id}`,
-    sceneType: plan.sceneType,
+    sceneType,
     title: getSharedSceneTitle(plan),
     timeHint: timeLabel,
     timeLabel,
@@ -135,6 +154,7 @@ export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneC
 
 export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
   const timeLabel = getDisplayTimeLabel(plan);
+  const sceneType = getPlanSceneType(plan);
   return {
     id: `che-shared-${plan.id}`,
     title: getCheScheduleTitle(plan),
@@ -144,7 +164,7 @@ export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
     timePrecision: plan.timePrecision ?? inferTimePrecision(timeLabel),
     type: 'shared',
     source: 'user_invite',
-    sceneType: plan.sceneType,
+    sceneType,
     linkedPlanId: plan.id,
     detail: getCheScheduleDetail(plan),
   };
@@ -155,7 +175,7 @@ export function createRecentMomentFromPlan(plan: UserPlan, now = new Date()): Re
     id: `moment-shared-${plan.id}`,
     time: '刚刚',
     text: getRecentMomentText(plan),
-    sourceScene: plan.sceneType,
+    sourceScene: getPlanSceneType(plan),
     linkedPlanId: plan.id,
     createdAt: now.toISOString(),
   };
@@ -197,10 +217,50 @@ function getDefaultPlanNote(sceneType: SceneType): string {
   }
 }
 
+function getPlanSceneType(plan: UserPlan): SceneType {
+  if (plan.sceneKey) return sceneKeyToSceneType(plan.sceneKey);
+  return sceneCategoryToSceneType(inferSceneCategory(`${plan.title} ${plan.note}`));
+}
+
+function inferSceneCategory(text: string): SceneCategory {
+  if (/学习|工作|写稿|面试|复习|看书|整理|做项目|开会|专注|设计|代码|英语|背单词/.test(text)) return 'work';
+  if (/健身|运动|练背|瑜伽|跑步|拉伸|训练/.test(text)) return 'fitness';
+  if (/吃饭|晚饭|午饭|早餐|做饭|咖啡|喝水|休息|夜宵|热的/.test(text)) return 'meal';
+  if (/散步|出门|晒太阳|公园|走走|透气|放松/.test(text)) return 'walk';
+  if (/电影|音乐|追剧|看剧|睡前|夜里|聊天|晚安/.test(text)) return 'rest';
+  return 'default';
+}
+
+function sceneKeyToSceneType(sceneKey: string): SceneType {
+  if (/work|study|focus|design|code/.test(sceneKey)) return 'study';
+  if (/fitness|sport|workout|training/.test(sceneKey)) return 'fitness';
+  if (/meal|coffee|food|cook/.test(sceneKey)) return 'meal';
+  if (/walk|park|casual|idle/.test(sceneKey)) return 'idle';
+  if (/movie|watch|music/.test(sceneKey)) return 'watch';
+  if (/deep|night|sleep/.test(sceneKey)) return 'deep_room';
+  return 'idle';
+}
+
+function sceneCategoryToSceneType(category: SceneCategory): SceneType {
+  switch (category) {
+    case 'work':
+      return 'study';
+    case 'fitness':
+      return 'fitness';
+    case 'meal':
+      return 'meal';
+    case 'rest':
+      return 'watch';
+    case 'walk':
+    case 'default':
+      return 'idle';
+  }
+}
+
 function getSharedSceneTitle(plan: UserPlan): string {
-  switch (plan.sceneType) {
+  switch (getPlanSceneType(plan)) {
     case 'study':
-      return '一起学习';
+      return '一起工作';
     case 'fitness':
       return '一起健身';
     case 'watch':
@@ -210,29 +270,30 @@ function getSharedSceneTitle(plan: UserPlan): string {
     case 'sleep':
       return '睡前聊会儿';
     default:
-      return `一起${plan.title}`;
+      return '随便待一会儿';
   }
 }
 
 function getSharedSceneDescription(plan: UserPlan): string {
-  switch (plan.sceneType) {
+  switch (getPlanSceneType(plan)) {
     case 'study':
-      return `你要${plan.title}，澈那会儿也会在书桌旁。`;
+      return '他也在安静处理事情。';
     case 'fitness':
-      return '这是你刚刚邀请澈一起做的事。';
+      return '他刚换好运动鞋。';
     case 'watch':
-      return '今晚可以轻一点，一起慢慢看一部。';
+      return '他把声音放轻了一点。';
     case 'meal':
-      return '到点先吃点热的，他也会留意自己的晚饭。';
+      return '他在等你把饭收好。';
     case 'sleep':
-      return '睡前留一点安静时间，不急着把话说满。';
+    case 'deep_room':
+      return '他把声音放轻了一点。';
     default:
-      return '你们刚刚把这段时间约好了。';
+      return '他在这里，等你说话。';
   }
 }
 
 function getCheScheduleTitle(plan: UserPlan): string {
-  switch (plan.sceneType) {
+  switch (getPlanSceneType(plan)) {
     case 'study':
       return `陪你${plan.title}`;
     case 'fitness':
@@ -249,7 +310,7 @@ function getCheScheduleTitle(plan: UserPlan): string {
 }
 
 function getCheScheduleDetail(plan: UserPlan): string {
-  switch (plan.sceneType) {
+  switch (getPlanSceneType(plan)) {
     case 'study':
       return '书桌边，适合安静待一会儿。';
     case 'fitness':
@@ -266,7 +327,7 @@ function getCheScheduleDetail(plan: UserPlan): string {
 }
 
 function getRecentMomentText(plan: UserPlan): string {
-  switch (plan.sceneType) {
+  switch (getPlanSceneType(plan)) {
     case 'study':
       return `你们约好了${getDisplayTimeLabel(plan)}一起${plan.title}。`;
     case 'fitness':

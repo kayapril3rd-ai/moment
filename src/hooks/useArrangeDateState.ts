@@ -55,6 +55,7 @@ export function useArrangeDateState(dayRecords: DayRecord[], userPlans: UserPlan
   const selectDate = (dateKey: string) => {
     setSelectedDateKey(dateKey);
     setCalendarMonth(parseDateKey(dateKey));
+    setIsCalendarExpanded(false);
   };
 
   return {

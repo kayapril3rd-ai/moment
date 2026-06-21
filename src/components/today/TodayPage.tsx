@@ -1,5 +1,3 @@
-// TodayPage 负责 MVP 的三主入口 shell，以及今日 mock state 的统一联动。
-// activeActivityId / activeScene / activeStartedAt 是当前活动的唯一来源，避免 Hero 和 Scene Chat 不同步。
 import { useEffect, useState } from 'react';
 import { ActivityDetail } from '../activity/ActivityDetail';
 import { ActivitySetup } from '../activity/ActivitySetup';
@@ -11,11 +9,13 @@ import { AppTopBar } from '../navigation/AppTopBar';
 import { BottomNav, type MainTab } from '../navigation/BottomNav';
 import { PlanDetailSheet } from '../schedule/PlanDetailSheet';
 import { CompanionOverviewGrid } from './CompanionOverviewGrid';
+import { DeepChatSummaryDrawer, getDeepChatCardSummary } from './DeepChatSummaryDrawer';
 import { HeroStatusCard } from './HeroStatusCard';
 import { QuietChatEntry } from './QuietChatEntry';
 import { RecentMoments } from './RecentMoments';
 import { SceneCardList } from './SceneCardList';
-import { cheTodaySummary, todayCopy } from '../../data';
+import { todayCopy } from '../../data';
+import type { UserProfile } from '../../data/mockProfile';
 import type { RecentMoment, SceneCard, SceneType } from '../../types/che';
 import { useCheDayState } from '../../hooks/useCheDayState';
 
@@ -23,9 +23,13 @@ interface TodayPageProps {
   onOpenScene: (sceneType: SceneType, activeStartedAt?: string | null) => void;
   onOpenDeep: () => void;
   onOpenMoments: () => void;
-  onRegisterSceneActions?: (actions: { endActiveActivity: () => void }) => void;
+  onRegisterSceneActions?: (actions: { endActiveActivity: (hasChat?: boolean) => void }) => void;
   recentMoments: RecentMoment[];
   onRecentMomentsChange: (moments: RecentMoment[]) => void;
+  userProfile: UserProfile;
+  memoryItems: string[];
+  onUserProfileChange: (profile: UserProfile) => void;
+  onMemoryItemsChange: (items: string[]) => void;
 }
 
 export function TodayPage({
@@ -35,10 +39,15 @@ export function TodayPage({
   onRegisterSceneActions,
   recentMoments,
   onRecentMomentsChange,
+  userProfile,
+  memoryItems,
+  onUserProfileChange,
+  onMemoryItemsChange,
 }: TodayPageProps) {
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('today');
   const [dayOverviewType, setDayOverviewType] = useState<'user' | 'che' | null>(null);
   const [isCompanionshipOpen, setIsCompanionshipOpen] = useState(false);
+  const [isDeepSummaryOpen, setIsDeepSummaryOpen] = useState(false);
   const [activityDetailCard, setActivityDetailCard] = useState<SceneCard | null>(null);
   const [activitySetupCard, setActivitySetupCard] = useState<SceneCard | null>(null);
   const {
@@ -50,6 +59,7 @@ export function TodayPage({
     cancelInvite,
     cancelSceneCard,
     cheSchedule,
+    cheTodayStatus,
     companionshipStats,
     completeActivity,
     completePlan,
@@ -59,6 +69,7 @@ export function TodayPage({
     displayHeroStatus,
     handleAddPlan,
     handleInvitePlan,
+    notifications,
     now,
     restoreTodo,
     sceneCards,
@@ -91,11 +102,11 @@ export function TodayPage({
 
   useEffect(() => {
     onRegisterSceneActions?.({
-      endActiveActivity: () => {
-        if (activeActivityCard) completeActivity(activeActivityCard);
+      endActiveActivity: (hasChat?: boolean) => {
+        if (activeActivityCard) completeActivity(activeActivityCard, hasChat);
       },
     });
-  }, [activeActivityCard, onRegisterSceneActions]);
+  }, [activeActivityCard, completeActivity, onRegisterSceneActions]);
 
   const handleSceneCardSelect = (card: SceneCard) => {
     switch (card.status) {
@@ -123,6 +134,8 @@ export function TodayPage({
   const openActiveScene = () => {
     if (activeActivityCard) onOpenScene(activeScene ?? activeActivityCard.sceneType, activeStartedAt);
   };
+  const greeting = getTimeGreeting(now, userProfile.nickname);
+  const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
 
   return (
     <main className="app-shell" aria-labelledby="app-title">
@@ -133,9 +146,9 @@ export function TodayPage({
           {activeMainTab === 'today' ? (
             <>
               <AppTopBar
-                greeting="下午好，澈"
-                subtitle="今天想和他做些什么呢？"
-                description="温柔的 AI 陪伴，让每个平凡的日子，都更从容一点。"
+                greeting={greeting}
+                notifications={notifications}
+                showNotification
               />
               <HeroStatusCard
                 status={displayHeroStatus}
@@ -146,21 +159,21 @@ export function TodayPage({
                     openActiveScene();
                     return;
                   }
-                  onOpenScene(upcomingHeroCard?.sceneType ?? 'study');
+                  onOpenScene(upcomingHeroCard?.sceneType ?? displayHeroStatus.availableScenes[0] ?? 'study');
                 }}
               />
               <QuietChatEntry onOpen={onOpenDeep} />
               <CompanionOverviewGrid
-                companionshipTitle="50 分钟"
-                companionshipDetail="比昨天多 32 分钟"
-                deepTalkTitle="2 段深聊"
-                deepTalkDetail="下午 · 夜里"
-                userTitle="1 待做 · 1 已约"
-                userDetail="下个：吃点热的"
-                cheTitle={cheTodaySummary.title}
-                cheDetail={cheTodaySummary.detail}
+                companionshipTitle={companionshipStats.title}
+                companionshipDetail={companionshipStats.detail}
+                deepTalkTitle={deepChatSummary.title}
+                deepTalkDetail={deepChatSummary.detail}
+                userTitle={userTodaySummary.title}
+                userDetail={userTodaySummary.detail}
+                cheTitle={cheTodayStatus.title}
+                cheDetail={cheTodayStatus.detail}
                 onOpenCompanionship={() => setIsCompanionshipOpen(true)}
-                onOpenDeep={onOpenDeep}
+                onOpenDeep={() => setIsDeepSummaryOpen(true)}
                 onOpenUser={() => setDayOverviewType('user')}
                 onOpenChe={() => setDayOverviewType('che')}
               />
@@ -173,7 +186,14 @@ export function TodayPage({
             <ArrangePage userPlans={userPlans} cheSchedule={cheSchedule} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={setSelectedPlan} />
           ) : null}
 
-          {activeMainTab === 'mine' ? <MinePage /> : null}
+          {activeMainTab === 'mine' ? (
+            <MinePage
+              userProfile={userProfile}
+              memoryItems={memoryItems}
+              onUserProfileChange={onUserProfileChange}
+              onMemoryItemsChange={onMemoryItemsChange}
+            />
+          ) : null}
         </div>
 
         <div className="bottom-fixed-area">
@@ -210,6 +230,13 @@ export function TodayPage({
           }}
         />
 
+        <DeepChatSummaryDrawer
+          isOpen={isDeepSummaryOpen}
+          records={dayRecords}
+          now={now}
+          onClose={() => setIsDeepSummaryOpen(false)}
+        />
+
         {selectedPlan ? (
           <PlanDetailSheet plan={selectedPlan} onClose={() => setSelectedPlan(null)} onUpdate={updatePlan} onInvite={handleInvitePlan} onCancelInvite={cancelInvite} onComplete={completePlan} onRestoreTodo={restoreTodo} onDelete={deletePlan} />
         ) : null}
@@ -242,4 +269,13 @@ export function TodayPage({
       </div>
     </main>
   );
+}
+
+function getTimeGreeting(now: number, nickname: string) {
+  const hour = new Date(now).getHours();
+  if (hour >= 5 && hour < 11) return `上午好，${nickname}`;
+  if (hour >= 11 && hour < 14) return `中午好，${nickname}`;
+  if (hour >= 14 && hour < 18) return `下午好，${nickname}`;
+  if (hour >= 18) return `晚上好，${nickname}`;
+  return `夜深了，${nickname}`;
 }

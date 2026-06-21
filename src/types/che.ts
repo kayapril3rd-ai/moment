@@ -45,6 +45,19 @@ export interface CheStatus {
   updatedAt: string;
 }
 
+export type NotificationType = 'che_message' | 'plan_reminder';
+
+export interface CheNotification {
+  id: string;
+  type: NotificationType;
+  content: string;
+  dateKey: string;
+  sceneKey?: string;
+  planId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 export interface UserPlan {
   id: string;
   dateKey?: string;
@@ -151,6 +164,12 @@ export interface SceneData {
   allowedQuickReplies: string[];
   isDeepEntry: boolean;
   imageUrl?: string;
+  cardImage?: string;
+  heroImage?: string;
+  sceneImage?: string;
+  cardFocus?: string;
+  heroFocus?: string;
+  sceneFocus?: string;
   mood?: 'mist' | 'warm' | 'night' | 'green' | 'coastal';
   textTone?: 'light' | 'dark';
   focalPoint?: string;

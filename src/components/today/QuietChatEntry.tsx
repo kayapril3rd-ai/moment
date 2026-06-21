@@ -1,6 +1,8 @@
 // QuietChatEntry is the low-pressure Deep Room entrance below the hero.
 // It should feel like "come sit for a while", not a therapy or tool module.
-import { ArrowRightSoftIcon, DeepRoomIcon } from '../icons';
+import { ArrowRightSoftIcon } from '../icons';
+
+const deepTalkCatIconUrl = new URL('../../assets/deep-talk-cat-cropped.png', import.meta.url).href;
 
 interface QuietChatEntryProps {
   onOpen: () => void;
@@ -10,7 +12,7 @@ export function QuietChatEntry({ onOpen }: QuietChatEntryProps) {
   return (
     <button className="quiet-chat-entry" type="button" onClick={onOpen}>
       <span className="quiet-icon" aria-hidden="true">
-        <DeepRoomIcon size={28} />
+        <img className="deep-talk-cat-icon" src={deepTalkCatIconUrl} alt="" />
       </span>
       <span className="quiet-copy">
         <span className="quiet-title-row">
