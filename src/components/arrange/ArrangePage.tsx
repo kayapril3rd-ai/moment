@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { CheScheduleItem, DayRecord, UserPlan } from '../../types/che';
 import { useArrangeDateState } from '../../hooks/useArrangeDateState';
 import { CalendarSoftIcon } from '../icons';
@@ -9,7 +10,7 @@ import { ArrangeSegmentedTabs } from './ArrangeSegmentedTabs';
 
 interface ArrangePageProps {
   userPlans: UserPlan[];
-  cheSchedule: CheScheduleItem[];
+  getCheScheduleForDate: (dateKey: string) => CheScheduleItem[];
   dayRecords: DayRecord[];
   onAddPlan: (input: string, selectedDateKey?: string) => boolean;
   onInvitePlan: (planId: string) => void;
@@ -18,7 +19,7 @@ interface ArrangePageProps {
 
 export function ArrangePage({
   userPlans,
-  cheSchedule,
+  getCheScheduleForDate,
   dayRecords,
   onAddPlan,
   onInvitePlan,
@@ -39,10 +40,13 @@ export function ArrangePage({
     selectDate,
     setActiveTab,
     toggleCalendarExpanded,
-  } = useArrangeDateState(dayRecords, userPlans, cheSchedule);
+  } = useArrangeDateState(dayRecords, userPlans);
 
   const visibleUserPlans = userPlans.filter((plan) => (plan.dateKey ?? selectedDateKey) === selectedDateKey);
-  const visibleCheSchedule = cheSchedule.filter((item) => (item.dateKey ?? selectedDateKey) === selectedDateKey);
+  const visibleCheSchedule = useMemo(
+    () => isPastRecord ? [] : getCheScheduleForDate(selectedDateKey),
+    [getCheScheduleForDate, isPastRecord, selectedDateKey],
+  );
 
   return (
     <section className="tab-page arrange-page schedule-page arrange-compact-page" aria-labelledby="arrange-title">

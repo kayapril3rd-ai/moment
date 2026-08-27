@@ -58,14 +58,13 @@ export function TodayPage({
     cancelInvite,
     cancelSceneCard,
     cheSchedule,
-    cheTodayStatus,
+    cheCurrentState,
     companionshipStats,
     completeActivity,
     completePlan,
     dayRecords,
     deletePlan,
-    displayHeroActionLabel,
-    displayHeroStatus,
+    getCheScheduleForDate,
     handleAddPlan,
     handleInvitePlan,
     notifications,
@@ -76,7 +75,6 @@ export function TodayPage({
     setSelectedPlanId,
     updateActivityTime,
     updatePlan,
-    upcomingHeroCard,
     userPlans,
     userTodaySummary,
   } = useCheDayState({ recentMoments, onRecentMomentsChange });
@@ -147,16 +145,12 @@ export function TodayPage({
                 showNotification
               />
               <HeroStatusCard
-                status={displayHeroStatus}
-                copy={todayCopy}
-                actionLabel={displayHeroActionLabel}
-                onOpenScene={() => {
-                  if (activeActivityCard) {
-                    openActiveScene();
-                    return;
-                  }
-                  onOpenScene(upcomingHeroCard?.sceneType ?? displayHeroStatus.availableScenes[0] ?? 'study');
-                }}
+                state={cheCurrentState}
+                now={now}
+                onOpenScene={cheCurrentState.entrySceneType ? () => onOpenScene(
+                  cheCurrentState.entrySceneType as SceneType,
+                  cheCurrentState.source === 'shared_activity' ? activeStartedAt : null,
+                ) : undefined}
               />
               <QuietChatEntry onOpen={onOpenDeep} />
               <CompanionOverviewGrid
@@ -166,8 +160,8 @@ export function TodayPage({
                 deepTalkDetail={deepChatSummary.detail}
                 userTitle={userTodaySummary.title}
                 userDetail={userTodaySummary.detail}
-                cheTitle={cheTodayStatus.title}
-                cheDetail={cheTodayStatus.detail}
+                cheTitle={cheCurrentState.activity}
+                cheDetail={`${cheCurrentState.location} · ${cheCurrentState.detail}`}
                 onOpenCompanionship={() => setIsCompanionshipOpen(true)}
                 onOpenDeep={() => setIsDeepSummaryOpen(true)}
                 onOpenUser={() => setDayOverviewType('user')}
@@ -179,7 +173,7 @@ export function TodayPage({
           ) : null}
 
           {activeMainTab === 'arrange' ? (
-            <ArrangePage userPlans={userPlans} cheSchedule={cheSchedule} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={(plan) => setSelectedPlanId(plan.id)} />
+            <ArrangePage userPlans={userPlans} getCheScheduleForDate={getCheScheduleForDate} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={(plan) => setSelectedPlanId(plan.id)} />
           ) : null}
 
           {activeMainTab === 'mine' ? (

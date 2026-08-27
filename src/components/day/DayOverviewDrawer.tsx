@@ -61,27 +61,6 @@ function createUserRow(plan: UserPlan, marker: string, note?: string): UserOverv
   };
 }
 
-function getCheRows(schedule: CheScheduleItem[]) {
-  const workItem = schedule.find((item) => item.type === 'work') ?? schedule[0];
-  const mealItem = schedule.find((item) => item.sceneType === 'meal') ?? schedule.find((item) => item.type === 'life');
-  const sharedItem = schedule.find((item) => item.type === 'shared');
-
-  return {
-    now: workItem ? [createCheRow(workItem, workItem.timeLabel ?? workItem.startTime)] : [],
-    later: mealItem ? [createCheRow(mealItem, mealItem.timeLabel ?? mealItem.startTime)] : [],
-    evening: sharedItem
-      ? [createCheRow(sharedItem, sharedItem.timeLabel ?? sharedItem.startTime)]
-      : [
-          {
-            id: 'che-overview-evening-open',
-            time: '20:30 后',
-            title: '可能去散步',
-            detail: '那会儿会空一点。',
-          },
-        ],
-  };
-}
-
 function createCheRow(item: CheScheduleItem, time: string): CheOverviewRow {
   return {
     id: item.id,
@@ -131,14 +110,10 @@ function OverviewGroup({ title, rows }: { title: string; rows: UserOverviewRow[]
 }
 
 function CheOverviewList({ schedule }: { schedule: CheScheduleItem[] }) {
-  const groups = getCheRows(schedule);
+  const rows = schedule.map((item) => createCheRow(item, item.timeLabel ?? item.startTime));
 
   return (
-    <>
-      <CheOverviewGroup title="现在" rows={groups.now} />
-      <CheOverviewGroup title="稍后" rows={groups.later} />
-      <CheOverviewGroup title="晚上" rows={groups.evening} />
-    </>
+    <CheOverviewGroup title="日程" rows={rows} />
   );
 }
 

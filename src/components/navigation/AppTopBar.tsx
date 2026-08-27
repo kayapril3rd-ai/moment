@@ -15,7 +15,6 @@ interface AppTopBarProps {
   showNotification?: boolean;
 }
 
-const echoFallback = '我刚忙完，可以陪你。';
 const maxEchoLength = 20;
 
 function formatEchoContent(content: string) {
@@ -55,7 +54,7 @@ export function AppTopBar({
               <button type="button" aria-label="关闭回响" onClick={toggleEcho}>×</button>
             </header>
             <div className="echo-list">
-              {notifications.length > 0 ? notifications.map((item) => <p className="echo-item" key={item.id}>{formatEchoContent(item.content)}</p>) : <p className="echo-item">{echoFallback}</p>}
+              {notifications.length > 0 ? notifications.map((item) => <p className="echo-item" key={item.id}>{formatEchoContent(item.content)}</p>) : <p className="echo-item">暂时没有新消息。</p>}
             </div>
           </section>
         </div>,

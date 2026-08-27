@@ -80,18 +80,6 @@ export type SceneCardStatus =
 
 export type TimePrecision = 'exact' | 'approximate' | 'period' | 'open';
 
-export interface CheStatus {
-  id: string;
-  period: string;
-  currentActivity: string;
-  moodHint: string;
-  location: string;
-  detail: string;
-  outfit: string;
-  availableScenes: SceneType[];
-  updatedAt: string;
-}
-
 export type NotificationType = 'che_message' | 'plan_reminder';
 
 export interface CheNotification {

@@ -1,4 +1,4 @@
-﻿import type { SceneType } from '../types/che';
+import type { AgentSceneDefinition, SceneType, SceneVariant } from '../types/che';
 
 export type SceneImageConfig = {
   cardImage: string;
@@ -21,12 +21,16 @@ const cardExercise = new URL('../../场景图/card/exercise.png', import.meta.ur
 const cardCooking = new URL('../../场景图/card/cooking.png', import.meta.url).href;
 const cardSofa = new URL('../../场景图/card/deep.png', import.meta.url).href;
 const cardDeep = new URL('../../场景图/card/deep 2.png', import.meta.url).href;
+const cardPark = new URL('../../场景图/card/park2.png', import.meta.url).href;
+const cardSea = new URL('../../场景图/card/sea.png', import.meta.url).href;
 
 const heroWork = new URL('../../场景图/hero/work.png', import.meta.url).href;
 const heroExercise = new URL('../../场景图/hero/exercise.png', import.meta.url).href;
 const heroCooking = new URL('../../场景图/hero/cooking.png', import.meta.url).href;
 const heroSofa = new URL('../../场景图/hero/deep2.png', import.meta.url).href;
 const heroDeep = new URL('../../场景图/hero/deep.png', import.meta.url).href;
+const heroPark = new URL('../../场景图/hero/park.png', import.meta.url).href;
+const heroSea = new URL('../../场景图/hero/sea.png', import.meta.url).href;
 
 const sceneWork = new URL('../../场景图/scene chat/work.png', import.meta.url).href;
 const sceneExercise = new URL('../../场景图/scene chat/exercise.png', import.meta.url).href;
@@ -34,6 +38,9 @@ const sceneCooking = new URL('../../场景图/scene chat/cooking.png', import.me
 const sceneSofa = new URL('../../场景图/scene chat/prime.png', import.meta.url).href;
 const sceneDeep = new URL('../../场景图/scene chat/deep.png', import.meta.url).href;
 const sceneStreet = new URL('../../场景图/scene chat/street.png', import.meta.url).href;
+const scenePark = new URL('../../场景图/scene chat/park.png', import.meta.url).href;
+const sceneSea = new URL('../../场景图/scene chat/sea.png', import.meta.url).href;
+const sceneShop = new URL('../../场景图/scene chat/shop.png', import.meta.url).href;
 
 export const sceneImageConfig: Record<SceneType, SceneImageConfig> = {
   study: makeScene(cardWork, heroWork, sceneWork, '64% 34%', '58% 32%', '58% 32%', '60% 32%'),
@@ -47,25 +54,25 @@ export const sceneImageConfig: Record<SceneType, SceneImageConfig> = {
   commute: makeScene(sceneStreet, sceneStreet, sceneStreet, '50% 32%', '50% 28%', '50% 30%', '50% 30%'),
 };
 
+const worldSceneImageOverrides: Partial<Record<SceneVariant, SceneImageConfig>> = {
+  park: makeScene(cardPark, heroPark, scenePark, '50% 32%', '50% 34%', '50% 34%', '50% 32%'),
+  seaside: makeScene(cardSea, heroSea, sceneSea, '50% 34%', '50% 36%', '50% 36%', '50% 34%'),
+  grocery: makeScene(sceneShop, sceneShop, sceneShop, '50% 38%', '50% 34%', '50% 36%', '50% 38%'),
+};
+
 function makeScene(cardImage: string, heroImage: string, sceneImage: string, cardFocus: string, heroFocus: string, sceneFocus: string, arrangeFocus: string): SceneImageConfig {
-  return {
-    cardImage,
-    heroImage,
-    sceneImage,
-    src: heroImage,
-    heroSrc: heroImage,
-    cardSrc: cardImage,
-    arrangeSrc: cardImage,
-    cardFocus,
-    thumbFocus: cardFocus,
-    heroFocus,
-    sceneFocus,
-    arrangeFocus,
-  };
+  return { cardImage, heroImage, sceneImage, src: heroImage, heroSrc: heroImage, cardSrc: cardImage, arrangeSrc: cardImage, cardFocus, thumbFocus: cardFocus, heroFocus, sceneFocus, arrangeFocus };
 }
 
-export function getSceneImage(sceneType: SceneType | null | undefined): SceneImageConfig {
-  return sceneImageConfig[sceneType ?? 'idle'];
+export function getSceneImage(sceneType: SceneType): SceneImageConfig {
+  return sceneImageConfig[sceneType];
+}
+
+export function getWorldSceneImage(worldScene: AgentSceneDefinition, entrySceneType: SceneType | null): SceneImageConfig {
+  const override = worldSceneImageOverrides[worldScene.sceneVariant];
+  if (override) return override;
+  if (entrySceneType) return getSceneImage(entrySceneType);
+  throw new Error(`Missing world scene image for ${worldScene.sceneKey}/${worldScene.sceneVariant}`);
 }
 
 export function getScenesNeedingCardCrop(): SceneType[] {

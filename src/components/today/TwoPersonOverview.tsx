@@ -1,5 +1,5 @@
 // TwoPersonOverview 负责展示用户和澈今天的摘要。
-// 后续改摘要文案请改 src/data/mockCheStatus.ts；改点击行为在 TodayPage 传入 props。
+// 摘要由 TodayPage 的当前 runtime state 提供，点击行为也由 TodayPage 传入。
 import type { CheScheduleItem, TodayCopy } from '../../types/che';
 
 interface DaySummary {

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { CheScheduleItem, DayRecord, DayRecordOwner, UserPlan } from '../types/che';
+import type { DayRecord, DayRecordOwner, UserPlan } from '../types/che';
 import {
   buildDateStrip,
   buildMonthDays,
@@ -13,7 +13,7 @@ import {
 
 export type ArrangeTab = 'mine' | 'che';
 
-export function useArrangeDateState(dayRecords: DayRecord[], userPlans: UserPlan[] = [], cheSchedule: CheScheduleItem[] = []) {
+export function useArrangeDateState(dayRecords: DayRecord[], userPlans: UserPlan[] = []) {
   const todayKey = toDateKey(new Date());
   const [activeTab, setActiveTab] = useState<ArrangeTab>('mine');
   const [selectedDateKey, setSelectedDateKey] = useState(todayKey);
@@ -34,14 +34,11 @@ export function useArrangeDateState(dayRecords: DayRecord[], userPlans: UserPlan
     userPlans.forEach((plan) => {
       if (plan.dateKey) keys.add(plan.dateKey);
     });
-    cheSchedule.forEach((item) => {
-      if (item.dateKey) keys.add(item.dateKey);
-    });
     dayRecords.forEach((record) => {
       keys.add(record.dateKey);
     });
     return keys;
-  }, [cheSchedule, dayRecords, userPlans]);
+  }, [dayRecords, userPlans]);
 
   const selectedOwner: DayRecordOwner = activeTab === 'mine' ? 'mine' : 'che';
   const records = useMemo(

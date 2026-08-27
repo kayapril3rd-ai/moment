@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { CheScheduleItem } from '../../types/che';
 import { ChatSoftIcon, ClockSoftIcon, SproutIcon, TodayBubbleIcon } from '../icons';
-import { getSceneImage } from '../../utils/sceneImages';
+import { getWorldSceneImage } from '../../utils/sceneImages';
 
 interface CheScheduleListProps {
   schedule: CheScheduleItem[];
@@ -11,7 +11,7 @@ export function CheScheduleList({ schedule }: CheScheduleListProps) {
   return (
     <div className="che-scene-list" aria-label="澈的今日安排">
       {schedule.map((item) => {
-        const image = getSceneImage(item.sceneType);
+        const image = getWorldSceneImage(item.worldScene, item.sceneType);
         const action = item.actionLabel?.trim();
         const statusText = getStatusText(item);
 

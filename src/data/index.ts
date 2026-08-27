@@ -1,4 +1,4 @@
-export { cheTodaySummary, mockCheStatus, todayCopy } from './mockCheStatus';
+export { todayCopy } from './todayCopy';
 export { buildCheScheduleForDate } from './cheSchedule';
 export { mockDayRecords } from './mockRecords';
 export { mockRecentMoments } from './mockMoments';
