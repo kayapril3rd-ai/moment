@@ -38,15 +38,14 @@ export function useArrangeDateState(dayRecords: DayRecord[], userPlans: UserPlan
       if (item.dateKey) keys.add(item.dateKey);
     });
     dayRecords.forEach((record) => {
-      const key = record.dateKey ?? record.date;
-      if (key) keys.add(key);
+      keys.add(record.dateKey);
     });
     return keys;
   }, [cheSchedule, dayRecords, userPlans]);
 
   const selectedOwner: DayRecordOwner = activeTab === 'mine' ? 'mine' : 'che';
   const records = useMemo(
-    () => dayRecords.filter((record) => (record.dateKey ?? record.date) === selectedDateKey && record.owner === selectedOwner),
+    () => dayRecords.filter((record) => record.dateKey === selectedDateKey && record.owner === selectedOwner),
     [dayRecords, selectedDateKey, selectedOwner],
   );
   const activityRecords = records.filter((record) => record.kind === 'activity');

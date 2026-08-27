@@ -1,6 +1,7 @@
 // TogetherMoments 是“时光记录”的占位页。
 // 后续可以扩展为共同活动摘要、轻量聊天摘要和澈记得的小事。
 import type { RecentMoment } from '../../types/che';
+import { formatMomentTime } from '../../utils/date';
 
 interface TogetherMomentsProps {
   moments: RecentMoment[];
@@ -8,6 +9,7 @@ interface TogetherMomentsProps {
 }
 
 export function TogetherMoments({ moments, onBack }: TogetherMomentsProps) {
+  const now = Date.now();
   return (
     <main className="app-shell" aria-labelledby="moments-page-title">
       <div className="phone-frame moments-frame">
@@ -28,7 +30,7 @@ export function TogetherMoments({ moments, onBack }: TogetherMomentsProps) {
         <div className="moments-page-list">
           {moments.map((moment) => (
             <article className="moment-card" key={moment.id}>
-              <time>{moment.time}</time>
+              <time dateTime={moment.createdAt}>{formatMomentTime(moment.createdAt, now)}</time>
               <p>{moment.text}</p>
             </article>
           ))}

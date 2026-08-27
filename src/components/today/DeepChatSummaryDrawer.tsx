@@ -78,7 +78,7 @@ function createDeepChatSummary(records: DayRecord[], now: number): DeepChatSumma
     .filter((record) => record.sceneType === 'deep_room' && record.kind === 'activity')
     .sort((a, b) => getRecordTime(b) - getRecordTime(a));
   const todayKey = toDateKey(new Date(now));
-  const todayRecords = deepRecords.filter((record) => (record.dateKey ?? record.date) === todayKey);
+  const todayRecords = deepRecords.filter((record) => record.dateKey === todayKey);
   const sourceRecords = todayRecords.length > 0 ? todayRecords : deepRecords;
 
   if (sourceRecords.length === 0) {
@@ -94,7 +94,7 @@ function createDeepChatSummary(records: DayRecord[], now: number): DeepChatSumma
 
   const latest = sourceRecords[0];
   return {
-    dateKey: latest.dateKey ?? latest.date ?? todayKey,
+    dateKey: latest.dateKey,
     count: sourceRecords.length,
     timeLabels: unique(sourceRecords.map((record) => record.timeLabel).filter(Boolean)),
     summary: latest.detail ?? latest.summary,
@@ -104,8 +104,7 @@ function createDeepChatSummary(records: DayRecord[], now: number): DeepChatSumma
 }
 
 function getRecordTime(record: DayRecord) {
-  const date = record.dateKey ?? record.date ?? '';
-  return new Date(`${date}T${record.startedAt ?? record.timeLabel ?? '00:00'}`).getTime() || 0;
+  return new Date(`${record.dateKey}T${record.startedAt ?? record.timeLabel ?? '00:00'}`).getTime() || 0;
 }
 
 function unique(values: string[]) {

@@ -41,6 +41,41 @@ Example:
 "scene"
 ```
 
+### Agent Scene Context
+
+`SceneType` remains the stable UI/activity routing key. The AI Agent uses a separate,
+coarser `AgentSceneKey` plus an extensible `SceneVariant`; these keys must not replace
+the existing UI key.
+
+| Field | Type | Purpose | Example |
+|---|---|---|---|
+| `sceneKey` | `AgentSceneKey` | Agent-level scene family | `"focus"` |
+| `sceneVariant` | `SceneVariant` | Concrete setting within that family | `"work_desk"` |
+| `cheCurrentState` | `string` (optional) | Runtime Che state, included only when an explicit current-state source provides it | `"他正在收尾体验评审稿。"` |
+
+Reserved Agent families include `home_idle`, `focus`, `meal`, `fitness`, `errand`,
+`commute`, `hangout`, and `deep_room`. Future contexts such as `errand / grocery`,
+`hangout / park`, and `hangout / seaside` do not require a premature UI `SceneType`.
+The centralized `AGENT_SCENE_BY_SCENE_TYPE` mapping is the source of truth; SceneData
+does not duplicate this mapping. `cheStatusHint` is UI copy and is not a runtime
+`cheCurrentState` source.
+
+| SceneType | AgentSceneKey | SceneVariant |
+|---|---|---|
+| `study` | `focus` | `work_desk` |
+| `watch` | `home_idle` | `movie_night` |
+| `fitness` | `fitness` | `home_gym` |
+| `meal` | `meal` | `cooking` |
+| `gaming` | `home_idle` | `gaming_sofa` |
+| `sleep` | `home_idle` | `bedside_night` |
+| `commute` | `commute` | `city_evening` |
+| `idle` | `home_idle` | `sofa_evening` |
+| `deep_room` | `deep_room` | `window_night` |
+
+Existing park and seaside image assets are reserved as unbound `hangout` environment
+resources. They do not imply new UI SceneTypes and are not part of the home `idle`
+definition.
+
 ## `CheStatus`
 Represents 澈's current time-aware state on Today.
 
@@ -79,9 +114,11 @@ Represents a plan created by the user.
 | `title` | string | User-facing plan title | `"晚上练背"` |
 | `startTime` | string | Local time or ISO datetime | `"19:30"` |
 | `endTime` | string \| null | Optional end time | `"20:30"` |
+| `durationMinutes` | number \| undefined | Event duration; computation falls back to 45 minutes | `60` |
 | `sceneType` | `SceneType` | Related scene | `"fitness"` |
 | `note` | string | User note | `"昨天硬拉了，今天轻一点"` |
-| `inviteStatus` | `"not_invited" \| "invited" \| "accepted"` | 澈 invite state | `"accepted"` |
+| `status` | `"todo" \| "active" \| "done" \| "cancelled"` | Plan lifecycle only | `"todo"` |
+| `inviteStatus` | `"not_invited" \| "accepted"` | Whether 澈 participates | `"accepted"` |
 | `createdAt` | string | Creation timestamp | `"2026-05-20T12:45:00+08:00"` |
 | `updatedAt` | string | Last update timestamp | `"2026-05-20T12:46:00+08:00"` |
 
@@ -95,6 +132,7 @@ Example:
   "endTime": "20:30",
   "sceneType": "fitness",
   "note": "昨天硬拉了，今天轻一点",
+  "status": "todo",
   "inviteStatus": "accepted",
   "createdAt": "2026-05-20T12:45:00+08:00",
   "updatedAt": "2026-05-20T12:46:00+08:00"
@@ -142,9 +180,8 @@ Represents a vertical flat card in `今天可以一起`.
 | `title` | string | Card title | `"一起健身"` |
 | `timeHint` | string | Short time hint | `"今晚 19:30"` |
 | `description` | string | Lived-in short copy | `"你练背，他也把核心训练排进去了"` |
-| `status` | `"available" \| "planned" \| "shared" \| "disabled"` | Card state | `"shared"` |
+| `status` | `"availableNow" \| "scheduled" \| "flexible" \| "active" \| "completed" \| "disabled"` | Card state | `"scheduled"` |
 | `linkedPlanId` | string \| null | Related user plan | `"plan-001"` |
-| `conversationMode` | `ConversationMode` | Usually scene; deep only for explicit deep entries | `"scene"` |
 | `sortOrder` | number | Today card order | `1` |
 
 Example:
@@ -156,9 +193,8 @@ Example:
   "title": "一起健身",
   "timeHint": "今晚 19:30",
   "description": "你练背，他也把核心训练排进去了",
-  "status": "shared",
+  "status": "scheduled",
   "linkedPlanId": "plan-001",
-  "conversationMode": "scene",
   "sortOrder": 1
 }
 ```
@@ -169,7 +205,6 @@ Represents a visible memory fragment. It shows relationship growth without expos
 | Field | Type | Purpose | Example |
 |---|---|---|---|
 | `id` | string | Unique moment id | `"moment-001"` |
-| `time` | string | Human-readable time or ISO datetime | `"刚刚"` |
 | `text` | string | Moment copy | `"澈把晚上的训练时间往后挪了十分钟，跟上你的计划。"` |
 | `sourceScene` | `SceneType \| null` | Related scene | `"fitness"` |
 | `linkedPlanId` | string \| null | Related user plan | `"plan-001"` |
@@ -180,25 +215,12 @@ Example:
 ```json
 {
   "id": "moment-001",
-  "time": "刚刚",
   "text": "澈把晚上的训练时间往后挪了十分钟，跟上你的计划。",
   "sourceScene": "fitness",
   "linkedPlanId": "plan-001",
   "createdAt": "2026-05-20T12:46:00+08:00"
 }
 ```
-
-## `RelationshipState`
-Hidden state for relationship growth. This must not be displayed as levels, scores, or upgrade copy.
-
-| Field | Type | Purpose | Example |
-|---|---|---|---|
-| `familiarity` | number | How much they have met/talked across scenes | `18` |
-| `dailyBond` | number | Frequency of shared daily activities | `12` |
-| `trust` | number | Whether deeper stress/vulnerability has been shared | `6` |
-| `mutuality` | number | Overlap between user interests and 澈's interests | `10` |
-| `tension` | number | Low-frequency closeness and intimate signal allowance | `3` |
-| `lastUpdatedAt` | string | Last state update timestamp | `"2026-05-20T12:46:00+08:00"` |
 
 Example:
 
@@ -216,6 +238,11 @@ Example:
 ## `SceneData`
 Represents a scene definition used by scene cards and mock conversation entry.
 
+All definitions live in the single `sceneRegistry`, typed so every `SceneType` has
+exactly one definition and each registry key matches its `SceneData.id`. Consumers
+index the registry directly; missing scenes are compile-time errors rather than an
+`idle` fallback. Traversal, when needed, is derived with `Object.values(sceneRegistry)`.
+
 | Field | Type | Purpose | Example |
 |---|---|---|---|
 | `id` | `SceneType` | Stable scene id | `"watch"` |
@@ -227,7 +254,6 @@ Represents a scene definition used by scene cards and mock conversation entry.
 | `cheStatusHint` | string | 澈 in-scene state | `"他去倒了杯水，坐回沙发边"` |
 | `starterMessage` | string | Mock first reply or opening line | `"好，我去倒杯水，陪你慢慢看。你今天要看什么哪部呀？"` |
 | `allowedQuickReplies` | string[] | Optional shallow quick actions | `["开始看", "换一部", "先聊两句"]` |
-| `isDeepEntry` | boolean | Whether this is one of the explicit deep entries | `false` |
 
 Example:
 
@@ -241,8 +267,7 @@ Example:
   "setting": "客厅灯开得很低，茶几上放着遥控器",
   "cheStatusHint": "他去倒了杯水，坐回沙发边",
   "starterMessage": "好，我去倒杯水，陪你慢慢看。你今天要看什么哪部呀？",
-  "allowedQuickReplies": ["开始看", "换一部", "先聊两句"],
-  "isDeepEntry": false
+  "allowedQuickReplies": ["开始看", "换一部", "先聊两句"]
 }
 ```
 
@@ -253,7 +278,6 @@ When a user invites 澈 to a plan, update these mock data collections together:
 2. Add or update a `CheScheduleItem` with `type: "shared"` and `source: "user_invite"`.
 3. Add or update a `SceneCard` with `status: "shared"` and `linkedPlanId`.
 4. Add a `RecentMoment` describing the small shared change.
-5. Optionally adjust hidden `RelationshipState.dailyBond` and `mutuality`.
 
 Do not require a second join action.
 
@@ -266,17 +290,15 @@ Suggested MVP localStorage keys:
 | `che.schedule.v1` | `CheScheduleItem[]` |
 | `che.sceneCards.v1` | `SceneCard[]` |
 | `che.recentMoments.v1` | `RecentMoment[]` |
-| `che.relationshipState.v1` | `RelationshipState` |
 
 ## MVP v1 Third Version Additions
 
 ### Scene Image Adaptation Fields
 
-`SceneData` should reserve these optional fields so future real images can enter the same UI container without changing layout:
+`SceneData` keeps only image overrides with current consumers; the central image registry owns card and hero assets.
 
 | Field | Type | Purpose | Example |
 |---|---|---|---|
-| `imageUrl` | `string` | real scene image URL or local asset path | `"/images/scenes/study-window.jpg"` |
 | `mood` | `"mist" \| "warm" \| "night" \| "green" \| "coastal"` | controls atmosphere tuning | `"mist"` |
 | `textTone` | `"light" \| "dark"` | tells overlay/text system what contrast to use | `"light"` |
 | `focalPoint` | `string` | CSS background-position / crop hint | `"center 42%"` |
@@ -288,6 +310,7 @@ Arrange page day records can be mocked first:
 | Field | Type | Purpose | Example |
 |---|---|---|---|
 | `id` | `string` | record id | `"record-workout-001"` |
+| `dateKey` | `string` | Canonical local day key | `"2026-05-20"` |
 | `kind` | `"activity" \| "letter" \| "moment"` | record presentation type | `"letter"` |
 | `title` | `string` | user-facing title | `"安静聊聊"` |
 | `timeLabel` | `string` | soft time anchor | `"夜里 23:10"` |

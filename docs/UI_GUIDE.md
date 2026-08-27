@@ -151,7 +151,6 @@ Deep Talk can use psychology silently, but foreground language must not feel lik
 Reserve these fields in scene data:
 
 - `sceneType`
-- `imageUrl`
 - `mood`
 - `textTone`
 - `focalPoint`

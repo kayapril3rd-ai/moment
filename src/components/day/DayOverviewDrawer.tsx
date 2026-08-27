@@ -33,10 +33,10 @@ function getUserRows(plans: UserPlan[]) {
     .filter((plan) => plan.status === 'done')
     .map((plan) => createUserRow(plan, '✓'));
   const accepted = uniquePlans
-    .filter((plan) => (plan.status === 'active' || plan.status === 'accepted' || plan.inviteStatus === 'accepted') && plan.status !== 'done' && plan.status !== 'cancelled')
+    .filter((plan) => (plan.status === 'active' || plan.inviteStatus === 'accepted') && plan.status !== 'done' && plan.status !== 'cancelled')
     .map((plan) => createUserRow(plan, '●', plan.status === 'active' ? '进行中' : '澈已答应'));
   const todo = uniquePlans
-    .filter((plan) => (!plan.status || plan.status === 'todo') && plan.inviteStatus !== 'accepted')
+    .filter((plan) => plan.status === 'todo' && plan.inviteStatus !== 'accepted')
     .map((plan) => createUserRow(plan, '○'));
 
   return { todo, accepted, done };

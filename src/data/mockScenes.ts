@@ -1,4 +1,8 @@
-import type { SceneCard, SceneData } from '../types/che';
+import type { SceneCard, SceneData, SceneType } from '../types/che';
+
+type SceneRegistry = {
+  [Scene in SceneType]: SceneData & { id: Scene };
+};
 
 export const mockSceneCards: SceneCard[] = [
   {
@@ -10,8 +14,7 @@ export const mockSceneCards: SceneCard[] = [
     timePrecision: 'approximate',
     description: '晚点热身，先晒一下太阳。',
     status: 'scheduled',
-    linkedPlanId: 'workout',
-    conversationMode: 'scene',
+    linkedPlanId: null,
     sortOrder: 1,
   },
   {
@@ -23,8 +26,7 @@ export const mockSceneCards: SceneCard[] = [
     timePrecision: 'period',
     description: '他在想今晚做点清淡的，也提醒你别空腹硬扛。',
     status: 'availableNow',
-    linkedPlanId: 'plan-001',
-    conversationMode: 'scene',
+    linkedPlanId: null,
     sortOrder: 2,
   },
   {
@@ -36,8 +38,7 @@ export const mockSceneCards: SceneCard[] = [
     timePrecision: 'period',
     description: '选一部轻一点的电影吧，今晚可以慢一点。',
     status: 'flexible',
-    linkedPlanId: 'plan-003',
-    conversationMode: 'scene',
+    linkedPlanId: null,
     sortOrder: 3,
   },
   {
@@ -50,13 +51,12 @@ export const mockSceneCards: SceneCard[] = [
     description: '他在桌边收尾稿子，你也可以安静做自己的事。',
     status: 'availableNow',
     linkedPlanId: null,
-    conversationMode: 'scene',
     sortOrder: 4,
   },
 ];
 
-export const mockScenes: SceneData[] = [
-  {
+export const sceneRegistry = {
+  study: {
     id: 'study',
     title: '一起专注',
     shortTitle: '专注',
@@ -66,42 +66,11 @@ export const mockScenes: SceneData[] = [
     cheStatusHint: '他也在安静处理事情。',
     starterMessage: '我这会儿在处理一点工作。你也把自己的事放在旁边，我们先各自专心一会儿。',
     allowedQuickReplies: ['开始专注', '休息五分钟', '换个任务'],
-    isDeepEntry: false,
     mood: 'mist',
     textTone: 'light',
     focalPoint: '58% 36%',
   },
-  {
-    id: 'meal',
-    title: '一起吃饭',
-    shortTitle: '吃饭',
-    conversationMode: 'scene',
-    entryLabel: '一起吃点热的',
-    setting: '厨房里有一点热气，锅里的汤还在小火滚着。',
-    cheStatusHint: '他在等你把饭收好。',
-    starterMessage: '先好好吃饭。今天不用一边吃一边绷着。',
-    allowedQuickReplies: ['看看吃什么', '简单一点', '晚点再吃'],
-    isDeepEntry: false,
-    mood: 'warm',
-    textTone: 'light',
-    focalPoint: '50% 38%',
-  },
-  {
-    id: 'fitness',
-    title: '一起健身',
-    shortTitle: '健身',
-    conversationMode: 'scene',
-    entryLabel: '一起动一动',
-    setting: '健身包放在门边，运动鞋已经换好了。',
-    cheStatusHint: '他刚换好运动鞋。',
-    starterMessage: '先热身，别一下子太狠。',
-    allowedQuickReplies: ['开始热身', '轻量一点', '练完报备'],
-    isDeepEntry: false,
-    mood: 'green',
-    textTone: 'light',
-    focalPoint: '54% 32%',
-  },
-  {
+  watch: {
     id: 'watch',
     title: '一起看电影',
     shortTitle: '电影',
@@ -111,12 +80,53 @@ export const mockScenes: SceneData[] = [
     cheStatusHint: '他把灯调暗了一点。',
     starterMessage: '今晚就轻一点吧。你想吐槽剧情也可以。',
     allowedQuickReplies: ['开始看', '换一部', '先聊两句'],
-    isDeepEntry: false,
     mood: 'mist',
     textTone: 'light',
     focalPoint: '52% 42%',
   },
-  {
+  fitness: {
+    id: 'fitness',
+    title: '一起健身',
+    shortTitle: '健身',
+    conversationMode: 'scene',
+    entryLabel: '一起动一动',
+    setting: '健身包放在门边，运动鞋已经换好了。',
+    cheStatusHint: '他刚换好运动鞋。',
+    starterMessage: '先热身，别一下子太狠。',
+    allowedQuickReplies: ['开始热身', '轻量一点', '练完报备'],
+    mood: 'green',
+    textTone: 'light',
+    focalPoint: '54% 32%',
+  },
+  meal: {
+    id: 'meal',
+    title: '一起吃饭',
+    shortTitle: '吃饭',
+    conversationMode: 'scene',
+    entryLabel: '一起吃点热的',
+    setting: '厨房里有一点热气，锅里的汤还在小火滚着。',
+    cheStatusHint: '他在等你把饭收好。',
+    starterMessage: '先好好吃饭。今天不用一边吃一边绷着。',
+    allowedQuickReplies: ['看看吃什么', '简单一点', '晚点再吃'],
+    mood: 'warm',
+    textTone: 'light',
+    focalPoint: '50% 38%',
+  },
+  gaming: {
+    id: 'gaming',
+    title: '一起打游戏',
+    shortTitle: '游戏',
+    conversationMode: 'scene',
+    entryLabel: '一起开一局',
+    setting: '客厅里留着一盏灯，手柄放在沙发边。',
+    cheStatusHint: '他把手柄拿起来，给你留了位置。',
+    starterMessage: '来，开一局。输赢先放一边，想玩什么？',
+    allowedQuickReplies: ['开一局', '换个角色', '先聊两句'],
+    mood: 'mist',
+    textTone: 'light',
+    focalPoint: '52% 40%',
+  },
+  sleep: {
     id: 'sleep',
     title: '睡前聊会儿',
     shortTitle: '睡前',
@@ -126,12 +136,25 @@ export const mockScenes: SceneData[] = [
     cheStatusHint: '他把声音放轻了一点。',
     starterMessage: '今天辛苦了。你可以少说一点，我也会在。',
     allowedQuickReplies: ['说两句', '安静一会儿', '准备睡了'],
-    isDeepEntry: false,
     mood: 'night',
     textTone: 'light',
     focalPoint: 'center',
   },
-  {
+  commute: {
+    id: 'commute',
+    title: '下班路上',
+    shortTitle: '路上',
+    conversationMode: 'scene',
+    entryLabel: '陪我走一段',
+    setting: '城市的灯刚亮起来，路上还有下班的人和缓慢的车流。',
+    cheStatusHint: '他也在往回走，回话比平时短一点。',
+    starterMessage: '我在，陪你走一段。要是在开车，到了再回我。',
+    allowedQuickReplies: ['说说路上', '聊两句今天', '先安静走着'],
+    mood: 'night',
+    textTone: 'light',
+    focalPoint: '50% 34%',
+  },
+  idle: {
     id: 'idle',
     title: '随便待一会儿',
     shortTitle: '日常',
@@ -141,12 +164,11 @@ export const mockScenes: SceneData[] = [
     cheStatusHint: '他在这里，等你说话。',
     starterMessage: '来了？今天想安静待一会儿，还是随便说点什么。',
     allowedQuickReplies: ['安静待会儿', '随便聊聊', '说今天'],
-    isDeepEntry: false,
     mood: 'mist',
     textTone: 'light',
     focalPoint: '56% 34%',
   },
-  {
+  deep_room: {
     id: 'deep_room',
     title: 'Deep Room',
     shortTitle: '安静聊聊',
@@ -156,9 +178,8 @@ export const mockScenes: SceneData[] = [
     cheStatusHint: '他坐近一点，等你开口。',
     starterMessage: '你不用一下子讲清楚。先说最压着你的那一块就好。',
     allowedQuickReplies: ['慢慢说', '先坐一会儿', '从一件事说起'],
-    isDeepEntry: true,
     mood: 'night',
     textTone: 'light',
     focalPoint: '50% 40%',
   },
-];
+} satisfies SceneRegistry;

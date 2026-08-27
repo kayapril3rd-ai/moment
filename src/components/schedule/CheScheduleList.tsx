@@ -25,7 +25,7 @@ export function CheScheduleList({ schedule }: CheScheduleListProps) {
             <span className="scene-card-overlay" aria-hidden="true" />
             <div className="che-scene-content">
               <span className="che-scene-icon" aria-hidden="true">
-                <CheIcon icon={item.iconKey ?? item.sceneKey ?? ''} />
+                <CheIcon icon={item.iconKey ?? item.sceneType ?? ''} />
               </span>
               <span className="che-scene-copy">
                 <small>{item.timeLabel || item.startTime}</small>

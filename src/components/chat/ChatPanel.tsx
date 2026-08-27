@@ -11,7 +11,7 @@ interface ChatPanelProps {
 
 export function ChatPanel({ scene, messages, onSend, onCollapse }: ChatPanelProps) {
   const [draft, setDraft] = useState('');
-  const isDeep = scene.isDeepEntry;
+  const isDeep = scene.conversationMode === 'deep';
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

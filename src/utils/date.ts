@@ -31,6 +31,26 @@ export function formatYearMonth(dateKeyOrDate: string | Date): string {
   return `${date.getFullYear()}年${date.getMonth() + 1}月`;
 }
 
+export function formatMomentTime(createdAt: string, now: number): string {
+  const createdDate = new Date(createdAt);
+  if (Number.isNaN(createdDate.getTime())) return '';
+
+  const nowDate = new Date(now);
+  const createdKey = toDateKey(createdDate);
+  const todayKey = toDateKey(nowDate);
+  const elapsedMs = now - createdDate.getTime();
+  if (createdKey === todayKey) return elapsedMs >= 0 && elapsedMs < 5 * 60_000 ? '刚刚' : '今天';
+
+  const yesterday = new Date(nowDate);
+  yesterday.setDate(nowDate.getDate() - 1);
+  if (createdKey === toDateKey(yesterday)) return '昨天';
+
+  if (createdDate.getFullYear() === nowDate.getFullYear()) {
+    return `${createdDate.getMonth() + 1}月${createdDate.getDate()}日`;
+  }
+  return `${createdDate.getFullYear()}年${createdDate.getMonth() + 1}月${createdDate.getDate()}日`;
+}
+
 export function buildDateStrip(anchor = new Date(), daysBefore = 1): DateItem[] {
   return Array.from({ length: 5 }, (_, index) => {
     const date = new Date(anchor);

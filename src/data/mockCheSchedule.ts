@@ -4,7 +4,6 @@ export const mockCheSchedule: CheScheduleItem[] = [
   {
     id: 'che-0527-work',
     dateKey: '2026-05-27',
-    sceneKey: 'study',
     iconKey: 'sun',
     title: '收尾项目',
     startTime: '',
@@ -24,7 +23,6 @@ export const mockCheSchedule: CheScheduleItem[] = [
   {
     id: 'che-0527-coffee',
     dateKey: '2026-05-27',
-    sceneKey: 'coffee',
     iconKey: 'coffee',
     title: '咖啡休息',
     startTime: '',
@@ -44,7 +42,6 @@ export const mockCheSchedule: CheScheduleItem[] = [
   {
     id: 'che-0527-walk',
     dateKey: '2026-05-27',
-    sceneKey: 'walk',
     iconKey: 'walk',
     title: '散步放松',
     startTime: '',
@@ -64,7 +61,6 @@ export const mockCheSchedule: CheScheduleItem[] = [
   {
     id: 'che-0527-night',
     dateKey: '2026-05-27',
-    sceneKey: 'deep_room',
     iconKey: 'moon',
     title: '空下来',
     startTime: '20:30',

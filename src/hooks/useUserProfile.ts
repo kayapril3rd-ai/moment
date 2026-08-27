@@ -51,7 +51,7 @@ function readStoredMemoryItems(): string[] {
     const parsed = JSON.parse(stored);
     if (!Array.isArray(parsed)) return defaultMemoryItems;
     const normalized = parsed.map((item) => String(item).trim()).filter(Boolean);
-    return normalized.length > 0 ? normalized : defaultMemoryItems;
+    return normalized;
   } catch {
     return defaultMemoryItems;
   }

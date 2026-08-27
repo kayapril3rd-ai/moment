@@ -152,7 +152,7 @@ Acceptance criteria:
 Suggested files when implementation starts:
 
 - `src/data/mockCheStatus.ts`
-- `src/data/mockSchedule.ts`
+- `src/data/mockCheSchedule.ts`
 - `src/data/mockScenes.ts`
 - `src/data/mockMoments.ts`
 - `src/types/che.ts`
@@ -165,7 +165,6 @@ Suggested types:
 - `CheScheduleItem`
 - `SceneCard`
 - `RecentMoment`
-- `RelationshipState`
 
 ## QA Checklist
 Before any implementation is considered done:

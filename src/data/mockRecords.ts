@@ -3,7 +3,6 @@ import type { DayRecord } from '../types/che';
 export const mockDayRecords: DayRecord[] = [
   {
     id: 'record-mine-study-0522',
-    date: '2026-05-22',
     dateKey: '2026-05-22',
     owner: 'mine',
     kind: 'activity',
@@ -19,7 +18,6 @@ export const mockDayRecords: DayRecord[] = [
   },
   {
     id: 'record-mine-photo-0522',
-    date: '2026-05-22',
     dateKey: '2026-05-22',
     owner: 'mine',
     kind: 'activity',
@@ -35,7 +33,6 @@ export const mockDayRecords: DayRecord[] = [
   },
   {
     id: 'record-mine-dinner-0522',
-    date: '2026-05-22',
     dateKey: '2026-05-22',
     owner: 'mine',
     kind: 'activity',
@@ -51,7 +48,6 @@ export const mockDayRecords: DayRecord[] = [
   },
   {
     id: 'record-che-work-0522',
-    date: '2026-05-22',
     dateKey: '2026-05-22',
     owner: 'che',
     kind: 'activity',
@@ -65,7 +61,6 @@ export const mockDayRecords: DayRecord[] = [
   },
   {
     id: 'record-che-walk-0522',
-    date: '2026-05-22',
     dateKey: '2026-05-22',
     owner: 'che',
     kind: 'activity',
@@ -79,7 +74,6 @@ export const mockDayRecords: DayRecord[] = [
   },
   {
     id: 'record-che-deep-0522',
-    date: '2026-05-22',
     dateKey: '2026-05-22',
     owner: 'che',
     kind: 'activity',
@@ -93,7 +87,6 @@ export const mockDayRecords: DayRecord[] = [
   },
   {
     id: 'record-letter-goodnight-0522',
-    date: '2026-05-22',
     dateKey: '2026-05-22',
     owner: 'che',
     kind: 'letter',

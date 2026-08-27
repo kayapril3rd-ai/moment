@@ -138,7 +138,7 @@ Inviting 澈 updates:
 Starting an activity updates:
 
 - sceneCard status = active
-- activeActivity / activeScene / activeStartedAt
+- activeActivity / activeStartedAt
 - Hero becomes active activity
 - Scene Chat duration uses activeStartedAt
 

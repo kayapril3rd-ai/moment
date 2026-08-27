@@ -146,10 +146,9 @@ function PlanIcon({ sceneType }: { sceneType: SceneType }) {
   return <SproutIcon size={24} />;
 }
 
-function getPlanAction(plan: UserPlan): { label: string; kind: 'invite' | 'accepted' | 'scheduled' | 'active' | 'done' } {
+function getPlanAction(plan: UserPlan): { label: string; kind: 'invite' | 'accepted' | 'active' | 'done' } {
   if (plan.status === 'done') return { label: '已完成', kind: 'done' };
   if (plan.status === 'active') return { label: '进行中', kind: 'active' };
   if (plan.inviteStatus === 'accepted') return { label: '已约好', kind: 'accepted' };
-  if (plan.status === 'accepted') return { label: '已安排', kind: 'scheduled' };
   return { label: '邀请澈', kind: 'invite' };
 }

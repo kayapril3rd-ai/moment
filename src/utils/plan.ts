@@ -100,23 +100,6 @@ export function getPlanTimeAnchor(plan: Pick<UserPlan, 'startTime' | 'timeLabel'
   return fallback.length > 5 ? '稍后' : fallback;
 }
 
-export function getPlanDurationLabel(plan: UserPlan): string {
-  if (plan.endTime && plan.startTime) return '一段时间';
-
-  switch (plan.sceneType) {
-    case 'study':
-      return '60 分钟';
-    case 'fitness':
-      return '45 分钟';
-    case 'watch':
-      return '90 分钟';
-    case 'meal':
-      return '40 分钟';
-    default:
-      return '30 分钟';
-  }
-}
-
 export function getCheInviteReply(plan: UserPlan): string {
   switch (plan.sceneType) {
     case 'study':
@@ -136,7 +119,7 @@ export function getCheInviteReply(plan: UserPlan): string {
 
 export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneCard {
   const timeLabel = getDisplayTimeLabel(plan);
-  const sceneType = getPlanSceneType(plan);
+  const sceneType = plan.sceneType;
   return {
     id: `scene-shared-${plan.id}`,
     sceneType,
@@ -147,14 +130,13 @@ export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneC
     description: getSharedSceneDescription(plan),
     status: 'scheduled',
     linkedPlanId: plan.id,
-    conversationMode: 'scene',
     sortOrder,
   };
 }
 
 export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
   const timeLabel = getDisplayTimeLabel(plan);
-  const sceneType = getPlanSceneType(plan);
+  const sceneType = plan.sceneType;
   return {
     id: `che-shared-${plan.id}`,
     title: getCheScheduleTitle(plan),
@@ -173,9 +155,8 @@ export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
 export function createRecentMomentFromPlan(plan: UserPlan, now = new Date()): RecentMoment {
   return {
     id: `moment-shared-${plan.id}`,
-    time: '刚刚',
     text: getRecentMomentText(plan),
-    sourceScene: getPlanSceneType(plan),
+    sourceScene: plan.sceneType,
     linkedPlanId: plan.id,
     createdAt: now.toISOString(),
   };
@@ -217,11 +198,6 @@ function getDefaultPlanNote(sceneType: SceneType): string {
   }
 }
 
-function getPlanSceneType(plan: UserPlan): SceneType {
-  if (plan.sceneKey) return sceneKeyToSceneType(plan.sceneKey);
-  return sceneCategoryToSceneType(inferSceneCategory(`${plan.title} ${plan.note}`));
-}
-
 function inferSceneCategory(text: string): SceneCategory {
   if (/学习|工作|写稿|面试|复习|看书|整理|做项目|开会|专注|设计|代码|英语|背单词/.test(text)) return 'work';
   if (/健身|运动|练背|瑜伽|跑步|拉伸|训练/.test(text)) return 'fitness';
@@ -229,16 +205,6 @@ function inferSceneCategory(text: string): SceneCategory {
   if (/散步|出门|晒太阳|公园|走走|透气|放松/.test(text)) return 'walk';
   if (/电影|音乐|追剧|看剧|睡前|夜里|聊天|晚安/.test(text)) return 'rest';
   return 'default';
-}
-
-function sceneKeyToSceneType(sceneKey: string): SceneType {
-  if (/work|study|focus|design|code/.test(sceneKey)) return 'study';
-  if (/fitness|sport|workout|training/.test(sceneKey)) return 'fitness';
-  if (/meal|coffee|food|cook/.test(sceneKey)) return 'meal';
-  if (/walk|park|casual|idle/.test(sceneKey)) return 'idle';
-  if (/movie|watch|music/.test(sceneKey)) return 'watch';
-  if (/deep|night|sleep/.test(sceneKey)) return 'deep_room';
-  return 'idle';
 }
 
 function sceneCategoryToSceneType(category: SceneCategory): SceneType {
@@ -258,7 +224,7 @@ function sceneCategoryToSceneType(category: SceneCategory): SceneType {
 }
 
 function getSharedSceneTitle(plan: UserPlan): string {
-  switch (getPlanSceneType(plan)) {
+  switch (plan.sceneType) {
     case 'study':
       return '一起工作';
     case 'fitness':
@@ -275,7 +241,7 @@ function getSharedSceneTitle(plan: UserPlan): string {
 }
 
 function getSharedSceneDescription(plan: UserPlan): string {
-  switch (getPlanSceneType(plan)) {
+  switch (plan.sceneType) {
     case 'study':
       return '他也在安静处理事情。';
     case 'fitness':
@@ -293,7 +259,7 @@ function getSharedSceneDescription(plan: UserPlan): string {
 }
 
 function getCheScheduleTitle(plan: UserPlan): string {
-  switch (getPlanSceneType(plan)) {
+  switch (plan.sceneType) {
     case 'study':
       return `陪你${plan.title}`;
     case 'fitness':
@@ -310,7 +276,7 @@ function getCheScheduleTitle(plan: UserPlan): string {
 }
 
 function getCheScheduleDetail(plan: UserPlan): string {
-  switch (getPlanSceneType(plan)) {
+  switch (plan.sceneType) {
     case 'study':
       return '书桌边，适合安静待一会儿。';
     case 'fitness':
@@ -327,7 +293,7 @@ function getCheScheduleDetail(plan: UserPlan): string {
 }
 
 function getRecentMomentText(plan: UserPlan): string {
-  switch (getPlanSceneType(plan)) {
+  switch (plan.sceneType) {
     case 'study':
       return `你们约好了${getDisplayTimeLabel(plan)}一起${plan.title}。`;
     case 'fitness':

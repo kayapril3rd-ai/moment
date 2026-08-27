@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { mockCheStatus, todayCopy } from '../data';
+import { mockCheStatus } from '../data';
 import type { CheNotification, CheScheduleItem, CheStatus, DayRecord, SceneCard, UserPlan } from '../types/che';
 import { toDateKey } from '../utils/date';
 import { parseClockMinutes } from '../utils/eventStatus';
@@ -122,9 +122,11 @@ function getUpcomingPeriod(card: SceneCard) {
 
 function createUserTodaySummary(userPlans: UserPlan[]) {
   const activePlan = userPlans.find((plan) => plan.status === 'active');
-  const nextPlan = userPlans.find((plan) => ['accepted', 'todo'].includes(plan.status ?? 'todo') || plan.inviteStatus === 'accepted');
-  const todoCount = userPlans.filter((plan) => (!plan.status || plan.status === 'todo' || plan.status === 'accepted' || plan.inviteStatus === 'accepted') && plan.status !== 'active' && plan.status !== 'done' && plan.status !== 'cancelled').length;
-  const acceptedCount = userPlans.filter((plan) => (plan.inviteStatus === 'accepted' || plan.status === 'accepted') && plan.status !== 'active' && plan.status !== 'done').length;
+  const nextPlan = userPlans.find((plan) => plan.status === 'todo');
+  const todoCount = userPlans.filter((plan) => plan.status === 'todo').length;
+  const acceptedCount = userPlans.filter(
+    (plan) => plan.inviteStatus === 'accepted' && plan.status !== 'done' && plan.status !== 'cancelled',
+  ).length;
   const activeCount = userPlans.filter((plan) => plan.status === 'active').length;
   const doneCount = userPlans.filter((plan) => plan.status === 'done').length;
   const countHint = `${todoCount}待做 · ${doneCount}完成`;
@@ -166,7 +168,7 @@ function createCheTodayStatus(schedule: CheScheduleItem[], now: number) {
 function createCompanionshipStats(activeStartedAt: string | null, now: number, dayRecords: DayRecord[]) {
   const todayKey = toDateKey(new Date(now));
   const completedMinutes = dayRecords
-    .filter((record) => record.kind === 'activity' && record.owner === 'mine' && (record.dateKey ?? record.date) === todayKey)
+    .filter((record) => record.kind === 'activity' && record.owner === 'mine' && record.dateKey === todayKey)
     .reduce((sum, record) => sum + getRecordDurationMinutes(record), 0);
   const activeMinutes = activeStartedAt ? Math.max(0, Math.floor((now - new Date(activeStartedAt).getTime()) / 60_000)) : 0;
   const totalMinutes = completedMinutes + activeMinutes;
@@ -188,7 +190,6 @@ function createNotifications(plans: UserPlan[], schedule: CheScheduleItem[], dat
       type: 'plan_reminder' as const,
       content: getPlanReminderText(plan),
       dateKey,
-      sceneKey: plan.sceneKey,
       planId: plan.id,
       isRead: false,
       createdAt: new Date().toISOString(),
@@ -199,7 +200,6 @@ function createNotifications(plans: UserPlan[], schedule: CheScheduleItem[], dat
     type: 'che_message',
     content: freeItem ? '我 20:30 后会空。' : '我刚忙完，可以陪你。',
     dateKey,
-    sceneKey: freeItem?.sceneKey,
     isRead: false,
     createdAt: new Date().toISOString(),
   };

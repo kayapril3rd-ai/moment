@@ -13,20 +13,21 @@ interface SceneChatProps {
 }
 
 export function SceneChat({ scene, activeStartedAt, onBack, onEndActivity }: SceneChatProps) {
-  const { messages, sendMessage } = useSceneChatMessages(scene);
-  const [isChatOpen, setIsChatOpen] = useState(scene.isDeepEntry);
+  const { agentSceneContext, messages, sendMessage } = useSceneChatMessages(scene);
+  const isDeep = scene.conversationMode === 'deep';
+  const [isChatOpen, setIsChatOpen] = useState(isDeep);
 
   useEffect(() => {
-    setIsChatOpen(scene.isDeepEntry);
-  }, [scene.id, scene.isDeepEntry]);
+    setIsChatOpen(isDeep);
+  }, [scene.id, isDeep]);
 
   useEffect(() => {
-    if (!isChatOpen || scene.isDeepEntry) return undefined;
+    if (!isChatOpen || isDeep) return undefined;
     window.history.pushState({ sceneChat: 'chat_open' }, '');
     const handlePopState = () => setIsChatOpen(false);
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [isChatOpen, scene.isDeepEntry]);
+  }, [isChatOpen, isDeep]);
 
   const handleEndActivity = onEndActivity
     ? () => {
@@ -37,9 +38,14 @@ export function SceneChat({ scene, activeStartedAt, onBack, onEndActivity }: Sce
     : undefined;
 
   return (
-    <main className="app-shell chat-shell" aria-labelledby="scene-chat-title">
+    <main
+      className="app-shell chat-shell"
+      aria-labelledby="scene-chat-title"
+      data-agent-scene={agentSceneContext.sceneKey}
+      data-scene-variant={agentSceneContext.sceneVariant}
+    >
       <div className={`phone-frame chat-frame${isChatOpen ? ' is-chat-open' : ''}`}>
-        <div onClick={() => isChatOpen && !scene.isDeepEntry && setIsChatOpen(false)}>
+        <div onClick={() => isChatOpen && !isDeep && setIsChatOpen(false)}>
           <SceneVisual scene={scene} activeStartedAt={activeStartedAt} onBack={onBack} onEndActivity={handleEndActivity} />
         </div>
         {!isChatOpen ? (

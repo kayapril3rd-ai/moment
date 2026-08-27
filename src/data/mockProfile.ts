@@ -28,12 +28,7 @@ export const relationshipStats = {
   recentDeepChat: '夜里',
 };
 
-export const defaultMemoryItems = [
-  '你不喜欢太空泛的安慰',
-  '你更喜欢具体回应',
-  '你最近在调整作息',
-  '你喜欢慢一点的聊天节奏',
-];
+export const defaultMemoryItems: string[] = [];
 
 export const privacyActions = [
   '清除聊天记录',

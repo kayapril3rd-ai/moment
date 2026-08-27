@@ -137,7 +137,6 @@ Shared state:
 - recentMoments
 - dayRecords
 - activeActivity
-- activeScene
 - activeStartedAt
 - companionshipStats
 
@@ -156,7 +155,6 @@ Compact lists show only short anchors. End times belong only in detail/edit cont
 
 Reserve:
 
-- `imageUrl`
 - `mood`
 - `textTone`
 - `focalPoint`

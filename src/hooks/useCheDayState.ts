@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { mockCheSchedule, mockDayRecords, mockSceneCards, mockUserPlans } from '../data';
-import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, SceneType, UserPlan } from '../types/che';
+import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, UserPlan } from '../types/che';
 import {
   addUniqueMoment,
   addUniqueRecord,
@@ -28,9 +28,8 @@ interface UseCheDayStateInput {
 
 export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheDayStateInput) {
   const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
-  const [activeScene, setActiveScene] = useState<SceneType | null>(null);
   const [activeStartedAt, setActiveStartedAt] = useState<string | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<UserPlan | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [userPlans, setUserPlans] = useState<UserPlan[]>(mockUserPlans);
   const [cheSchedule, setCheSchedule] = useState<CheScheduleItem[]>(mockCheSchedule);
   const [sceneCards, setSceneCards] = useState<SceneCard[]>(mockSceneCards);
@@ -38,10 +37,11 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!activeStartedAt) return undefined;
-    const timerId = window.setInterval(() => setNow(Date.now()), 30_000);
+    const timerId = window.setInterval(() => setNow(Date.now()), 60_000);
     return () => window.clearInterval(timerId);
-  }, [activeStartedAt]);
+  }, []);
+
+  const selectedPlan = userPlans.find((plan) => plan.id === selectedPlanId) ?? null;
 
   const derivedState = useCheDayDerivedState({
     activeActivityId,
@@ -71,13 +71,12 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     const acceptedPlan: UserPlan = {
       ...plan,
       inviteStatus: 'accepted',
-      status: 'accepted',
+      status: 'todo',
       inviteReply: getCheInviteReply(plan),
       updatedAt: new Date().toISOString(),
     };
 
     setUserPlans((currentPlans) => currentPlans.map((item) => (item.id === planId ? acceptedPlan : item)));
-    setSelectedPlan((currentPlan) => (currentPlan?.id === planId ? acceptedPlan : currentPlan));
 
     setSceneCards((currentCards) => {
       if (currentCards.some((card) => card.linkedPlanId === planId && card.status === 'scheduled')) return currentCards;
@@ -114,7 +113,6 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     };
 
     setActiveActivityId(card.id);
-    setActiveScene(card.sceneType);
     setActiveStartedAt(startedAt);
 
     setSceneCards((currentCards) =>
@@ -153,7 +151,6 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
 
     if (activeActivityId === card.id) {
       setActiveActivityId(null);
-      setActiveScene(null);
       setActiveStartedAt(null);
     }
 
@@ -182,7 +179,6 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
         startTime: extractStartTime(timeLabel),
         timeLabel,
         timePrecision: nextPrecision,
-        status: 'accepted',
       });
     }
 
@@ -192,7 +188,6 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   const updatePlan = (planId: string, updates: Partial<UserPlan>) => {
     const nextUpdates = { ...updates, updatedAt: new Date().toISOString() };
     setUserPlans((currentPlans) => currentPlans.map((plan) => (plan.id === planId ? { ...plan, ...nextUpdates } : plan)));
-    setSelectedPlan((currentPlan) => (currentPlan?.id === planId ? { ...currentPlan, ...nextUpdates } : currentPlan));
     setSceneCards((currentCards) =>
       currentCards.map((card) =>
         card.linkedPlanId === planId
@@ -212,7 +207,6 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   const cancelInvite = (planId: string) => {
     if (derivedState.activeActivityCard?.linkedPlanId === planId) {
       setActiveActivityId(null);
-      setActiveScene(null);
       setActiveStartedAt(null);
     }
     updatePlan(planId, { inviteStatus: 'not_invited', status: 'todo' });
@@ -224,11 +218,11 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     const relatedCard = sceneCards.find((card) => card.linkedPlanId === planId);
     if (relatedCard) {
       completeActivity(relatedCard);
-      setSelectedPlan(null);
+      setSelectedPlanId(null);
       return;
     }
     updatePlan(planId, { status: 'done' });
-    setSelectedPlan(null);
+    setSelectedPlanId(null);
   };
 
   const restoreTodo = (planId: string) => {
@@ -241,13 +235,12 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   const deletePlan = (planId: string) => {
     if (derivedState.activeActivityCard?.linkedPlanId === planId) {
       setActiveActivityId(null);
-      setActiveScene(null);
       setActiveStartedAt(null);
     }
     setUserPlans((currentPlans) => currentPlans.filter((plan) => plan.id !== planId));
     setCheSchedule((currentSchedule) => currentSchedule.filter((item) => item.linkedPlanId !== planId));
     setSceneCards((currentCards) => currentCards.filter((card) => card.linkedPlanId !== planId));
-    setSelectedPlan(null);
+    setSelectedPlanId(null);
   };
 
   const cancelSceneCard = (cardId: string) => {
@@ -259,7 +252,6 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   return {
     ...derivedState,
     activeActivityId,
-    activeScene,
     activeStartedAt,
     cancelInvite,
     cancelSceneCard,
@@ -275,7 +267,7 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     restoreTodo,
     sceneCards,
     selectedPlan,
-    setSelectedPlan,
+    setSelectedPlanId,
     updateActivityTime,
     updatePlan,
     userPlans,

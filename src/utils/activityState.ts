@@ -26,7 +26,7 @@ export function syncCheScheduleForActive(schedule: CheScheduleItem[], card: Scen
 export function createActivityRecord(card: SceneCard, startedAt: string | null, completedAt: string): DayRecord {
   return {
     id: `record-${card.id}`,
-    date: toDateKey(new Date(completedAt)),
+    dateKey: toDateKey(new Date(completedAt)),
     owner: 'mine',
     kind: 'activity',
     title: card.title,
@@ -97,7 +97,7 @@ export function createMoment({
   sourceScene: SceneType | null;
   linkedPlanId: string | null;
 }): RecentMoment {
-  return { id, time: '刚刚', text, sourceScene, linkedPlanId, createdAt: new Date().toISOString() };
+  return { id, text, sourceScene, linkedPlanId, createdAt: new Date().toISOString() };
 }
 
 function getActiveCheScheduleDetail(sceneType: SceneType): string {

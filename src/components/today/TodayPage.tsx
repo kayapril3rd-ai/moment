@@ -53,7 +53,6 @@ export function TodayPage({
   const {
     activeActivityCard,
     activeActivityId,
-    activeScene,
     activeStartedAt,
     activateActivity,
     cancelInvite,
@@ -74,7 +73,7 @@ export function TodayPage({
     restoreTodo,
     sceneCards,
     selectedPlan,
-    setSelectedPlan,
+    setSelectedPlanId,
     updateActivityTime,
     updatePlan,
     upcomingHeroCard,
@@ -118,11 +117,8 @@ export function TodayPage({
       case 'flexible':
         setActivitySetupCard(card);
         break;
-      case 'deep':
-        onOpenDeep();
-        break;
       case 'active':
-        onOpenScene(activeActivityId === card.id ? activeScene ?? card.sceneType : card.sceneType, activeActivityId === card.id ? activeStartedAt : null);
+        onOpenScene(activeActivityId === card.id ? activeActivityCard?.sceneType ?? card.sceneType : card.sceneType, activeActivityId === card.id ? activeStartedAt : null);
         break;
       case 'availableNow':
       default:
@@ -132,7 +128,7 @@ export function TodayPage({
   };
 
   const openActiveScene = () => {
-    if (activeActivityCard) onOpenScene(activeScene ?? activeActivityCard.sceneType, activeStartedAt);
+    if (activeActivityCard) onOpenScene(activeActivityCard.sceneType, activeStartedAt);
   };
   const greeting = getTimeGreeting(now, userProfile.nickname);
   const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
@@ -178,12 +174,12 @@ export function TodayPage({
                 onOpenChe={() => setDayOverviewType('che')}
               />
               <SceneCardList title={todayCopy.sceneSectionTitle} cards={sceneCards} onSelectScene={handleSceneCardSelect} />
-              <RecentMoments title={todayCopy.momentsSectionTitle} archiveLabel={todayCopy.momentsArchiveLabel} moments={recentMoments} onOpenMoments={() => setActiveMainTab('arrange')} />
+              <RecentMoments title={todayCopy.momentsSectionTitle} archiveLabel={todayCopy.momentsArchiveLabel} moments={recentMoments} now={now} onOpenMoments={() => setActiveMainTab('arrange')} />
             </>
           ) : null}
 
           {activeMainTab === 'arrange' ? (
-            <ArrangePage userPlans={userPlans} cheSchedule={cheSchedule} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={setSelectedPlan} />
+            <ArrangePage userPlans={userPlans} cheSchedule={cheSchedule} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={(plan) => setSelectedPlanId(plan.id)} />
           ) : null}
 
           {activeMainTab === 'mine' ? (
@@ -238,7 +234,7 @@ export function TodayPage({
         />
 
         {selectedPlan ? (
-          <PlanDetailSheet plan={selectedPlan} onClose={() => setSelectedPlan(null)} onUpdate={updatePlan} onInvite={handleInvitePlan} onCancelInvite={cancelInvite} onComplete={completePlan} onRestoreTodo={restoreTodo} onDelete={deletePlan} />
+          <PlanDetailSheet plan={selectedPlan} onClose={() => setSelectedPlanId(null)} onUpdate={updatePlan} onInvite={handleInvitePlan} onCancelInvite={cancelInvite} onComplete={completePlan} onRestoreTodo={restoreTodo} onDelete={deletePlan} />
         ) : null}
 
         {activityDetailCard ? (
@@ -254,7 +250,7 @@ export function TodayPage({
               cancelSceneCard(activityDetailCard.id);
               setActivityDetailCard(null);
             }}
-            onBackToScene={() => onOpenScene(activeScene ?? activityDetailCard.sceneType, activeStartedAt)}
+            onBackToScene={() => onOpenScene(activeActivityCard?.sceneType ?? activityDetailCard.sceneType, activeStartedAt)}
             onComplete={() => finishActivity(activityDetailCard)}
             onOpenMoments={() => {
               setActivityDetailCard(null);

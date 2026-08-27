@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { SceneChat } from './components/chat/SceneChat';
 import { TogetherMoments } from './components/moments/TogetherMoments';
 import { TodayPage } from './components/today/TodayPage';
-import { mockRecentMoments, mockScenes } from './data';
+import { mockRecentMoments, sceneRegistry } from './data';
 import { useUserProfile } from './hooks/useUserProfile';
-import type { RecentMoment, SceneData, SceneType } from './types/che';
+import type { RecentMoment, SceneType } from './types/che';
 
 type AppView = 'today' | 'scene' | 'moments';
 
@@ -19,8 +19,7 @@ export default function App() {
   const [recentMoments, setRecentMoments] = useState<RecentMoment[]>(mockRecentMoments);
   const [sceneActions, setSceneActions] = useState<SceneActions | null>(null);
   const { userProfile, memoryItems, setUserProfile, setMemoryItems } = useUserProfile();
-  const sceneById = useMemo(() => new Map(mockScenes.map((scene) => [scene.id, scene])), []);
-  const currentScene = sceneById.get(currentSceneType) ?? (sceneById.get('idle') as SceneData);
+  const currentScene = sceneRegistry[currentSceneType];
 
   const openScene = (sceneType: SceneType, activeStartedAt?: string | null) => {
     setCurrentSceneType(sceneType);
@@ -51,7 +50,7 @@ export default function App() {
           activeStartedAt={currentSceneStartedAt}
           onBack={() => setView('today')}
           onEndActivity={
-            currentSceneStartedAt && !currentScene.isDeepEntry
+            currentSceneStartedAt && currentScene.conversationMode !== 'deep'
               ? (hasChat?: boolean) => {
                   sceneActions?.endActiveActivity(hasChat);
                   setCurrentSceneStartedAt(null);
