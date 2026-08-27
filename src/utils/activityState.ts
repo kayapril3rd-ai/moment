@@ -1,19 +1,23 @@
 import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, SceneType, TimePrecision } from '../types/che';
-import { toDateKey } from './date';
-import { AGENT_SCENE_BY_SCENE_TYPE } from './agentSceneContext';
+import { toDateKey } from './date.ts';
+import { AGENT_SCENE_BY_SCENE_TYPE } from './agentSceneContext.ts';
 
 export function syncCheScheduleForActive(schedule: CheScheduleItem[], card: SceneCard, startedAt: string): CheScheduleItem[] {
+  const worldScene = card.worldSceneOverride ?? AGENT_SCENE_BY_SCENE_TYPE[card.sceneType];
+  const linkedScheduleItem = card.linkedPlanId
+    ? schedule.find((item) => item.linkedPlanId === card.linkedPlanId)
+    : undefined;
   const activeItem: CheScheduleItem = {
     id: `che-active-${card.id}`,
     title: `正在陪你${card.title.replace('一起', '')}`,
     startTime: new Date(startedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    endTime: null,
+    endTime: linkedScheduleItem?.endTime ?? null,
     timeLabel: '现在',
     timePrecision: 'open',
     type: 'shared',
-    source: 'mock',
+    source: 'shared_activity',
     sceneType: card.sceneType,
-    worldScene: { ...AGENT_SCENE_BY_SCENE_TYPE[card.sceneType] },
+    worldScene: { ...worldScene },
     linkedPlanId: card.linkedPlanId,
     dateKey: toDateKey(new Date(startedAt)),
     detail: getActiveCheScheduleDetail(card.sceneType),

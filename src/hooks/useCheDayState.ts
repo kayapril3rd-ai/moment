@@ -198,6 +198,8 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
 
   const updatePlan = (planId: string, updates: Partial<UserPlan>) => {
     const nextUpdates = { ...updates, updatedAt: new Date().toISOString() };
+    const currentPlan = userPlans.find((plan) => plan.id === planId);
+    const updatedPlan = currentPlan ? { ...currentPlan, ...nextUpdates } : null;
     setUserPlans((currentPlans) => currentPlans.map((plan) => (plan.id === planId ? { ...plan, ...nextUpdates } : plan)));
     setSceneCards((currentCards) =>
       currentCards.map((card) =>
@@ -209,7 +211,9 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     setRuntimeCheScheduleItems((currentSchedule) =>
       currentSchedule.map((item) =>
         item.linkedPlanId === planId
-          ? { ...item, startTime: updates.startTime ?? item.startTime, timeLabel: updates.timeLabel ?? item.timeLabel, timePrecision: updates.timePrecision ?? item.timePrecision, title: updates.title ?? item.title }
+          ? updatedPlan && item.source === 'user_invite'
+            ? { ...createCheScheduleItemFromPlan(updatedPlan), id: item.id }
+            : { ...item, startTime: updates.startTime ?? item.startTime, timeLabel: updates.timeLabel ?? item.timeLabel, timePrecision: updates.timePrecision ?? item.timePrecision, title: updates.title ?? item.title }
           : item,
       ),
     );

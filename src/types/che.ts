@@ -30,6 +30,7 @@ export type SceneVariant =
   | 'movie_night'
   | 'gaming_sofa'
   | 'bedside_night'
+  | 'home_day'
   | 'grocery'
   | 'park'
   | 'seaside';
@@ -68,7 +69,7 @@ export type UserPlanStatus = 'todo' | 'active' | 'done' | 'cancelled';
 
 export type ScheduleItemType = 'work' | 'life' | 'shared' | 'rest';
 
-export type ScheduleItemSource = 'che' | 'user_invite' | 'mock';
+export type ScheduleItemSource = 'che' | 'user_invite' | 'shared_activity';
 
 export type SceneCardStatus =
   | 'availableNow'
@@ -102,6 +103,7 @@ export interface UserPlan {
   timePrecision?: TimePrecision;
   durationMinutes?: number;
   sceneType: SceneType;
+  worldScene: AgentSceneDefinition;
   note: string;
   inviteStatus: InviteStatus;
   status: UserPlanStatus;
@@ -136,6 +138,7 @@ export interface CheScheduleItem {
 export interface SceneCard {
   id: string;
   sceneType: SceneType;
+  worldSceneOverride?: AgentSceneDefinition;
   title: string;
   timeHint: string;
   timeLabel?: string;

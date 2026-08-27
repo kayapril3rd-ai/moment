@@ -1,4 +1,5 @@
 import type { UserPlan } from '../types/che';
+import { AGENT_SCENE_BY_SCENE_TYPE } from '../utils/agentSceneContext';
 
 export const mockUserPlans: UserPlan[] = [
   {
@@ -11,6 +12,7 @@ export const mockUserPlans: UserPlan[] = [
     timePrecision: 'exact',
     durationMinutes: 60,
     sceneType: 'study',
+    worldScene: AGENT_SCENE_BY_SCENE_TYPE.study,
     note: '记这件小事，也算认真往前走了一步。',
     inviteStatus: 'accepted',
     status: 'todo',
@@ -28,6 +30,7 @@ export const mockUserPlans: UserPlan[] = [
     timePrecision: 'period',
     durationMinutes: 45,
     sceneType: 'idle',
+    worldScene: { sceneKey: 'hangout', sceneVariant: 'park' },
     note: '面试后出去走一会儿，缓一缓。',
     inviteStatus: 'accepted',
     status: 'todo',
@@ -45,6 +48,7 @@ export const mockUserPlans: UserPlan[] = [
     timePrecision: 'period',
     durationMinutes: 90,
     sceneType: 'watch',
+    worldScene: AGENT_SCENE_BY_SCENE_TYPE.watch,
     note: '晚上选一部轻松一点的电影。',
     inviteStatus: 'not_invited',
     status: 'todo',
@@ -61,6 +65,7 @@ export const mockUserPlans: UserPlan[] = [
     timePrecision: 'open',
     durationMinutes: 40,
     sceneType: 'fitness',
+    worldScene: AGENT_SCENE_BY_SCENE_TYPE.fitness,
     note: '不用练太狠，动一动就很好。',
     inviteStatus: 'not_invited',
     status: 'todo',
@@ -76,6 +81,7 @@ export const mockUserPlans: UserPlan[] = [
     timeLabel: '10:00',
     timePrecision: 'exact',
     sceneType: 'study',
+    worldScene: AGENT_SCENE_BY_SCENE_TYPE.study,
     note: '一起进入专注模式',
     inviteStatus: 'not_invited',
     status: 'todo',
@@ -91,6 +97,7 @@ export const mockUserPlans: UserPlan[] = [
     timeLabel: '时间待定',
     timePrecision: 'open',
     sceneType: 'idle',
+    worldScene: { sceneKey: 'hangout', sceneVariant: 'park' },
     note: '放松一下，呼吸新鲜空气',
     inviteStatus: 'accepted',
     status: 'todo',
@@ -107,6 +114,7 @@ export const mockUserPlans: UserPlan[] = [
     timeLabel: '晚些时候',
     timePrecision: 'period',
     sceneType: 'watch',
+    worldScene: AGENT_SCENE_BY_SCENE_TYPE.watch,
     note: '选一部喜欢的电影吧',
     inviteStatus: 'not_invited',
     status: 'todo',
@@ -122,6 +130,7 @@ export const mockUserPlans: UserPlan[] = [
     timeLabel: '晚些时候',
     timePrecision: 'period',
     sceneType: 'fitness',
+    worldScene: AGENT_SCENE_BY_SCENE_TYPE.fitness,
     note: '运动让心情更轻盈',
     inviteStatus: 'accepted',
     status: 'todo',

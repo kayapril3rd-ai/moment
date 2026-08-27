@@ -72,9 +72,11 @@ does not duplicate this mapping. `cheStatusHint` is UI copy and is not a runtime
 | `idle` | `home_idle` | `sofa_evening` |
 | `deep_room` | `deep_room` | `window_night` |
 
-Existing park and seaside image assets are reserved as unbound `hangout` environment
-resources. They do not imply new UI SceneTypes and are not part of the home `idle`
-definition.
+`home_idle / home_day` is used by the deterministic morning rhythm and daytime
+default gaps. It does not introduce a new UI `SceneType`.
+
+Existing park and seaside assets are world-visual overrides for `hangout` environments.
+They do not imply new UI SceneTypes and are not part of the home `idle` definition.
 
 ## `CheStatus`
 Represents 澈's current time-aware state on Today.
@@ -111,12 +113,13 @@ Represents a plan created by the user.
 | Field | Type | Purpose | Example |
 |---|---|---|---|
 | `id` | string | Unique plan id | `"plan-001"` |
-| `title` | string | User-facing plan title | `"晚上练背"` |
+| `title` | string | User-facing plan title | `"公园散步"` |
 | `startTime` | string | Local time or ISO datetime | `"19:30"` |
 | `endTime` | string \| null | Optional end time | `"20:30"` |
 | `durationMinutes` | number \| undefined | Event duration; computation falls back to 45 minutes | `60` |
-| `sceneType` | `SceneType` | Related scene | `"fitness"` |
-| `note` | string | User note | `"昨天硬拉了，今天轻一点"` |
+| `sceneType` | `SceneType` | Enterable UI scene used by the plan | `"idle"` |
+| `worldScene` | `AgentSceneDefinition` | Real life environment / Agent context | `{ "sceneKey": "hangout", "sceneVariant": "park" }` |
+| `note` | string | User note | `"晚点出去走一会儿"` |
 | `status` | `"todo" \| "active" \| "done" \| "cancelled"` | Plan lifecycle only | `"todo"` |
 | `inviteStatus` | `"not_invited" \| "accepted"` | Whether 澈 participates | `"accepted"` |
 | `createdAt` | string | Creation timestamp | `"2026-05-20T12:45:00+08:00"` |
@@ -127,11 +130,13 @@ Example:
 ```json
 {
   "id": "plan-001",
-  "title": "晚上练背",
+  "title": "公园散步",
   "startTime": "19:30",
   "endTime": "20:30",
-  "sceneType": "fitness",
-  "note": "昨天硬拉了，今天轻一点",
+  "durationMinutes": 60,
+  "sceneType": "idle",
+  "worldScene": { "sceneKey": "hangout", "sceneVariant": "park" },
+  "note": "晚点出去走一会儿",
   "status": "todo",
   "inviteStatus": "accepted",
   "createdAt": "2026-05-20T12:45:00+08:00",
@@ -152,7 +157,7 @@ is the required Agent-layer description of what 澈 is actually doing.
 | `startTime` | string | Local time or ISO datetime | `"19:40"` |
 | `endTime` | string \| null | Optional end time | `"20:40"` |
 | `type` | `"work" \| "life" \| "shared" \| "rest"` | Schedule category | `"shared"` |
-| `source` | `"che" \| "user_invite" \| "mock"` | Where this item came from | `"user_invite"` |
+| `source` | `"che" \| "user_invite" \| "shared_activity"` | Where this item came from | `"user_invite"` |
 | `sceneType` | `SceneType \| null` | Related scene if any | `"fitness"` |
 | `worldScene` | `AgentSceneDefinition` | Real Agent world context | `{ "sceneKey": "fitness", "sceneVariant": "home_gym" }` |
 | `linkedPlanId` | string \| null | Related user plan | `"plan-001"` |
@@ -196,10 +201,14 @@ the full matching schedule item.
 ## `SceneCard`
 Represents a vertical flat card in `今天可以一起`.
 
+Cards without `linkedPlanId` are evergreen suggestions: they use `flexible` and do
+not claim an exact time. A `scheduled` card is created from a real accepted plan.
+
 | Field | Type | Purpose | Example |
 |---|---|---|---|
 | `id` | string | Unique card id | `"scene-fitness-tonight"` |
 | `sceneType` | `SceneType` | Scene represented by this card | `"fitness"` |
+| `worldSceneOverride` | `AgentSceneDefinition \| undefined` | Present only when a shared plan world differs from the default `sceneType` mapping | `{ "sceneKey": "hangout", "sceneVariant": "park" }` |
 | `title` | string | Card title | `"一起健身"` |
 | `timeHint` | string | Short time hint | `"今晚 19:30"` |
 | `description` | string | Lived-in short copy | `"你练背，他也把核心训练排进去了"` |
@@ -299,7 +308,7 @@ When a user invites 澈 to a plan, update these mock data collections together:
 
 1. `UserPlan.inviteStatus` becomes `"accepted"`.
 2. Add or update a `CheScheduleItem` with `type: "shared"` and `source: "user_invite"`.
-3. Add or update a `SceneCard` with `status: "shared"` and `linkedPlanId`.
+3. Add or update a `SceneCard` with `status: "scheduled"` and `linkedPlanId`.
 4. Add a `RecentMoment` describing the small shared change.
 
 Do not require a second join action.

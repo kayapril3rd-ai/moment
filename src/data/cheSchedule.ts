@@ -14,6 +14,8 @@ interface ScheduleItemInput {
   iconKey?: string;
 }
 
+const HOME_DAY_WORLD_SCENE: AgentSceneDefinition = { sceneKey: 'home_idle', sceneVariant: 'home_day' };
+
 const weekdayEvenings: ReadonlyArray<ScheduleItemInput> = [
   {
     key: 'fitness',
@@ -126,7 +128,7 @@ function buildWeekdaySchedule(dateKey: string, variation: number): CheScheduleIt
       endTime: '09:00',
       type: 'rest',
       sceneType: 'idle',
-      worldScene: AGENT_SCENE_BY_SCENE_TYPE.idle,
+      worldScene: HOME_DAY_WORLD_SCENE,
       detail: '早上的节奏还比较慢。',
       iconKey: 'sun',
     }),
@@ -202,7 +204,7 @@ function buildWeekendSchedule(dateKey: string, variation: number): CheScheduleIt
       endTime: '10:30',
       type: 'rest',
       sceneType: 'idle',
-      worldScene: AGENT_SCENE_BY_SCENE_TYPE.idle,
+      worldScene: HOME_DAY_WORLD_SCENE,
       detail: '周末早上的节奏比较慢。',
       iconKey: 'sun',
     }),

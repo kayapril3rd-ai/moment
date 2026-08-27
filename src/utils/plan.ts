@@ -1,4 +1,5 @@
 import type {
+  AgentSceneDefinition,
   CheScheduleItem,
   RecentMoment,
   SceneCard,
@@ -6,8 +7,8 @@ import type {
   TimePrecision,
   UserPlan,
 } from '../types/che';
-import { toDateKey } from './date';
-import { AGENT_SCENE_BY_SCENE_TYPE } from './agentSceneContext';
+import { toDateKey } from './date.ts';
+import { AGENT_SCENE_BY_SCENE_TYPE } from './agentSceneContext.ts';
 
 export interface ParsedPlanInput {
   dateKey: string;
@@ -16,9 +17,8 @@ export interface ParsedPlanInput {
   timeLabel: string;
   timePrecision: TimePrecision;
   sceneType: SceneType;
+  worldScene: AgentSceneDefinition;
 }
-
-type SceneCategory = 'work' | 'fitness' | 'meal' | 'walk' | 'rest' | 'default';
 
 const clockTimeSearchPattern = /(\d{1,2}:\d{2})/;
 const cnNumber = '(?:一|二|两|三|四|五|六|七|八|九|十|十一|十二)';
@@ -34,20 +34,21 @@ export function parsePlanInput(input: string, now = new Date(), selectedDateKey 
   const timeMatch = textWithoutDate.match(timeWordPattern);
   const timeLabel = timeMatch ? timeMatch[0].replace(/\s+/g, '') : inferLooseTimeLabel(textWithoutDate);
   const title = (timeMatch ? textWithoutDate.replace(timeMatch[0], '') : textWithoutDate).trim() || normalized;
-  const startTime = /^\d{1,2}:\d{2}$/.test(timeLabel) ? timeLabel : '';
+  const startTime = normalizeExactTime(timeLabel);
 
+  const scene = inferPlanScene(title);
   return {
     dateKey,
     title,
     startTime,
     timeLabel,
     timePrecision: inferTimePrecision(timeLabel),
-    sceneType: inferSceneTypeFromPlan(title),
+    ...scene,
   };
 }
 
 export function inferSceneTypeFromPlan(text: string): SceneType {
-  return sceneCategoryToSceneType(inferSceneCategory(text));
+  return inferPlanScene(text).sceneType;
 }
 
 export function createUserPlanFromInput(input: string, now = new Date(), selectedDateKey?: string): UserPlan | null {
@@ -64,6 +65,7 @@ export function createUserPlanFromInput(input: string, now = new Date(), selecte
     timeLabel: parsed.timeLabel,
     timePrecision: parsed.timePrecision,
     sceneType: parsed.sceneType,
+    worldScene: { ...parsed.worldScene },
     note: getDefaultPlanNote(parsed.sceneType),
     inviteStatus: 'not_invited',
     status: 'todo',
@@ -121,6 +123,9 @@ export function getCheInviteReply(plan: UserPlan): string {
 export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneCard {
   const timeLabel = getDisplayTimeLabel(plan);
   const sceneType = plan.sceneType;
+  const defaultWorldScene = AGENT_SCENE_BY_SCENE_TYPE[sceneType];
+  const hasWorldSceneOverride = plan.worldScene.sceneKey !== defaultWorldScene.sceneKey
+    || plan.worldScene.sceneVariant !== defaultWorldScene.sceneVariant;
   return {
     id: `scene-shared-${plan.id}`,
     sceneType,
@@ -132,23 +137,25 @@ export function createSharedSceneFromPlan(plan: UserPlan, sortOrder = 0): SceneC
     status: 'scheduled',
     linkedPlanId: plan.id,
     sortOrder,
+    ...(hasWorldSceneOverride ? { worldSceneOverride: { ...plan.worldScene } } : {}),
   };
 }
 
 export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
   const timeLabel = getDisplayTimeLabel(plan);
   const sceneType = plan.sceneType;
+  const endTime = getSharedPlanEndTime(plan);
   return {
     id: `che-shared-${plan.id}`,
     title: getCheScheduleTitle(plan),
     startTime: plan.startTime,
-    endTime: null,
-    timeLabel,
+    endTime,
+    timeLabel: plan.startTime && endTime ? `${plan.startTime}–${endTime}` : timeLabel,
     timePrecision: plan.timePrecision ?? inferTimePrecision(timeLabel),
     type: 'shared',
     source: 'user_invite',
     sceneType,
-    worldScene: { ...AGENT_SCENE_BY_SCENE_TYPE[sceneType] },
+    worldScene: { ...plan.worldScene },
     linkedPlanId: plan.id,
     dateKey: plan.dateKey ?? toDateKey(new Date(plan.createdAt)),
     detail: getCheScheduleDetail(plan),
@@ -184,6 +191,24 @@ function inferTimePrecision(timeLabel: string): TimePrecision {
   return 'period';
 }
 
+function normalizeExactTime(value: string): string {
+  const match = value.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return '';
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+}
+
+function getSharedPlanEndTime(plan: UserPlan): string | null {
+  if (!/^\d{1,2}:\d{2}$/.test(plan.startTime)) return null;
+  if (plan.endTime) return plan.endTime;
+
+  const [hours, minutes] = plan.startTime.split(':').map(Number);
+  const durationMinutes = plan.durationMinutes ?? 45;
+  const endMinutes = Math.min(24 * 60, hours * 60 + minutes + durationMinutes);
+  const endHours = Math.floor(endMinutes / 60);
+  const endMinutePart = endMinutes % 60;
+  return `${String(endHours).padStart(2, '0')}:${String(endMinutePart).padStart(2, '0')}`;
+}
+
 function getDefaultPlanNote(sceneType: SceneType): string {
   switch (sceneType) {
     case 'study':
@@ -201,98 +226,42 @@ function getDefaultPlanNote(sceneType: SceneType): string {
   }
 }
 
-function inferSceneCategory(text: string): SceneCategory {
-  if (/学习|工作|写稿|面试|复习|看书|整理|做项目|开会|专注|设计|代码|英语|背单词/.test(text)) return 'work';
-  if (/健身|运动|练背|瑜伽|跑步|拉伸|训练/.test(text)) return 'fitness';
-  if (/吃饭|晚饭|午饭|早餐|做饭|咖啡|喝水|休息|夜宵|热的/.test(text)) return 'meal';
-  if (/散步|出门|晒太阳|公园|走走|透气|放松/.test(text)) return 'walk';
-  if (/电影|音乐|追剧|看剧|睡前|夜里|聊天|晚安/.test(text)) return 'rest';
-  return 'default';
+function inferPlanScene(text: string): { sceneType: SceneType; worldScene: AgentSceneDefinition } {
+  if (/海边/.test(text)) return { sceneType: 'idle', worldScene: { sceneKey: 'hangout', sceneVariant: 'seaside' } };
+  if (/买东西|超市|日用品/.test(text)) return { sceneType: 'idle', worldScene: { sceneKey: 'errand', sceneVariant: 'grocery' } };
+  if (/公园|散步|走走/.test(text)) return { sceneType: 'idle', worldScene: { sceneKey: 'hangout', sceneVariant: 'park' } };
+  if (/学习|工作|写稿|面试|复习|看书|整理|做项目|开会|专注|设计|代码|英语|背单词/.test(text)) return sceneDefinition('study');
+  if (/健身|运动|练背|瑜伽|跑步|拉伸|训练/.test(text)) return sceneDefinition('fitness');
+  if (/吃饭|晚饭|午饭|早餐|做饭|夜宵|热的/.test(text)) return sceneDefinition('meal');
+  if (/打游戏|游戏|开黑/.test(text)) return sceneDefinition('gaming');
+  if (/电影|追剧|看剧/.test(text)) return sceneDefinition('watch');
+  if (/睡前|晚安/.test(text)) return sceneDefinition('sleep');
+  return sceneDefinition('idle');
 }
 
-function sceneCategoryToSceneType(category: SceneCategory): SceneType {
-  switch (category) {
-    case 'work':
-      return 'study';
-    case 'fitness':
-      return 'fitness';
-    case 'meal':
-      return 'meal';
-    case 'rest':
-      return 'watch';
-    case 'walk':
-    case 'default':
-      return 'idle';
-  }
+function sceneDefinition(sceneType: SceneType) {
+  return { sceneType, worldScene: { ...AGENT_SCENE_BY_SCENE_TYPE[sceneType] } };
 }
 
 function getSharedSceneTitle(plan: UserPlan): string {
-  switch (plan.sceneType) {
-    case 'study':
-      return '一起工作';
-    case 'fitness':
-      return '一起健身';
-    case 'watch':
-      return '一起看电影';
-    case 'meal':
-      return '一起吃饭';
-    case 'sleep':
-      return '睡前聊会儿';
-    default:
-      return '随便待一会儿';
-  }
+  return plan.title.startsWith('一起') ? plan.title : `一起${plan.title}`;
 }
 
-function getSharedSceneDescription(plan: UserPlan): string {
-  switch (plan.sceneType) {
-    case 'study':
-      return '他也在安静处理事情。';
-    case 'fitness':
-      return '他刚换好运动鞋。';
-    case 'watch':
-      return '他把声音放轻了一点。';
-    case 'meal':
-      return '他在等你把饭收好。';
-    case 'sleep':
-    case 'deep_room':
-      return '他把声音放轻了一点。';
-    default:
-      return '他在这里，等你说话。';
-  }
+function getSharedSceneDescription(_plan: UserPlan): string {
+  return '这段时间已经给你留出来了。';
 }
 
 function getCheScheduleTitle(plan: UserPlan): string {
   switch (plan.sceneType) {
     case 'study':
-      return `陪你${plan.title}`;
-    case 'fitness':
-      return `和你一起${plan.title}`;
-    case 'watch':
-      return '一起看电影';
-    case 'meal':
-      return '和你一起吃点热的';
-    case 'sleep':
-      return '睡前陪你聊会儿';
+      return `等你开始${plan.title}`;
     default:
-      return `陪你${plan.title}`;
+      return `等你一起${plan.title.replace(/^一起/, '')}`;
   }
 }
 
-function getCheScheduleDetail(plan: UserPlan): string {
-  switch (plan.sceneType) {
-    case 'study':
-      return '书桌边，适合安静待一会儿。';
-    case 'fitness':
-      return '运动前先热身，不赶进度。';
-    case 'watch':
-      return '客厅，灯开低一点。';
-    case 'meal':
-      return '餐桌旁，先把饭吃安稳。';
-    case 'sleep':
-      return '睡前半小时，声音放轻。';
-    default:
-      return '他把这段时间先留出来。';
-  }
+function getCheScheduleDetail(_plan: UserPlan): string {
+  return '这段时间已经给你留出来了。';
 }
 
 function getRecentMomentText(plan: UserPlan): string {

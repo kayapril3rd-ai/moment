@@ -24,13 +24,14 @@ export function resolveCheCurrentState({
   const currentDate = typeof now === 'number' ? new Date(now) : now;
 
   if (activeActivityCard) {
+    const worldScene = activeActivityCard.worldSceneOverride ?? AGENT_SCENE_BY_SCENE_TYPE[activeActivityCard.sceneType];
     return {
       source: 'shared_activity',
       activity: activeActivityCard.title,
       detail: activeActivityCard.description,
-      location: getWorldLocation(AGENT_SCENE_BY_SCENE_TYPE[activeActivityCard.sceneType]),
+      location: getWorldLocation(worldScene),
       availability: 'available',
-      worldScene: { ...AGENT_SCENE_BY_SCENE_TYPE[activeActivityCard.sceneType] },
+      worldScene: { ...worldScene },
       entrySceneType: activeActivityCard.sceneType,
       ...(activeStartedAt ? { startedAt: activeStartedAt } : {}),
     };
@@ -53,13 +54,16 @@ export function resolveCheCurrentState({
     };
   }
 
+  const defaultWorldScene: AgentSceneDefinition = currentDate.getHours() >= 18 || currentDate.getHours() < 5
+    ? AGENT_SCENE_BY_SCENE_TYPE.idle
+    : { sceneKey: 'home_idle', sceneVariant: 'home_day' };
   return {
     source: 'default_rhythm',
     activity: '休息',
     detail: '现在是没有安排的日常空档。',
     location: '家里',
     availability: 'available',
-    worldScene: { ...AGENT_SCENE_BY_SCENE_TYPE.idle },
+    worldScene: { ...defaultWorldScene },
     entrySceneType: 'idle',
   };
 }
@@ -131,6 +135,8 @@ function getWorldLocation(worldScene: AgentSceneDefinition): string {
       return '客厅里';
     case 'bedside_night':
       return '卧室里';
+    case 'home_day':
+      return '家里';
     case 'window_night':
       return '窗边';
     case 'park':
