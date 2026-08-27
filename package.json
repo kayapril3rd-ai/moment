@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "verify:daily-world": "node --experimental-strip-types scripts/verifyCheDailyWorld.ts",
     "preview": "vite preview"
   },
   "dependencies": {

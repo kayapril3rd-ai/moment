@@ -142,6 +142,9 @@ Example:
 ## `CheScheduleItem`
 Represents 澈's schedule, including his own plans and shared plans created by invite.
 
+`sceneType` only identifies an enterable UI scene and may be `null`. `worldScene`
+is the required Agent-layer description of what 澈 is actually doing.
+
 | Field | Type | Purpose | Example |
 |---|---|---|---|
 | `id` | string | Unique schedule id | `"che-schedule-001"` |
@@ -151,6 +154,7 @@ Represents 澈's schedule, including his own plans and shared plans created by i
 | `type` | `"work" \| "life" \| "shared" \| "rest"` | Schedule category | `"shared"` |
 | `source` | `"che" \| "user_invite" \| "mock"` | Where this item came from | `"user_invite"` |
 | `sceneType` | `SceneType \| null` | Related scene if any | `"fitness"` |
+| `worldScene` | `AgentSceneDefinition` | Real Agent world context | `{ "sceneKey": "fitness", "sceneVariant": "home_gym" }` |
 | `linkedPlanId` | string \| null | Related user plan | `"plan-001"` |
 | `detail` | string | Small life detail | `"他说晚点也补点核心"` |
 
@@ -165,10 +169,29 @@ Example:
   "type": "shared",
   "source": "user_invite",
   "sceneType": "fitness",
+  "worldScene": { "sceneKey": "fitness", "sceneVariant": "home_gym" },
   "linkedPlanId": "plan-001",
   "detail": "他说晚点也补点核心"
 }
 ```
+
+## `CheCurrentState`
+
+Stable output from the Daily World resolver. It contains only current facts, not
+the full matching schedule item.
+
+| Field | Type | Purpose |
+|---|---|---|
+| `source` | `"schedule" \| "shared_activity" \| "default_rhythm"` | Resolver source |
+| `activity` | `string` | Current activity fact |
+| `detail` | `string` | Short factual detail |
+| `location` | `string` | Current world location |
+| `availability` | `"busy" \| "lightly_available" \| "available"` | Derived availability |
+| `worldScene` | `AgentSceneDefinition` | Agent world context |
+| `entrySceneType` | `SceneType \| null` | Enterable UI scene, when one exists |
+| `scheduleItemId` | `string \| undefined` | Matching schedule id only |
+| `startedAt` | `string \| undefined` | Current interval start |
+| `endsAt` | `string \| undefined` | Current interval end |
 
 ## `SceneCard`
 Represents a vertical flat card in `今天可以一起`.

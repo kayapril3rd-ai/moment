@@ -43,6 +43,23 @@ export interface AgentSceneContext extends AgentSceneDefinition {
   cheCurrentState?: string;
 }
 
+export type CheAvailability = 'busy' | 'lightly_available' | 'available';
+
+export type CheCurrentStateSource = 'schedule' | 'shared_activity' | 'default_rhythm';
+
+export interface CheCurrentState {
+  source: CheCurrentStateSource;
+  activity: string;
+  detail: string;
+  location: string;
+  availability: CheAvailability;
+  worldScene: AgentSceneDefinition;
+  entrySceneType: SceneType | null;
+  scheduleItemId?: string;
+  startedAt?: string;
+  endsAt?: string;
+}
+
 export type ConversationMode = 'scene' | 'deep';
 
 export type InviteStatus = 'not_invited' | 'accepted';
@@ -123,6 +140,7 @@ export interface CheScheduleItem {
   type: ScheduleItemType;
   source: ScheduleItemSource;
   sceneType: SceneType | null;
+  worldScene: AgentSceneDefinition;
   linkedPlanId: string | null;
   detail: string;
 }

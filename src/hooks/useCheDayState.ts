@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { mockCheSchedule, mockDayRecords, mockSceneCards, mockUserPlans } from '../data';
+import { buildCheScheduleForDate, mockDayRecords, mockSceneCards, mockUserPlans } from '../data';
 import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, UserPlan } from '../types/che';
 import {
   addUniqueMoment,
@@ -20,6 +20,7 @@ import {
   getCheInviteReply,
 } from '../utils/plan';
 import { useCheDayDerivedState } from './useCheDayDerivedState';
+import { toDateKey } from '../utils/date';
 
 interface UseCheDayStateInput {
   recentMoments: RecentMoment[];
@@ -31,7 +32,7 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   const [activeStartedAt, setActiveStartedAt] = useState<string | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [userPlans, setUserPlans] = useState<UserPlan[]>(mockUserPlans);
-  const [cheSchedule, setCheSchedule] = useState<CheScheduleItem[]>(mockCheSchedule);
+  const [cheSchedule, setCheSchedule] = useState<CheScheduleItem[]>(() => buildCheScheduleForDate(toDateKey(new Date())));
   const [sceneCards, setSceneCards] = useState<SceneCard[]>(mockSceneCards);
   const [dayRecords, setDayRecords] = useState<DayRecord[]>(mockDayRecords);
   const [now, setNow] = useState(() => Date.now());

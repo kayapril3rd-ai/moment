@@ -1,5 +1,6 @@
 import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, SceneType, TimePrecision } from '../types/che';
 import { toDateKey } from './date';
+import { AGENT_SCENE_BY_SCENE_TYPE } from './agentSceneContext';
 
 export function syncCheScheduleForActive(schedule: CheScheduleItem[], card: SceneCard, startedAt: string): CheScheduleItem[] {
   const activeItem: CheScheduleItem = {
@@ -12,7 +13,9 @@ export function syncCheScheduleForActive(schedule: CheScheduleItem[], card: Scen
     type: 'shared',
     source: 'mock',
     sceneType: card.sceneType,
+    worldScene: { ...AGENT_SCENE_BY_SCENE_TYPE[card.sceneType] },
     linkedPlanId: card.linkedPlanId,
+    dateKey: toDateKey(new Date(startedAt)),
     detail: getActiveCheScheduleDetail(card.sceneType),
   };
 

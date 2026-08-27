@@ -7,6 +7,7 @@ import type {
   UserPlan,
 } from '../types/che';
 import { toDateKey } from './date';
+import { AGENT_SCENE_BY_SCENE_TYPE } from './agentSceneContext';
 
 export interface ParsedPlanInput {
   dateKey: string;
@@ -147,7 +148,9 @@ export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
     type: 'shared',
     source: 'user_invite',
     sceneType,
+    worldScene: { ...AGENT_SCENE_BY_SCENE_TYPE[sceneType] },
     linkedPlanId: plan.id,
+    dateKey: plan.dateKey ?? toDateKey(new Date(plan.createdAt)),
     detail: getCheScheduleDetail(plan),
   };
 }
