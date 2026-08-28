@@ -54,6 +54,22 @@ the existing UI key.
 | `sceneVariant` | `SceneVariant` | Concrete context variant | `"work_desk"` |
 | `cheCurrentState` | `string` | Daily World state formatted as a short factual sentence | `"澈现在在书桌前处理体验方案，这会儿还在工作。"` |
 
+### Blocking chat transport
+
+The browser sends a Moment-owned `ChatRequest` to same-origin `POST /api/chat`:
+
+| Field | Type | Purpose |
+|---|---|---|
+| `query` | `string` | User message; it is not duplicated inside Dify `inputs` |
+| `context` | `ChatRuntimeContext` | Existing scene/runtime context built by `buildChatRuntimeContext` |
+| `conversationId` | `string \| undefined` | Dify conversation for the current natural day |
+| `userId` | `string` | Stable anonymous ID stored under `moment.chat.userId` |
+
+The server returns only `answer`, `conversationId`, and `messageId`. Dify API keys,
+raw metadata, workflow internals, and Authorization headers never enter the Vite
+client bundle. Conversation IDs are stored by local date under
+`moment.chat.conversations`; Scene and 安静聊聊 share the same ID on the same day.
+
 Reserved Agent families include `home_idle`, `focus`, `meal`, `fitness`, `errand`,
 `commute`, `hangout`, and `deep_room`. Future contexts such as `errand / grocery`,
 `hangout / park`, and `hangout / seaside` do not require a premature UI `SceneType`.

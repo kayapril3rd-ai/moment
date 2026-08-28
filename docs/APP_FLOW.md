@@ -95,7 +95,8 @@ completed
 ```text
 Scene Chat
   ├─ 返回 → 今天
-  ├─ 输入消息 → append user message → append mock 澈 reply
+  ├─ 输入消息 → optimistic user message → POST /api/chat → append Dify answer
+  ├─ 请求失败 → 保留 user message → 显示重试，不生成 fake reply
   └─ 安静聊聊 → Deep Talk
 ```
 
@@ -112,7 +113,7 @@ Rules:
 ```text
 安静聊聊
   ├─ 返回 → 今天
-  └─ 输入消息 → slower mock reply
+  └─ 输入消息 → 使用同一天共享的 Dify conversation
 ```
 
 Rules:

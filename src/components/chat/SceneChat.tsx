@@ -14,7 +14,14 @@ interface SceneChatProps {
 }
 
 export function SceneChat({ scene, cheCurrentState, activeStartedAt, onBack, onEndActivity }: SceneChatProps) {
-  const { chatRuntimeContext, messages, sendMessage } = useSceneChatMessages(scene, cheCurrentState);
+  const {
+    chatRuntimeContext,
+    error,
+    isSending,
+    messages,
+    retryLastMessage,
+    sendMessage,
+  } = useSceneChatMessages(scene, cheCurrentState);
   const isDeep = scene.conversationMode === 'deep';
   const [isChatOpen, setIsChatOpen] = useState(isDeep);
 
@@ -58,7 +65,15 @@ export function SceneChat({ scene, cheCurrentState, activeStartedAt, onBack, onE
           </div>
         ) : (
           <div onClick={(event) => event.stopPropagation()}>
-            <ChatPanel scene={scene} messages={messages} onSend={sendMessage} onCollapse={() => setIsChatOpen(false)} />
+            <ChatPanel
+              scene={scene}
+              messages={messages}
+              isSending={isSending}
+              error={error}
+              onSend={sendMessage}
+              onRetry={retryLastMessage}
+              onCollapse={() => setIsChatOpen(false)}
+            />
           </div>
         )}
       </div>
