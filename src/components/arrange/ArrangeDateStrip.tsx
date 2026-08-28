@@ -23,14 +23,13 @@ export function ArrangeDateStrip({
 }: ArrangeDateStripProps) {
   const selectedDate = parseDateKey(selectedDateKey);
   const selectedDateContext = `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日 · ${weekdays[selectedDate.getDay()]}`;
-  const isSelectedToday = selectedDateKey === toDateKey(new Date());
+  const todayKey = toDateKey(new Date());
 
   return (
     <section className="arrange-date-area" aria-label="日期选择">
       <div className="arrange-selected-date-row">
         <div className="arrange-selected-date-copy">
           <strong>{selectedDateContext}</strong>
-          {isSelectedToday ? <span>今天</span> : null}
         </div>
         <button className="calendar-toggle-button" type="button" onClick={onToggleCalendar}>
           {isCalendarExpanded ? '收起' : '展开'}
@@ -46,7 +45,13 @@ export function ArrangeDateStrip({
           <div className="date-strip date-strip-circles">
             {dateStrip.map((item) => (
               <button
-                className={`date-pill${selectedDateKey === item.dateKey ? ' is-active' : ''}`}
+                className={[
+                  'date-pill',
+                  selectedDateKey === item.dateKey ? 'is-active' : '',
+                  item.dateKey === todayKey ? 'is-today' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
                 type="button"
                 key={item.dateKey}
                 onClick={() => onSelectDate(item.dateKey)}
