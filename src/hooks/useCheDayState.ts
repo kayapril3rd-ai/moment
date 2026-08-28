@@ -19,6 +19,7 @@ import {
   createSharedSceneFromPlan,
   createUserPlanFromInput,
   getCheInviteReply,
+  restoreCheScheduleItemFromPlan,
 } from '../utils/plan';
 import { useCheDayDerivedState } from './useCheDayDerivedState';
 import { toDateKey } from '../utils/date';
@@ -240,7 +241,11 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   };
 
   const restoreTodo = (planId: string) => {
-    updatePlan(planId, { status: 'todo' });
+    const plan = userPlans.find((item) => item.id === planId);
+    if (!plan) return;
+    const restoredPlan: UserPlan = { ...plan, status: 'todo', updatedAt: new Date().toISOString() };
+    setUserPlans((currentPlans) => currentPlans.map((item) => (item.id === planId ? restoredPlan : item)));
+    setRuntimeCheScheduleItems((currentSchedule) => restoreCheScheduleItemFromPlan(currentSchedule, restoredPlan));
     setSceneCards((currentCards) =>
       currentCards.map((card) => (card.linkedPlanId === planId && card.status === 'completed' ? { ...card, status: 'scheduled', timeLabel: card.timeHint } : card)),
     );
@@ -279,6 +284,7 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     getCheScheduleForDate,
     activateActivity,
     now,
+    recentMoments,
     restoreTodo,
     sceneCards,
     selectedPlan,
@@ -288,6 +294,8 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     userPlans,
   };
 }
+
+export type CheDayState = ReturnType<typeof useCheDayState>;
 
 function getCompletedChatMomentText(card: SceneCard) {
   switch (card.sceneType) {

@@ -41,7 +41,7 @@ Example:
 "scene"
 ```
 
-### Agent Scene Context
+### Chat Runtime Context
 
 `SceneType` remains the stable UI/activity routing key. The AI Agent uses a separate,
 coarser `AgentSceneKey` plus an extensible `SceneVariant`; these keys must not replace
@@ -49,16 +49,20 @@ the existing UI key.
 
 | Field | Type | Purpose | Example |
 |---|---|---|---|
-| `sceneKey` | `AgentSceneKey` | Agent-level scene family | `"focus"` |
-| `sceneVariant` | `SceneVariant` | Concrete setting within that family | `"work_desk"` |
-| `cheCurrentState` | `string` (optional) | Runtime Che state, included only when an explicit current-state source provides it | `"他正在收尾体验评审稿。"` |
+| `chatMode` | `ConversationMode` | Current conversation mode | `"scene"` |
+| `sceneKey` | `AgentSceneKey` | Agent-level context for this conversation | `"focus"` |
+| `sceneVariant` | `SceneVariant` | Concrete context variant | `"work_desk"` |
+| `cheCurrentState` | `string` | Daily World state formatted as a short factual sentence | `"澈现在在书桌前处理体验方案，这会儿还在工作。"` |
 
 Reserved Agent families include `home_idle`, `focus`, `meal`, `fitness`, `errand`,
 `commute`, `hangout`, and `deep_room`. Future contexts such as `errand / grocery`,
 `hangout / park`, and `hangout / seaside` do not require a premature UI `SceneType`.
 The centralized `AGENT_SCENE_BY_SCENE_TYPE` mapping is the source of truth; SceneData
-does not duplicate this mapping. `cheStatusHint` is UI copy and is not a runtime
-`cheCurrentState` source.
+does not duplicate this mapping. `buildChatRuntimeContext` combines the selected
+`SceneData` with the App-owned `CheCurrentState`. A matching or active shared scene
+uses the current world scene; an unrelated normal scene uses its UI scene mapping;
+deep chat uses `deep_room / window_night` while preserving the factual Daily World
+state text. `cheStatusHint` is UI copy and is not a runtime `cheCurrentState` source.
 
 | SceneType | AgentSceneKey | SceneVariant |
 |---|---|---|

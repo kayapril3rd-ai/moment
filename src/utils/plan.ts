@@ -163,6 +163,17 @@ export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
   };
 }
 
+export function restoreCheScheduleItemFromPlan(
+  schedule: CheScheduleItem[],
+  restoredPlan: UserPlan,
+): CheScheduleItem[] {
+  if (restoredPlan.inviteStatus !== 'accepted') return schedule;
+  const reservation = createCheScheduleItemFromPlan(restoredPlan);
+  return schedule.map((item) => item.linkedPlanId === restoredPlan.id
+    ? { ...reservation, id: item.id }
+    : item);
+}
+
 export function createRecentMomentFromPlan(plan: UserPlan, now = new Date()): RecentMoment {
   return {
     id: `moment-shared-${plan.id}`,

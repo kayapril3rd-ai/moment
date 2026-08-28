@@ -1,8 +1,11 @@
 import type {
-  AgentSceneContext,
   AgentSceneDefinition,
+  ChatRuntimeContext,
+  CheCurrentState,
+  SceneData,
   SceneType,
 } from '../types/che';
+import { formatCheCurrentStateForAgent } from './cheCurrentState.ts';
 
 /**
  * Stable bridge from UI/activity routing to the coarser Agent scene taxonomy.
@@ -21,12 +24,19 @@ export const AGENT_SCENE_BY_SCENE_TYPE: Readonly<Record<SceneType, AgentSceneDef
   deep_room: { sceneKey: 'deep_room', sceneVariant: 'window_night' },
 };
 
-export function getAgentSceneContext(
-  sceneType: SceneType,
-  cheCurrentState?: string,
-): AgentSceneContext {
-  const definition = AGENT_SCENE_BY_SCENE_TYPE[sceneType];
-  return cheCurrentState === undefined
-    ? { ...definition }
-    : { ...definition, cheCurrentState };
+export function buildChatRuntimeContext(
+  scene: SceneData,
+  currentState: CheCurrentState,
+): ChatRuntimeContext {
+  const sceneDefinition = scene.conversationMode === 'deep'
+    ? AGENT_SCENE_BY_SCENE_TYPE.deep_room
+    : currentState.source === 'shared_activity' || currentState.entrySceneType === scene.id
+      ? currentState.worldScene
+      : AGENT_SCENE_BY_SCENE_TYPE[scene.id];
+
+  return {
+    chatMode: scene.conversationMode,
+    ...sceneDefinition,
+    cheCurrentState: formatCheCurrentStateForAgent(currentState),
+  };
 }

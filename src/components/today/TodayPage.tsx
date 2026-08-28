@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ActivityDetail } from '../activity/ActivityDetail';
 import { ActivitySetup } from '../activity/ActivitySetup';
 import { ArrangePage } from '../arrange/ArrangePage';
@@ -16,16 +16,14 @@ import { RecentMoments } from './RecentMoments';
 import { SceneCardList } from './SceneCardList';
 import { todayCopy } from '../../data';
 import type { UserProfile } from '../../data/mockProfile';
-import type { RecentMoment, SceneCard, SceneType } from '../../types/che';
-import { useCheDayState } from '../../hooks/useCheDayState';
+import type { SceneCard, SceneType } from '../../types/che';
+import type { CheDayState } from '../../hooks/useCheDayState';
 
 interface TodayPageProps {
-  onOpenScene: (sceneType: SceneType, activeStartedAt?: string | null) => void;
+  onOpenScene: (sceneType: SceneType) => void;
   onOpenDeep: () => void;
   onOpenMoments: () => void;
-  onRegisterSceneActions?: (actions: { endActiveActivity: (hasChat?: boolean) => void }) => void;
-  recentMoments: RecentMoment[];
-  onRecentMomentsChange: (moments: RecentMoment[]) => void;
+  dayState: CheDayState;
   userProfile: UserProfile;
   memoryItems: string[];
   onUserProfileChange: (profile: UserProfile) => void;
@@ -36,9 +34,7 @@ export function TodayPage({
   onOpenScene,
   onOpenDeep,
   onOpenMoments,
-  onRegisterSceneActions,
-  recentMoments,
-  onRecentMomentsChange,
+  dayState,
   userProfile,
   memoryItems,
   onUserProfileChange,
@@ -69,6 +65,7 @@ export function TodayPage({
     handleInvitePlan,
     notifications,
     now,
+    recentMoments,
     restoreTodo,
     sceneCards,
     selectedPlan,
@@ -77,7 +74,7 @@ export function TodayPage({
     updatePlan,
     userPlans,
     userTodaySummary,
-  } = useCheDayState({ recentMoments, onRecentMomentsChange });
+  } = dayState;
 
   const startActivity = (card: SceneCard) => {
     activateActivity(card);
@@ -97,14 +94,6 @@ export function TodayPage({
     setActivityDetailCard(nextCard);
   };
 
-  useEffect(() => {
-    onRegisterSceneActions?.({
-      endActiveActivity: (hasChat?: boolean) => {
-        if (activeActivityCard) completeActivity(activeActivityCard, hasChat);
-      },
-    });
-  }, [activeActivityCard, completeActivity, onRegisterSceneActions]);
-
   const handleSceneCardSelect = (card: SceneCard) => {
     switch (card.status) {
       case 'scheduled':
@@ -116,7 +105,7 @@ export function TodayPage({
         setActivitySetupCard(card);
         break;
       case 'active':
-        onOpenScene(activeActivityId === card.id ? activeActivityCard?.sceneType ?? card.sceneType : card.sceneType, activeActivityId === card.id ? activeStartedAt : null);
+        onOpenScene(activeActivityId === card.id ? activeActivityCard?.sceneType ?? card.sceneType : card.sceneType);
         break;
       case 'availableNow':
       default:
@@ -126,7 +115,7 @@ export function TodayPage({
   };
 
   const openActiveScene = () => {
-    if (activeActivityCard) onOpenScene(activeActivityCard.sceneType, activeStartedAt);
+    if (activeActivityCard) onOpenScene(activeActivityCard.sceneType);
   };
   const greeting = getTimeGreeting(now, userProfile.nickname);
   const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
@@ -147,10 +136,7 @@ export function TodayPage({
               <HeroStatusCard
                 state={cheCurrentState}
                 now={now}
-                onOpenScene={cheCurrentState.entrySceneType ? () => onOpenScene(
-                  cheCurrentState.entrySceneType as SceneType,
-                  cheCurrentState.source === 'shared_activity' ? activeStartedAt : null,
-                ) : undefined}
+                onOpenScene={cheCurrentState.entrySceneType ? () => onOpenScene(cheCurrentState.entrySceneType as SceneType) : undefined}
               />
               <QuietChatEntry onOpen={onOpenDeep} />
               <CompanionOverviewGrid
@@ -244,7 +230,7 @@ export function TodayPage({
               cancelSceneCard(activityDetailCard.id);
               setActivityDetailCard(null);
             }}
-            onBackToScene={() => onOpenScene(activeActivityCard?.sceneType ?? activityDetailCard.sceneType, activeStartedAt)}
+            onBackToScene={() => onOpenScene(activeActivityCard?.sceneType ?? activityDetailCard.sceneType)}
             onComplete={() => finishActivity(activityDetailCard)}
             onOpenMoments={() => {
               setActivityDetailCard(null);

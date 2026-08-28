@@ -40,8 +40,9 @@ export interface AgentSceneDefinition {
   sceneVariant: SceneVariant;
 }
 
-export interface AgentSceneContext extends AgentSceneDefinition {
-  cheCurrentState?: string;
+export interface ChatRuntimeContext extends AgentSceneDefinition {
+  chatMode: ConversationMode;
+  cheCurrentState: string;
 }
 
 export type CheAvailability = 'busy' | 'lightly_available' | 'available';

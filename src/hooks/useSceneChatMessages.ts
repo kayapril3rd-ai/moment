@@ -1,25 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ChatMessage, SceneData } from '../types/che';
-import { getAgentSceneContext } from '../utils/agentSceneContext';
+import type { ChatMessage, CheCurrentState, SceneData } from '../types/che';
+import { buildChatRuntimeContext } from '../utils/agentSceneContext';
 import { getMockSceneReply, getSceneOpeningMessage } from '../utils/reply';
 
-export function useSceneChatMessages(scene: SceneData) {
-  const agentSceneContext = getAgentSceneContext(scene.id);
-  const initialMessage = useMemo<ChatMessage>(
-    () => ({
-      id: `che-opening-${scene.id}`,
-      role: 'che',
-      text: getSceneOpeningMessage(scene),
-      createdAt: new Date().toISOString(),
-    }),
-    [scene],
+export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurrentState) {
+  const chatRuntimeContext = useMemo(
+    () => buildChatRuntimeContext(scene, cheCurrentState),
+    [cheCurrentState, scene],
   );
-
-  const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [createInitialMessage(scene)]);
 
   useEffect(() => {
-    setMessages([initialMessage]);
-  }, [initialMessage]);
+    setMessages([createInitialMessage(scene)]);
+  }, [scene.id]);
 
   const sendMessage = (text: string) => {
     const now = Date.now();
@@ -39,5 +32,14 @@ export function useSceneChatMessages(scene: SceneData) {
     setMessages((currentMessages) => [...currentMessages, userMessage, cheMessage]);
   };
 
-  return { agentSceneContext, messages, sendMessage };
+  return { chatRuntimeContext, messages, sendMessage };
+}
+
+function createInitialMessage(scene: SceneData): ChatMessage {
+  return {
+    id: `che-opening-${scene.id}`,
+    role: 'che',
+    text: getSceneOpeningMessage(scene),
+    createdAt: new Date().toISOString(),
+  };
 }

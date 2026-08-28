@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { SceneData } from '../../types/che';
+import type { CheCurrentState, SceneData } from '../../types/che';
 import { useSceneChatMessages } from '../../hooks/useSceneChatMessages';
 import { ChatIcon } from '../icons';
 import { ChatPanel } from './ChatPanel';
@@ -7,13 +7,14 @@ import { SceneVisual } from './SceneVisual';
 
 interface SceneChatProps {
   scene: SceneData;
+  cheCurrentState: CheCurrentState;
   activeStartedAt?: string | null;
   onBack: () => void;
   onEndActivity?: (hasChat?: boolean) => void;
 }
 
-export function SceneChat({ scene, activeStartedAt, onBack, onEndActivity }: SceneChatProps) {
-  const { agentSceneContext, messages, sendMessage } = useSceneChatMessages(scene);
+export function SceneChat({ scene, cheCurrentState, activeStartedAt, onBack, onEndActivity }: SceneChatProps) {
+  const { chatRuntimeContext, messages, sendMessage } = useSceneChatMessages(scene, cheCurrentState);
   const isDeep = scene.conversationMode === 'deep';
   const [isChatOpen, setIsChatOpen] = useState(isDeep);
 
@@ -41,8 +42,9 @@ export function SceneChat({ scene, activeStartedAt, onBack, onEndActivity }: Sce
     <main
       className="app-shell chat-shell"
       aria-labelledby="scene-chat-title"
-      data-agent-scene={agentSceneContext.sceneKey}
-      data-scene-variant={agentSceneContext.sceneVariant}
+      data-agent-scene={chatRuntimeContext.sceneKey}
+      data-scene-variant={chatRuntimeContext.sceneVariant}
+      data-chat-mode={chatRuntimeContext.chatMode}
     >
       <div className={`phone-frame chat-frame${isChatOpen ? ' is-chat-open' : ''}`}>
         <div onClick={() => isChatOpen && !isDeep && setIsChatOpen(false)}>

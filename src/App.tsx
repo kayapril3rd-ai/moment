@@ -3,27 +3,27 @@ import { SceneChat } from './components/chat/SceneChat';
 import { TogetherMoments } from './components/moments/TogetherMoments';
 import { TodayPage } from './components/today/TodayPage';
 import { mockRecentMoments, sceneRegistry } from './data';
+import { useCheDayState } from './hooks/useCheDayState';
 import { useUserProfile } from './hooks/useUserProfile';
 import type { RecentMoment, SceneType } from './types/che';
 
 type AppView = 'today' | 'scene' | 'moments';
 
-interface SceneActions {
-  endActiveActivity: (hasChat?: boolean) => void;
-}
-
 export default function App() {
   const [view, setView] = useState<AppView>('today');
   const [currentSceneType, setCurrentSceneType] = useState<SceneType>('study');
-  const [currentSceneStartedAt, setCurrentSceneStartedAt] = useState<string | null>(null);
   const [recentMoments, setRecentMoments] = useState<RecentMoment[]>(mockRecentMoments);
-  const [sceneActions, setSceneActions] = useState<SceneActions | null>(null);
   const { userProfile, memoryItems, setUserProfile, setMemoryItems } = useUserProfile();
+  const dayState = useCheDayState({ recentMoments, onRecentMomentsChange: setRecentMoments });
   const currentScene = sceneRegistry[currentSceneType];
+  const currentActiveCard = currentScene.conversationMode !== 'deep'
+    && dayState.activeActivityCard?.sceneType === currentSceneType
+    ? dayState.activeActivityCard
+    : null;
+  const currentSceneActiveStartedAt = currentActiveCard ? dayState.activeStartedAt : null;
 
-  const openScene = (sceneType: SceneType, activeStartedAt?: string | null) => {
+  const openScene = (sceneType: SceneType) => {
     setCurrentSceneType(sceneType);
-    setCurrentSceneStartedAt(activeStartedAt ?? null);
     setView('scene');
   };
 
@@ -34,9 +34,7 @@ export default function App() {
           onOpenScene={openScene}
           onOpenDeep={() => openScene('deep_room')}
           onOpenMoments={() => setView('moments')}
-          onRegisterSceneActions={setSceneActions}
-          recentMoments={recentMoments}
-          onRecentMomentsChange={setRecentMoments}
+          dayState={dayState}
           userProfile={userProfile}
           memoryItems={memoryItems}
           onUserProfileChange={setUserProfile}
@@ -47,13 +45,13 @@ export default function App() {
       {view === 'scene' ? (
         <SceneChat
           scene={currentScene}
-          activeStartedAt={currentSceneStartedAt}
+          cheCurrentState={dayState.cheCurrentState}
+          activeStartedAt={currentSceneActiveStartedAt}
           onBack={() => setView('today')}
           onEndActivity={
-            currentSceneStartedAt && currentScene.conversationMode !== 'deep'
+            currentActiveCard
               ? (hasChat?: boolean) => {
-                  sceneActions?.endActiveActivity(hasChat);
-                  setCurrentSceneStartedAt(null);
+                  dayState.completeActivity(currentActiveCard, hasChat);
                   setView('today');
                 }
               : undefined

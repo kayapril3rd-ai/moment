@@ -3,9 +3,10 @@ import { buildCheScheduleForDate } from '../src/data/cheSchedule.ts';
 import { formatCheCurrentStateForAgent, resolveCheCurrentState } from '../src/utils/cheCurrentState.ts';
 import { getCheScheduleForDate } from '../src/utils/cheSchedule.ts';
 import { getSceneImage, getWorldSceneImage } from '../src/utils/sceneImages.ts';
-import { createCheScheduleItemFromPlan, createSharedSceneFromPlan, createUserPlanFromInput } from '../src/utils/plan.ts';
+import { buildChatRuntimeContext } from '../src/utils/agentSceneContext.ts';
+import { createCheScheduleItemFromPlan, createSharedSceneFromPlan, createUserPlanFromInput, restoreCheScheduleItemFromPlan } from '../src/utils/plan.ts';
 import { completeCheScheduleForActivity, syncCheScheduleForActive } from '../src/utils/activityState.ts';
-import { mockSceneCards } from '../src/data/mockScenes.ts';
+import { mockSceneCards, sceneRegistry } from '../src/data/mockScenes.ts';
 import type { SceneCard, UserPlan } from '../src/types/che.ts';
 
 const weekdayKey = '2026-08-27';
@@ -189,6 +190,25 @@ assert.equal(afterCompletedMovieState.source, 'default_rhythm');
 assert.notEqual(afterCompletedMovieState.worldScene.sceneKey, 'hangout');
 assert.notEqual(afterCompletedMovieState.scheduleItemId, movieScheduleItem.id);
 
+const restoredMoviePlan: UserPlan = { ...acceptedMoviePlan, status: 'todo' };
+const restoredMovieRuntime = restoreCheScheduleItemFromPlan(completedMovieRuntime, restoredMoviePlan);
+assert.equal(restoredMovieRuntime.length, 1);
+assert.equal(restoredMovieRuntime[0].id, completedMovieRuntime[0].id, 'restore must preserve the runtime schedule item id');
+assert.equal(restoredMovieRuntime[0].status, 'planned');
+assert.equal(restoredMovieRuntime[0].source, 'user_invite');
+const restoredMovieState = resolveAt(
+  weekdayKey,
+  '20:30',
+  getCheScheduleForDate(weekdayKey, restoredMovieRuntime),
+);
+assert.equal(restoredMovieState.source, 'schedule');
+assert.deepEqual(restoredMovieState.worldScene, { sceneKey: 'home_idle', sceneVariant: 'movie_night' });
+assert.deepEqual(
+  restoreCheScheduleItemFromPlan([], { ...restoredMoviePlan, inviteStatus: 'not_invited' }),
+  [],
+  'restore must not create a runtime reservation without an accepted invite',
+);
+
 const cancelledMovieRuntime = completedMovieRuntime.filter((item) => item.linkedPlanId !== acceptedMoviePlan.id);
 const scheduleAfterCancel = getCheScheduleForDate(weekdayKey, cancelledMovieRuntime);
 const restoredBaseState = resolveAt(weekdayKey, '20:41', scheduleAfterCancel);
@@ -213,6 +233,35 @@ const activeParkState = resolveCheCurrentState({
   activeActivityCard: { ...parkCard, status: 'active' },
 });
 assert.deepEqual(activeParkState.worldScene, { sceneKey: 'hangout', sceneVariant: 'park' });
+
+const currentFocusState = resolveAt(weekdayKey, '10:30', weekdaySchedule);
+const studyChatContext = buildChatRuntimeContext(sceneRegistry.study, currentFocusState);
+assert.deepEqual(
+  { chatMode: studyChatContext.chatMode, sceneKey: studyChatContext.sceneKey, sceneVariant: studyChatContext.sceneVariant },
+  { chatMode: 'scene', sceneKey: 'focus', sceneVariant: 'work_desk' },
+);
+assert.equal(studyChatContext.cheCurrentState, formatCheCurrentStateForAgent(currentFocusState));
+
+const parkChatContext = buildChatRuntimeContext(sceneRegistry.idle, activeParkState);
+assert.deepEqual(
+  { chatMode: parkChatContext.chatMode, sceneKey: parkChatContext.sceneKey, sceneVariant: parkChatContext.sceneVariant },
+  { chatMode: 'scene', sceneKey: 'hangout', sceneVariant: 'park' },
+);
+assert.match(parkChatContext.cheCurrentState, /公园/);
+
+const deepChatContext = buildChatRuntimeContext(sceneRegistry.deep_room, currentFocusState);
+assert.deepEqual(
+  { chatMode: deepChatContext.chatMode, sceneKey: deepChatContext.sceneKey, sceneVariant: deepChatContext.sceneVariant },
+  { chatMode: 'deep', sceneKey: 'deep_room', sceneVariant: 'window_night' },
+);
+assert.equal(deepChatContext.cheCurrentState, formatCheCurrentStateForAgent(currentFocusState));
+assert.match(deepChatContext.cheCurrentState, /书桌/);
+
+const unrelatedWatchContext = buildChatRuntimeContext(sceneRegistry.watch, currentFocusState);
+assert.deepEqual(
+  { chatMode: unrelatedWatchContext.chatMode, sceneKey: unrelatedWatchContext.sceneKey, sceneVariant: unrelatedWatchContext.sceneVariant },
+  { chatMode: 'scene', sceneKey: 'home_idle', sceneVariant: 'movie_night' },
+);
 
 const restPlan = requirePlan(createUserPlanFromInput('休息一下', at(weekdayKey, '09:00'), weekdayKey));
 assert.equal(restPlan.sceneType, 'idle');
@@ -254,10 +303,17 @@ console.log(JSON.stringify({
   partialOverlapSchedule: summarizeSchedule(partialSchedule),
   afterPartialSharedState: summarizeState(afterPartialSharedState),
   completedMovieStatus: completedMovieRuntime[0].status,
+  restoredMovieStatus: restoredMovieRuntime[0].status,
   afterCompletedMovieState: summarizeState(afterCompletedMovieState),
   baseRestoredAfterCancel: summarizeState(restoredBaseState),
   planWorldScenes: [parkPlan, seasidePlan, groceryPlan].map((plan) => `${plan.sceneType} -> ${plan.worldScene.sceneKey}/${plan.worldScene.sceneVariant}`),
   activeScheduleSource: activeParkSchedule[0].source,
+  chatRuntimeContexts: {
+    study: studyChatContext,
+    activePark: parkChatContext,
+    deep: deepChatContext,
+    unrelatedWatch: unrelatedWatchContext,
+  },
   evergreenCardsAreFlexible: true,
   formatterExamples: [
     weekdayStates[1].agentText,
