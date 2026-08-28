@@ -1,29 +1,29 @@
 ﻿:root {
   color-scheme: light;
-  --bg-app: #f6f5f2;
-  --bg-soft: #faf8f3;
-  --bg-warm: #f3eee5;
-  --surface: #fffcf7;
-  --surface-strong: rgba(255, 252, 247, 0.94);
-  --surface-mist: #eee7de;
-  --surface-glass: rgba(255, 252, 247, 0.72);
-  --surface-hero-action: rgba(255, 252, 247, 0.84);
-  --text-main: #1f302b;
-  --text-soft: #6e7c76;
-  --text-faint: #9aa7a1;
+  --bg-app: #faf8f4;
+  --bg-soft: #fffdfc;
+  --bg-warm: #f1e5d5;
+  --surface: #fffdfc;
+  --surface-strong: rgba(255, 253, 252, 0.94);
+  --surface-mist: #f2f5f1;
+  --surface-glass: rgba(255, 253, 252, 0.7);
+  --surface-hero-action: rgba(24, 36, 30, 0.2);
+  --text-main: #24362f;
+  --text-soft: #7b8882;
+  --text-faint: #a4ada8;
   --text-inverse: #f8faf7;
-  --green-main: #4f765f;
-  --green-dark: #355c4a;
-  --green-soft: #e1eae2;
+  --green-main: #63816f;
+  --green-dark: #3f5e50;
+  --green-soft: #e6eee8;
   --blue-mist: #d8e4ea;
   --blue-gray: #7ba0b8;
   --slate: #394b54;
   --warm-light: #efcb78;
   --wood-soft: #a89279;
-  --line-soft: rgba(47, 95, 71, 0.14);
-  --line-hero-action: rgba(255, 252, 247, 0.42);
-  --text-hero-action: #355c4a;
-  --shadow-soft-color: rgba(49, 72, 63, 0.08);
+  --line-soft: rgba(35, 54, 47, 0.08);
+  --line-hero-action: rgba(255, 255, 255, 0.42);
+  --text-hero-action: #ffffff;
+  --shadow-soft-color: rgba(30, 45, 38, 0.045);
 
   --color-bg: var(--bg-app);
   --color-bg-warm: var(--bg-warm);
@@ -49,7 +49,7 @@
   --warm-card: var(--bg-warm);
   --mist-blue: var(--blue-gray);
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -75,9 +75,9 @@
   --scene-thumb-size: 4rem;
 
   --radius-sm: 0.75rem;
-  --radius-card: 1.35rem;
+  --radius-card: 1.3rem;
   --radius-pill: 999px;
-  --shadow-soft: 0 18px 48px var(--color-shadow);
-  --shadow-subtle: 0 10px 28px rgba(49, 72, 63, 0.06);
+  --shadow-soft: 0 8px 28px var(--color-shadow);
+  --shadow-subtle: 0 8px 28px rgba(30, 45, 38, 0.045);
 }
 

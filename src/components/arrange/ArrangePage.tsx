@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import type { CheScheduleItem, DayRecord, UserPlan } from '../../types/che';
 import { useArrangeDateState } from '../../hooks/useArrangeDateState';
-import { CalendarSoftIcon } from '../icons';
 import { CheScheduleList } from '../schedule/CheScheduleList';
 import { UserPlanList } from '../schedule/UserPlanList';
 import { ArrangeDateStrip } from './ArrangeDateStrip';
@@ -51,10 +50,7 @@ export function ArrangePage({
   return (
     <section className="tab-page arrange-page schedule-page arrange-compact-page" aria-labelledby="arrange-title">
       <header className="schedule-header">
-        <span className="schedule-brand">
-          <CalendarSoftIcon className="schedule-title-icon" size={24} aria-hidden="true" />
-          <h1 id="arrange-title">安排</h1>
-        </span>
+        <h1 id="arrange-title">安排</h1>
       </header>
 
       <ArrangeDateStrip

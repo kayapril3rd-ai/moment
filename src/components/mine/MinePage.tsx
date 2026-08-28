@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { privacyActions, type UserProfile } from '../../data/mockProfile';
 import type { DayRecord, RecentMoment } from '../../types/che';
-import { ArrowRightSoftIcon, CloseSoftIcon, UserSoftIcon } from '../icons';
+import { CloseSoftIcon } from '../icons';
 
 type MineSheetType = 'preferences' | 'relationship' | 'memory' | 'privacy';
 
@@ -32,10 +32,7 @@ export function MinePage({ userProfile, memoryItems, dayRecords, recentMoments, 
   return (
     <div className="tab-page mine-page">
       <header className="tab-page-header mine-page-header">
-        <span className="page-title-lockup">
-          <UserSoftIcon className="page-title-icon" size={32} aria-hidden="true" />
-          <h1>我的</h1>
-        </span>
+        <h1>我的</h1>
       </header>
 
       <section className="mine-entry-stack" aria-label="我的">
@@ -48,7 +45,6 @@ export function MinePage({ userProfile, memoryItems, dayRecords, recentMoments, 
           >
             <span className="mine-entry-head">
               <strong>{card.title}</strong>
-              <ArrowRightSoftIcon size={18} aria-hidden="true" />
             </span>
             {card.id === 'relationship' ? <RelationshipStats summary={relationshipSummary} /> : card.subtitle ? <small>{card.subtitle}</small> : null}
           </button>

@@ -11,8 +11,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(216, 228, 234, 0.82) 0%, rgba(238, 243, 239, 0.98) 48%, rgba(247, 250, 247, 0.96) 100%);
+  background: var(--bg-app);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
