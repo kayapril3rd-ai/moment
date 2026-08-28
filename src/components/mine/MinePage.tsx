@@ -31,6 +31,10 @@ export function MinePage({ userProfile, memoryItems, dayRecords, recentMoments, 
 
   return (
     <div className="tab-page mine-page" aria-label="我的">
+      <header className="mine-identity-block">
+        <h1>{userProfile.nickname}</h1>
+        <p>关于你，也关于你们</p>
+      </header>
       <section className="mine-entry-group" aria-label="设置与记录">
         {entryCards.map((card) => (
           <button

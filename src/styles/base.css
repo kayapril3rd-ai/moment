@@ -14,8 +14,9 @@ body {
   background: var(--bg-app);
   color: var(--color-text);
   font-family: var(--font-sans);
-  font-size: var(--font-size-base);
-  line-height: var(--line-normal);
+  font-size: var(--text-body-size);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
   letter-spacing: 0;
 }
 

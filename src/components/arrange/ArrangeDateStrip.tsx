@@ -1,4 +1,4 @@
-import type { DateItem, MonthDateItem } from '../../utils/date';
+import { parseDateKey, toDateKey, type DateItem, type MonthDateItem } from '../../utils/date';
 
 interface ArrangeDateStripProps {
   calendarMonthLabel: string;
@@ -21,35 +21,41 @@ export function ArrangeDateStrip({
   onSelectDate,
   onToggleCalendar,
 }: ArrangeDateStripProps) {
+  const selectedDate = parseDateKey(selectedDateKey);
+  const selectedDateContext = `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日 · ${weekdays[selectedDate.getDay()]}`;
+  const isSelectedToday = selectedDateKey === toDateKey(new Date());
+
   return (
     <section className="arrange-date-area" aria-label="日期选择">
+      <div className="arrange-selected-date-row">
+        <div className="arrange-selected-date-copy">
+          <strong>{selectedDateContext}</strong>
+          {isSelectedToday ? <span>今天</span> : null}
+        </div>
+        <button className="calendar-toggle-button" type="button" onClick={onToggleCalendar}>
+          {isCalendarExpanded ? '收起' : '展开'}
+        </button>
+      </div>
+
       <div className="arrange-date-toolbar">
         {isCalendarExpanded ? (
           <div className="arrange-calendar-head">
             <h2>{calendarMonthLabel}</h2>
-            <button className="calendar-toggle-button" type="button" onClick={onToggleCalendar}>
-              收起
-            </button>
           </div>
         ) : (
-          <>
-            <div className="date-strip date-strip-circles">
-              {dateStrip.map((item) => (
-                <button
-                  className={`date-pill${selectedDateKey === item.dateKey ? ' is-active' : ''}`}
-                  type="button"
-                  key={item.dateKey}
-                  onClick={() => onSelectDate(item.dateKey)}
-                  aria-label={`${item.dayNumber}日`}
-                >
-                  <span>{item.dayNumber}</span>
-                </button>
-              ))}
-            </div>
-            <button className="calendar-toggle-button" type="button" onClick={onToggleCalendar}>
-              展开
-            </button>
-          </>
+          <div className="date-strip date-strip-circles">
+            {dateStrip.map((item) => (
+              <button
+                className={`date-pill${selectedDateKey === item.dateKey ? ' is-active' : ''}`}
+                type="button"
+                key={item.dateKey}
+                onClick={() => onSelectDate(item.dateKey)}
+                aria-label={`${item.dayNumber}日`}
+              >
+                <span>{item.dayNumber}</span>
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -81,3 +87,5 @@ export function ArrangeDateStrip({
     </section>
   );
 }
+
+const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'] as const;

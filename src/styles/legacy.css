@@ -2473,7 +2473,7 @@ body {
 
 body {
   color: var(--color-text-main);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .app-shell {
@@ -4528,8 +4528,8 @@ button,
 .arrange-page .che-scene-copy strong {
   overflow: hidden;
   color: #24352D;
-  font-size: 20px;
-  font-weight: 650;
+  font-size: var(--text-card-title-size);
+  font-weight: var(--weight-semibold);
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5984,8 +5984,8 @@ button,
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
-  font-size: 13px;
-  font-weight: 650;
+  font-size: var(--text-button-size);
+  font-weight: var(--weight-semibold);
   backdrop-filter: blur(12px);
 }
 
@@ -6010,14 +6010,15 @@ button,
 
 .scene-visual-copy p {
   font-size: 15px;
-  font-weight: 650;
+  font-weight: var(--weight-semibold);
 }
 
 .scene-visual-copy h1 {
   margin-top: 8px;
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1.14;
+  font-size: var(--text-hero-size);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-hero);
+  letter-spacing: 0;
 }
 
 .scene-visual-copy span {
@@ -6073,8 +6074,8 @@ button,
 .chat-launcher p {
   margin: 0;
   color: rgba(255, 255, 255, 0.92);
-  font-size: 14px;
-  font-weight: 650;
+  font-size: var(--text-button-size);
+  font-weight: var(--weight-semibold);
   text-shadow: 0 2px 10px rgba(31, 48, 44, 0.38);
 }
 
@@ -6120,8 +6121,9 @@ button,
 
 .chat-message p {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: var(--text-chat-size);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-chat);
 }
 
 .chat-message.is-che {
@@ -6155,8 +6157,15 @@ button,
   border-radius: 999px;
   background: transparent;
   color: #24352D;
-  font-size: 14px;
+  font-size: var(--text-chat-size);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-chat);
   outline: 0;
+}
+
+.chat-input-row input::placeholder {
+  font-size: var(--text-body-size);
+  font-weight: var(--weight-regular);
 }
 
 .chat-input-row button {
@@ -6168,8 +6177,8 @@ button,
   border-radius: 50%;
   background: #4F6554;
   color: #fff;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--text-button-size);
+  font-weight: var(--weight-semibold);
 }
 
 @media (max-width: 374px) {
