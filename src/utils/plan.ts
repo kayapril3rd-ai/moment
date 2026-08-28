@@ -154,6 +154,7 @@ export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
     timePrecision: plan.timePrecision ?? inferTimePrecision(timeLabel),
     type: 'shared',
     source: 'user_invite',
+    status: 'planned',
     sceneType,
     worldScene: { ...plan.worldScene },
     linkedPlanId: plan.id,

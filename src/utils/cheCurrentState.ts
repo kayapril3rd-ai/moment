@@ -79,6 +79,7 @@ function findCurrentScheduleItem(now: Date, schedule: CheScheduleItem[]): CheSch
   const dateKey = toDateKey(now);
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   return schedule.find((item) => {
+    if (item.status === 'completed') return false;
     if (item.dateKey && item.dateKey !== dateKey) return false;
     if (!item.endTime) return false;
     const start = parseExactTime(item.startTime);

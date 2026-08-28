@@ -7,9 +7,9 @@ export function getCheScheduleForDate(
 ): CheScheduleItem[] {
   const runtimeForDate = runtimeItems.filter((item) => item.dateKey === dateKey);
   const exactSharedItems = runtimeForDate.filter(isExactSharedItem);
-  const baseSchedule = buildCheScheduleForDate(dateKey).filter(
-    (baseItem) => !exactSharedItems.some((sharedItem) => itemsOverlap(baseItem, sharedItem)),
-  );
+  const baseSchedule = buildCheScheduleForDate(dateKey)
+    .map((baseItem) => truncateBaseItemBeforeShared(baseItem, exactSharedItems))
+    .filter((item): item is CheScheduleItem => item !== null);
   return [...baseSchedule, ...runtimeForDate].sort(compareScheduleItems);
 }
 
@@ -24,13 +24,33 @@ function isExactSharedItem(item: CheScheduleItem): boolean {
     && parseClockMinutes(item.endTime) !== null;
 }
 
-function itemsOverlap(left: CheScheduleItem, right: CheScheduleItem): boolean {
-  const leftStart = parseClockMinutes(left.startTime);
-  const leftEnd = parseClockMinutes(left.endTime);
-  const rightStart = parseClockMinutes(right.startTime);
-  const rightEnd = parseClockMinutes(right.endTime);
-  if (leftStart === null || leftEnd === null || rightStart === null || rightEnd === null) return false;
-  return leftStart < rightEnd && rightStart < leftEnd;
+function truncateBaseItemBeforeShared(
+  baseItem: CheScheduleItem,
+  exactSharedItems: CheScheduleItem[],
+): CheScheduleItem | null {
+  const baseStart = parseClockMinutes(baseItem.startTime);
+  const baseEnd = parseClockMinutes(baseItem.endTime);
+  if (baseStart === null || baseEnd === null) return baseItem;
+
+  const interruptAt = exactSharedItems.reduce<number | null>((earliest, sharedItem) => {
+    const sharedStart = parseClockMinutes(sharedItem.startTime);
+    const sharedEnd = parseClockMinutes(sharedItem.endTime);
+    if (sharedStart === null || sharedEnd === null) return earliest;
+    const overlaps = baseStart < sharedEnd && sharedStart < baseEnd;
+    if (!overlaps) return earliest;
+    return earliest === null ? sharedStart : Math.min(earliest, sharedStart);
+  }, null);
+
+  if (interruptAt === null) return baseItem;
+  if (interruptAt <= baseStart) return null;
+
+  const endTime = formatClockMinutes(interruptAt);
+  return {
+    ...baseItem,
+    id: `${baseItem.id}-before-shared`,
+    endTime,
+    timeLabel: `${baseItem.startTime}–${endTime}`,
+  };
 }
 
 function parseClockMinutes(value: string | null): number | null {
@@ -40,4 +60,10 @@ function parseClockMinutes(value: string | null): number | null {
   const minutes = Number(match[2]);
   if (minutes > 59 || hours > 24 || (hours === 24 && minutes !== 0)) return null;
   return hours * 60 + minutes;
+}
+
+function formatClockMinutes(value: number): string {
+  const hours = Math.floor(value / 60);
+  const minutes = value % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 }

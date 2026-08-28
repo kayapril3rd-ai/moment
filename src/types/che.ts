@@ -71,6 +71,8 @@ export type ScheduleItemType = 'work' | 'life' | 'shared' | 'rest';
 
 export type ScheduleItemSource = 'che' | 'user_invite' | 'shared_activity';
 
+export type CheScheduleItemStatus = 'planned' | 'active' | 'completed';
+
 export type SceneCardStatus =
   | 'availableNow'
   | 'scheduled'
@@ -117,7 +119,7 @@ export interface CheScheduleItem {
   dateKey?: string;
   iconKey?: string;
   actionLabel?: string;
-  status?: string;
+  status?: CheScheduleItemStatus;
   cardImage?: string;
   heroImage?: string;
   cardFocus?: string;

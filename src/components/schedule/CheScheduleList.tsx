@@ -31,7 +31,7 @@ export function CheScheduleList({ schedule }: CheScheduleListProps) {
                 <small>{item.timeLabel || item.startTime}</small>
                 <strong>{item.title}</strong>
                 <p>{item.detail}</p>
-                {statusText ? <em className={item.status === '忙碌中' || item.status === 'busy' ? 'che-status-busy' : 'che-status-available'}>{statusText}</em> : null}
+                {statusText ? <em className="che-status-available">{statusText}</em> : null}
               </span>
             </div>
             {action ? (
@@ -47,11 +47,7 @@ export function CheScheduleList({ schedule }: CheScheduleListProps) {
 }
 
 function getStatusText(item: CheScheduleItem): string {
-  if (!item.status) return '';
-  if (item.status === 'busy') return '状态：忙碌中';
-  if (item.status === 'available') return '状态：可陪伴';
-  if (item.status === 'can_join') return '';
-  return item.status.startsWith('状态') ? item.status : `状态：${item.status}`;
+  return item.status === 'completed' ? '已完成' : '';
 }
 
 function CheIcon({ icon }: { icon: string }) {

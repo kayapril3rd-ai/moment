@@ -4,6 +4,7 @@ import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, UserPlan } fr
 import {
   addUniqueMoment,
   addUniqueRecord,
+  completeCheScheduleForActivity,
   createActivityRecord,
   createMoment,
   extractStartTime,
@@ -165,9 +166,7 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
       setActiveStartedAt(null);
     }
 
-    setRuntimeCheScheduleItems((currentSchedule) =>
-      currentSchedule.filter((item) => item.id !== `che-active-${card.id}` && (!card.linkedPlanId || item.linkedPlanId !== card.linkedPlanId)),
-    );
+    setRuntimeCheScheduleItems((currentSchedule) => completeCheScheduleForActivity(currentSchedule, card));
 
     setDayRecords((currentRecords) => addUniqueRecord(currentRecords, createActivityRecord(card, startedAt, completedAt)));
     updateRecentMoments((currentMoments) =>

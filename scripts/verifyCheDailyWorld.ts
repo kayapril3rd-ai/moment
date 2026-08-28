@@ -4,7 +4,7 @@ import { formatCheCurrentStateForAgent, resolveCheCurrentState } from '../src/ut
 import { getCheScheduleForDate } from '../src/utils/cheSchedule.ts';
 import { getSceneImage, getWorldSceneImage } from '../src/utils/sceneImages.ts';
 import { createCheScheduleItemFromPlan, createSharedSceneFromPlan, createUserPlanFromInput } from '../src/utils/plan.ts';
-import { syncCheScheduleForActive } from '../src/utils/activityState.ts';
+import { completeCheScheduleForActivity, syncCheScheduleForActive } from '../src/utils/activityState.ts';
 import { mockSceneCards } from '../src/data/mockScenes.ts';
 import type { SceneCard, UserPlan } from '../src/types/che.ts';
 
@@ -77,6 +77,9 @@ assert.equal(sharedState.source, 'shared_activity');
 assert.equal(sharedState.worldScene.sceneKey, 'home_idle');
 assert.equal(sharedState.worldScene.sceneVariant, 'gaming_sofa');
 assert.equal(sharedState.availability, 'available');
+const temporaryActiveSchedule = syncCheScheduleForActive([], sharedCard, `${weekdayKey}T10:20:00`);
+assert.equal(temporaryActiveSchedule[0].status, 'active');
+assert.deepEqual(completeCheScheduleForActivity(temporaryActiveSchedule, sharedCard), []);
 
 const scheduledFitnessCard: SceneCard = {
   id: 'verify-scheduled-fitness',
@@ -117,6 +120,7 @@ const movieScheduleItem = createCheScheduleItemFromPlan(acceptedMoviePlan);
 assert.equal(movieScheduleItem.startTime, '20:00');
 assert.equal(movieScheduleItem.endTime, '21:30');
 assert.deepEqual(movieScheduleItem.worldScene, { sceneKey: 'home_idle', sceneVariant: 'movie_night' });
+assert.equal(movieScheduleItem.status, 'planned');
 assert.match(movieScheduleItem.title, /^等你/);
 assert.doesNotMatch(movieScheduleItem.title, /正在/);
 
@@ -139,6 +143,56 @@ const activeMovieState = resolveCheCurrentState({
 });
 assert.equal(activeMovieState.source, 'shared_activity');
 assert.deepEqual(activeMovieState.worldScene, { sceneKey: 'home_idle', sceneVariant: 'movie_night' });
+
+const partialPlan = requirePlan(createUserPlanFromInput('16:30 看电影', at(weekdayKey, '09:00'), weekdayKey));
+const partialSharedItem = createCheScheduleItemFromPlan({ ...partialPlan, durationMinutes: 30, inviteStatus: 'accepted' });
+const partialSchedule = getCheScheduleForDate(weekdayKey, [partialSharedItem]);
+const truncatedFocus = partialSchedule.find((item) => item.source === 'che' && item.startTime === '13:30');
+assert.ok(truncatedFocus);
+assert.equal(truncatedFocus.endTime, '16:30');
+assert.equal(truncatedFocus.timeLabel, '13:30–16:30');
+assert.match(truncatedFocus.id, /-before-shared$/);
+assert.deepEqual(resolveAt(weekdayKey, '15:00', partialSchedule).worldScene, { sceneKey: 'focus', sceneVariant: 'work_desk' });
+assert.deepEqual(resolveAt(weekdayKey, '16:45', partialSchedule).worldScene, { sceneKey: 'home_idle', sceneVariant: 'movie_night' });
+const afterPartialSharedState = resolveAt(weekdayKey, '17:15', partialSchedule);
+assert.equal(afterPartialSharedState.source, 'default_rhythm');
+assert.notEqual(afterPartialSharedState.worldScene.sceneKey, 'focus');
+
+const activeMovieRuntime = syncCheScheduleForActive(
+  [movieScheduleItem],
+  movieCard,
+  `${weekdayKey}T20:30:00`,
+);
+assert.equal(activeMovieRuntime[0].status, 'active');
+assert.equal(activeMovieRuntime[0].startTime, movieScheduleItem.startTime);
+assert.equal(activeMovieRuntime[0].endTime, movieScheduleItem.endTime);
+const activeMovieTimeline = getCheScheduleForDate(weekdayKey, activeMovieRuntime);
+const activeMovieAt2030 = resolveCheCurrentState({
+  now: at(weekdayKey, '20:30'),
+  cheSchedule: activeMovieTimeline,
+  activeActivityCard: movieCard,
+  activeStartedAt: `${weekdayKey}T20:30:00`,
+});
+assert.equal(activeMovieAt2030.source, 'shared_activity');
+
+const completedMovieRuntime = completeCheScheduleForActivity(activeMovieRuntime, movieCard);
+assert.equal(completedMovieRuntime.length, 1);
+assert.equal(completedMovieRuntime[0].status, 'completed');
+for (const field of ['startTime', 'endTime', 'dateKey', 'worldScene', 'linkedPlanId'] as const) {
+  assert.deepEqual(completedMovieRuntime[0][field], movieScheduleItem[field], `completed item must preserve ${field}`);
+}
+const completedMovieTimeline = getCheScheduleForDate(weekdayKey, completedMovieRuntime);
+assert.ok(completedMovieTimeline.some((item) => item.id === movieScheduleItem.id && item.status === 'completed'));
+assert.ok(completedMovieTimeline.some((item) => item.source === 'che' && item.startTime === '19:30' && item.endTime === '20:00'));
+const afterCompletedMovieState = resolveAt(weekdayKey, '20:41', completedMovieTimeline);
+assert.equal(afterCompletedMovieState.source, 'default_rhythm');
+assert.notEqual(afterCompletedMovieState.worldScene.sceneKey, 'hangout');
+assert.notEqual(afterCompletedMovieState.scheduleItemId, movieScheduleItem.id);
+
+const cancelledMovieRuntime = completedMovieRuntime.filter((item) => item.linkedPlanId !== acceptedMoviePlan.id);
+const scheduleAfterCancel = getCheScheduleForDate(weekdayKey, cancelledMovieRuntime);
+const restoredBaseState = resolveAt(weekdayKey, '20:41', scheduleAfterCancel);
+assert.deepEqual(restoredBaseState.worldScene, { sceneKey: 'hangout', sceneVariant: 'park' });
 
 const parkPlan = verifyPlanWorldScene('20:00 公园散步', 'idle', { sceneKey: 'hangout', sceneVariant: 'park' });
 const seasidePlan = verifyPlanWorldScene('20:00 海边走走', 'idle', { sceneKey: 'hangout', sceneVariant: 'seaside' });
@@ -197,6 +251,11 @@ console.log(JSON.stringify({
   acceptedMovieSchedule: summarizeSchedule(scheduleWithMovie),
   waitingForMovieState: summarizeState(waitingForMovieState),
   activeMovieState: summarizeState(activeMovieState),
+  partialOverlapSchedule: summarizeSchedule(partialSchedule),
+  afterPartialSharedState: summarizeState(afterPartialSharedState),
+  completedMovieStatus: completedMovieRuntime[0].status,
+  afterCompletedMovieState: summarizeState(afterCompletedMovieState),
+  baseRestoredAfterCancel: summarizeState(restoredBaseState),
   planWorldScenes: [parkPlan, seasidePlan, groceryPlan].map((plan) => `${plan.sceneType} -> ${plan.worldScene.sceneKey}/${plan.worldScene.sceneVariant}`),
   activeScheduleSource: activeParkSchedule[0].source,
   evergreenCardsAreFlexible: true,

@@ -158,6 +158,7 @@ is the required Agent-layer description of what 澈 is actually doing.
 | `endTime` | string \| null | Optional end time | `"20:40"` |
 | `type` | `"work" \| "life" \| "shared" \| "rest"` | Schedule category | `"shared"` |
 | `source` | `"che" \| "user_invite" \| "shared_activity"` | Where this item came from | `"user_invite"` |
+| `status` | `"planned" \| "active" \| "completed"` (optional) | Runtime shared-item lifecycle; deterministic base items omit it | `"planned"` |
 | `sceneType` | `SceneType \| null` | Related scene if any | `"fitness"` |
 | `worldScene` | `AgentSceneDefinition` | Real Agent world context | `{ "sceneKey": "fitness", "sceneVariant": "home_gym" }` |
 | `linkedPlanId` | string \| null | Related user plan | `"plan-001"` |
@@ -173,12 +174,20 @@ Example:
   "endTime": "20:40",
   "type": "shared",
   "source": "user_invite",
+  "status": "planned",
   "sceneType": "fitness",
   "worldScene": { "sceneKey": "fitness", "sceneVariant": "home_gym" },
   "linkedPlanId": "plan-001",
   "detail": "他说晚点也补点核心"
 }
 ```
+
+Exact runtime shared items interrupt overlapping deterministic base items. When a
+shared item starts inside a base interval, the base item is deterministically
+truncated at the shared start and never resumes afterward. Completed shared items
+remain in that day's schedule as timeline footprints, still suppress base activity,
+but the current-state resolver ignores them. Cancelling an invite or deleting its
+plan removes the runtime item and allows the deterministic base schedule to return.
 
 ## `CheCurrentState`
 

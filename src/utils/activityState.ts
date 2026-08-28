@@ -7,15 +7,30 @@ export function syncCheScheduleForActive(schedule: CheScheduleItem[], card: Scen
   const linkedScheduleItem = card.linkedPlanId
     ? schedule.find((item) => item.linkedPlanId === card.linkedPlanId)
     : undefined;
+  if (linkedScheduleItem) {
+    return schedule.map((item) => item.linkedPlanId === card.linkedPlanId
+      ? {
+          ...item,
+          title: `正在陪你${card.title.replace('一起', '')}`,
+          status: 'active',
+          source: 'shared_activity',
+          sceneType: card.sceneType,
+          worldScene: { ...worldScene },
+          detail: getActiveCheScheduleDetail(card.sceneType),
+        }
+      : item);
+  }
+
   const activeItem: CheScheduleItem = {
     id: `che-active-${card.id}`,
     title: `正在陪你${card.title.replace('一起', '')}`,
     startTime: new Date(startedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    endTime: linkedScheduleItem?.endTime ?? null,
+    endTime: null,
     timeLabel: '现在',
     timePrecision: 'open',
     type: 'shared',
     source: 'shared_activity',
+    status: 'active',
     sceneType: card.sceneType,
     worldScene: { ...worldScene },
     linkedPlanId: card.linkedPlanId,
@@ -23,11 +38,17 @@ export function syncCheScheduleForActive(schedule: CheScheduleItem[], card: Scen
     detail: getActiveCheScheduleDetail(card.sceneType),
   };
 
-  if (card.linkedPlanId && schedule.some((item) => item.linkedPlanId === card.linkedPlanId)) {
-    return schedule.map((item) => (item.linkedPlanId === card.linkedPlanId ? activeItem : item));
+  return [activeItem, ...schedule.filter((item) => item.id !== activeItem.id)];
+}
+
+export function completeCheScheduleForActivity(schedule: CheScheduleItem[], card: SceneCard): CheScheduleItem[] {
+  if (card.linkedPlanId) {
+    return schedule.map((item) => item.linkedPlanId === card.linkedPlanId
+      ? { ...item, title: card.title, status: 'completed' }
+      : item);
   }
 
-  return [activeItem, ...schedule.filter((item) => item.id !== activeItem.id)];
+  return schedule.filter((item) => item.id !== `che-active-${card.id}`);
 }
 
 export function createActivityRecord(card: SceneCard, startedAt: string | null, completedAt: string): DayRecord {
