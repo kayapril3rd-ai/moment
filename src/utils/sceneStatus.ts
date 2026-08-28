@@ -1,7 +1,7 @@
 import type { SceneData } from '../types/che';
 
 export function getSceneStatus(scene: SceneData, activeStartedAt: string | null | undefined, now: number): string {
-  if (scene.conversationMode === 'deep') return `${scene.title} · 夜里`;
+  if (scene.conversationMode === 'deep') return '安静聊聊';
   if (!activeStartedAt) return `${scene.title} · 刚开始`;
   if (!shouldShowElapsedTime(scene.id)) return `${scene.title} · 进行中`;
 

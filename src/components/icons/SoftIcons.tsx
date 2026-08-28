@@ -147,3 +147,28 @@ export function ArrowRightSoftIcon({ size = 20, ...props }: IconProps) {
     </svg>
   );
 }
+
+export function BackSoftIcon({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...iconProps(size, props)}>
+      <path d="m14.5 6-6 6 6 6" />
+    </svg>
+  );
+}
+
+export function CloseSoftIcon({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...iconProps(size, props)}>
+      <path d="m7 7 10 10M17 7 7 17" />
+    </svg>
+  );
+}
+
+export function SendSoftIcon({ size = 20, ...props }: IconProps) {
+  return (
+    <svg {...iconProps(size, props)} style={{ transform: 'translateX(-1px)', ...props.style }}>
+      <path d="m4.5 11 14-6.2c.7-.3 1.4.4 1 1.1l-6.2 13.6c-.3.7-1.3.6-1.5-.1l-1.4-4.7-4.8-1.6c-.7-.2-.8-1.2-.1-1.5Z" />
+      <path d="m10.5 14.5 3.7-3.7" />
+    </svg>
+  );
+}

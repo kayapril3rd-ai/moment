@@ -1,4 +1,4 @@
-// BottomScheduleBar 负责底部固定“今日安排”管理入口。
+// BottomScheduleBar 负责底部固定安排管理入口。
 // 后续要改入口文案请优先改 src/data/todayCopy.ts；要改打开行为则改 TodayPage 传入的 onOpen。
 interface BottomScheduleBarProps {
   title: string;

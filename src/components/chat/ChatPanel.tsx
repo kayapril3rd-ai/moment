@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import type { ChatMessage, SceneData } from '../../types/che';
-import { SendIcon } from '../icons';
+import { SendSoftIcon } from '../icons';
 
 interface ChatPanelProps {
   scene: SceneData;
@@ -43,7 +43,7 @@ export function ChatPanel({ scene, messages, onSend, onCollapse }: ChatPanelProp
             onChange={(event) => setDraft(event.target.value)}
           />
           <button type="submit" aria-label="发送">
-            <SendIcon size={20} aria-hidden="true" />
+            <SendSoftIcon size={20} aria-hidden="true" />
           </button>
         </form>
       </div>

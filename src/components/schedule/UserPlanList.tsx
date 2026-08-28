@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import type { SceneType, UserPlan } from '../../types/che';
-import { CalendarSoftIcon, ClockSoftIcon, DumbbellSoftIcon, PlanCardIcon, SproutIcon } from '../icons';
+import { ChatSoftIcon, ClockSoftIcon, DumbbellSoftIcon, MovieIcon, PlanCardIcon, SproutIcon, TodayBubbleIcon } from '../icons';
 
 interface UserPlanListProps {
   plans: UserPlan[];
@@ -63,8 +63,6 @@ export function UserPlanList({ plans, selectedDateKey, onAddPlan, onInvite, onSe
       </form>
       {hint ? <p className="plan-input-hint">{hint}</p> : null}
 
-      <h2 className="schedule-section-title">今日安排</h2>
-
       <div className="schedule-list my-schedule-list" aria-label="我的计划">
         {plans.length === 0 ? (
           <article className="arrange-empty-card">
@@ -93,17 +91,16 @@ export function UserPlanList({ plans, selectedDateKey, onAddPlan, onInvite, onSe
               <span className="plan-icon my-plan-icon" aria-hidden="true">
                 <PlanIcon sceneType={plan.sceneType} />
               </span>
-              <span className="plan-time-copy my-plan-time">
-                <strong className="my-plan-time-main">{getScheduleTimeLabel(plan)}</strong>
-                {durationLabel ? (
-                  <small className="my-plan-duration">
-                    <ClockSoftIcon size={13} aria-hidden="true" />
-                    {durationLabel}
-                  </small>
-                ) : null}
-              </span>
-
               <div className="schedule-item-main my-plan-main">
+                <div className="my-plan-meta">
+                  <time>{getScheduleTimeLabel(plan)}</time>
+                  {durationLabel ? (
+                    <small className="my-plan-duration">
+                      <ClockSoftIcon size={13} aria-hidden="true" />
+                      {durationLabel}
+                    </small>
+                  ) : null}
+                </div>
                 <h3 className="my-plan-title">{plan.title}</h3>
                 {plan.note ? <p className="my-plan-desc">{plan.note}</p> : null}
                 {isReplyVisible ? <p className="invite-reply my-plan-desc">{plan.inviteReply}</p> : null}
@@ -142,7 +139,9 @@ function getScheduleDurationLabel(plan: UserPlan): string {
 function PlanIcon({ sceneType }: { sceneType: SceneType }) {
   if (sceneType === 'fitness') return <DumbbellSoftIcon size={24} />;
   if (sceneType === 'study') return <PlanCardIcon size={24} />;
-  if (sceneType === 'watch') return <CalendarSoftIcon size={24} />;
+  if (sceneType === 'watch') return <MovieIcon size={24} />;
+  if (sceneType === 'meal') return <TodayBubbleIcon size={24} />;
+  if (sceneType === 'gaming') return <ChatSoftIcon size={24} />;
   return <SproutIcon size={24} />;
 }
 

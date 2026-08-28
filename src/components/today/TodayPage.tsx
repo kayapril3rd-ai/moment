@@ -117,7 +117,6 @@ export function TodayPage({
   const openActiveScene = () => {
     if (activeActivityCard) onOpenScene(activeActivityCard.sceneType);
   };
-  const greeting = getTimeGreeting(now, userProfile.nickname);
   const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
 
   return (
@@ -129,13 +128,11 @@ export function TodayPage({
           {activeMainTab === 'today' ? (
             <>
               <AppTopBar
-                greeting={greeting}
                 notifications={notifications}
                 showNotification
               />
               <HeroStatusCard
                 state={cheCurrentState}
-                now={now}
                 onOpenScene={cheCurrentState.entrySceneType ? () => onOpenScene(cheCurrentState.entrySceneType as SceneType) : undefined}
               />
               <QuietChatEntry onOpen={onOpenDeep} />
@@ -166,6 +163,8 @@ export function TodayPage({
             <MinePage
               userProfile={userProfile}
               memoryItems={memoryItems}
+              dayRecords={dayRecords}
+              recentMoments={recentMoments}
               onUserProfileChange={onUserProfileChange}
               onMemoryItemsChange={onMemoryItemsChange}
             />
@@ -245,13 +244,4 @@ export function TodayPage({
       </div>
     </main>
   );
-}
-
-function getTimeGreeting(now: number, nickname: string) {
-  const hour = new Date(now).getHours();
-  if (hour >= 5 && hour < 11) return `上午好，${nickname}`;
-  if (hour >= 11 && hour < 14) return `中午好，${nickname}`;
-  if (hour >= 14 && hour < 18) return `下午好，${nickname}`;
-  if (hour >= 18) return `晚上好，${nickname}`;
-  return `夜深了，${nickname}`;
 }

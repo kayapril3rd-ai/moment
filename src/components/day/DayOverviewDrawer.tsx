@@ -1,5 +1,6 @@
 import type { CheScheduleItem, UserPlan } from '../../types/che';
 import { getPlanTimeAnchor } from '../../utils/plan';
+import { ArrowRightSoftIcon, CloseSoftIcon } from '../icons';
 
 type DayOverviewType = 'user' | 'che';
 
@@ -92,14 +93,11 @@ function OverviewGroup({ title, rows }: { title: string; rows: UserOverviewRow[]
       <h3 id={`day-group-${title}`}>{title}</h3>
       <div className="day-overview-list">
         {rows.map((row) => (
-          <article className="day-overview-row" key={row.id}>
+          <article className="day-overview-row user-day-row" key={row.id}>
             <span className="day-status-mark" aria-hidden="true">{row.marker}</span>
-            <div>
-              <p>
-                {row.time ? <span>{row.time}</span> : null}
-                {row.time ? ' ' : ''}
-                {row.title}
-              </p>
+            <time className="day-time-anchor">{row.time}</time>
+            <div className="user-day-row-copy">
+              <p>{row.title}</p>
               {row.note ? <small>{row.note}</small> : null}
             </div>
           </article>
@@ -162,7 +160,7 @@ export function DayOverviewDrawer({
             <h2 id="day-overview-title">{title}</h2>
           </div>
           <button className="drawer-close" type="button" aria-label="关闭" onClick={onClose}>
-            ×
+            <CloseSoftIcon size={20} aria-hidden="true" />
           </button>
         </header>
 
@@ -171,7 +169,8 @@ export function DayOverviewDrawer({
             <>
               <UserOverviewList plans={userPlans} />
               <button className="day-overview-manage" type="button" onClick={onManageToday}>
-                去今日安排 &gt;
+                <span>去安排</span>
+                <ArrowRightSoftIcon size={18} aria-hidden="true" />
               </button>
             </>
           ) : (

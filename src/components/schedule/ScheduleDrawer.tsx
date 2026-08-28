@@ -1,8 +1,9 @@
-// ScheduleDrawer 负责“今日安排”的可编辑抽屉：添加计划、查看我的/澈的安排、邀请澈。
+// ScheduleDrawer 负责可编辑安排抽屉：添加计划、查看我的/澈的安排、邀请澈。
 // 首页概览卡的只读查看不走这里，避免“查看今天”和“管理安排”混在一起。
 import type { CheScheduleItem, UserPlan } from '../../types/che';
 import { CheScheduleList } from './CheScheduleList';
 import { UserPlanList } from './UserPlanList';
+import { CloseSoftIcon } from '../icons';
 
 export type ScheduleTab = 'user' | 'che';
 
@@ -31,7 +32,7 @@ export function ScheduleDrawer({
 }: ScheduleDrawerProps) {
   return (
     <div className={`schedule-drawer-layer ${isOpen ? 'is-open' : ''}`} aria-hidden={!isOpen}>
-      <button className="schedule-scrim" type="button" aria-label="关闭今日安排" onClick={onClose} />
+      <button className="schedule-scrim" type="button" aria-label="关闭安排" onClick={onClose} />
 
       <section
         className="schedule-drawer"
@@ -43,10 +44,10 @@ export function ScheduleDrawer({
 
         <header className="drawer-header">
           <div>
-            <h2 id="schedule-drawer-title">今日安排</h2>
+            <h2 id="schedule-drawer-title">安排</h2>
           </div>
           <button className="drawer-close" type="button" aria-label="关闭" onClick={onClose}>
-            ×
+            <CloseSoftIcon size={20} aria-hidden="true" />
           </button>
         </header>
 

@@ -52,7 +52,7 @@ export function ArrangePage({
     <section className="tab-page arrange-page schedule-page arrange-compact-page" aria-labelledby="arrange-title">
       <header className="schedule-header">
         <span className="schedule-brand">
-          <CalendarSoftIcon className="schedule-title-icon" size={38} aria-hidden="true" />
+          <CalendarSoftIcon className="schedule-title-icon" size={24} aria-hidden="true" />
           <h1 id="arrange-title">安排</h1>
         </span>
       </header>
@@ -82,8 +82,7 @@ export function ArrangePage({
           {activeTab === 'mine' ? (
             <UserPlanList plans={visibleUserPlans} selectedDateKey={selectedDateKey} onAddPlan={onAddPlan} onInvite={onInvitePlan} onSelectPlan={onSelectPlan} />
           ) : (
-            <section className="che-arrange-panel" aria-labelledby="che-arrange-title">
-              <h2 id="che-arrange-title" className="schedule-section-title">今日安排</h2>
+            <section className="che-arrange-panel" aria-label="澈的安排">
               {visibleCheSchedule.length > 0 ? <CheScheduleList schedule={visibleCheSchedule} /> : <p className="arrange-empty-text">这一天还没有安排。</p>}
             </section>
           )}

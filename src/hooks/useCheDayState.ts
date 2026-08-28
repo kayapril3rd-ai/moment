@@ -308,7 +308,7 @@ function getCompletedChatMomentText(card: SceneCard) {
     case 'watch':
       return '你们看完一段，也顺手聊了几句剧情。';
     case 'deep_room':
-      return 'Deep Room 里那段话被好好收住了。';
+      return '安静聊聊里的那段话被好好收住了。';
     default:
       return `你们完成了${card.title}，也聊了几句。`;
   }

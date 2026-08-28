@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
-import { privacyActions, relationshipStats, type UserProfile } from '../../data/mockProfile';
-import { UserSoftIcon } from '../icons';
+import { useState } from 'react';
+import { privacyActions, type UserProfile } from '../../data/mockProfile';
+import type { DayRecord, RecentMoment } from '../../types/che';
+import { ArrowRightSoftIcon, CloseSoftIcon, UserSoftIcon } from '../icons';
 
 type MineSheetType = 'preferences' | 'relationship' | 'memory' | 'privacy';
 
 interface MinePageProps {
   userProfile: UserProfile;
   memoryItems: string[];
+  dayRecords: DayRecord[];
+  recentMoments: RecentMoment[];
   onUserProfileChange: (profile: UserProfile) => void;
   onMemoryItemsChange: (items: string[]) => void;
 }
@@ -16,14 +19,15 @@ const entryCards: Array<{
   title: string;
   subtitle?: string;
 }> = [
-  { id: 'preferences', title: '我的偏好' },
-  { id: 'relationship', title: '关系记录' },
-  { id: 'memory', title: '记忆管理', subtitle: '查看澈记得的小事' },
-  { id: 'privacy', title: '隐私', subtitle: '数据、记忆与清除入口' },
+  { id: 'preferences', title: '聊天偏好' },
+  { id: 'relationship', title: '一起的记录' },
+  { id: 'memory', title: '澈记得的事', subtitle: '关于你的细节和小事' },
+  { id: 'privacy', title: '隐私', subtitle: '数据与清除' },
 ];
 
-export function MinePage({ userProfile, memoryItems, onUserProfileChange, onMemoryItemsChange }: MinePageProps) {
+export function MinePage({ userProfile, memoryItems, dayRecords, recentMoments, onUserProfileChange, onMemoryItemsChange }: MinePageProps) {
   const [activeSheet, setActiveSheet] = useState<MineSheetType | null>(null);
+  const relationshipSummary = deriveRelationshipSummary(dayRecords, recentMoments);
 
   return (
     <div className="tab-page mine-page">
@@ -44,9 +48,9 @@ export function MinePage({ userProfile, memoryItems, onUserProfileChange, onMemo
           >
             <span className="mine-entry-head">
               <strong>{card.title}</strong>
-              <span aria-hidden="true">&gt;</span>
+              <ArrowRightSoftIcon size={18} aria-hidden="true" />
             </span>
-            {card.id === 'relationship' ? <RelationshipStats /> : card.subtitle ? <small>{card.subtitle}</small> : null}
+            {card.id === 'relationship' ? <RelationshipStats summary={relationshipSummary} /> : card.subtitle ? <small>{card.subtitle}</small> : null}
           </button>
         ))}
       </section>
@@ -56,6 +60,8 @@ export function MinePage({ userProfile, memoryItems, onUserProfileChange, onMemo
           type={activeSheet}
           userProfile={userProfile}
           memoryItems={memoryItems}
+          dayRecords={dayRecords}
+          recentMoments={recentMoments}
           onUserProfileChange={onUserProfileChange}
           onMemoryItemsChange={onMemoryItemsChange}
           onClose={() => setActiveSheet(null)}
@@ -65,20 +71,22 @@ export function MinePage({ userProfile, memoryItems, onUserProfileChange, onMemo
   );
 }
 
-function RelationshipStats() {
+function RelationshipStats({ summary }: { summary: RelationshipSummary }) {
+  if (summary.recordedDays === 0) return <small className="mine-empty-summary">暂无记录</small>;
+
   return (
-    <div className="mine-stat-row" aria-label="关系记录">
+    <div className="mine-stat-row" aria-label="一起的记录">
       <span>
-        <small>已相伴</small>
-        <strong>{relationshipStats.companionDays}<em>天</em></strong>
+        <small>有记录的日子</small>
+        <strong>{summary.recordedDays}<em>天</em></strong>
       </span>
       <span>
-        <small>深聊</small>
-        <strong>{relationshipStats.deepChatCount}<em>次</em></strong>
+        <small>安静聊聊</small>
+        <strong>{summary.quietTalkCount}<em>次</em></strong>
       </span>
       <span>
         <small>一起完成</small>
-        <strong>{relationshipStats.completedTogetherCount}<em>件小事</em></strong>
+        <strong>{summary.completedTogetherCount}<em>件</em></strong>
       </span>
     </div>
   );
@@ -88,6 +96,8 @@ function MineDetailSheet({
   type,
   userProfile,
   memoryItems,
+  dayRecords,
+  recentMoments,
   onUserProfileChange,
   onMemoryItemsChange,
   onClose,
@@ -99,13 +109,15 @@ function MineDetailSheet({
       <section className="mine-modal" role="dialog" aria-modal="true" aria-labelledby="mine-sheet-title" onClick={(event) => event.stopPropagation()}>
         <header className="mine-modal-header">
           <h2 id="mine-sheet-title">{title}</h2>
-          <button className="mine-modal-close" type="button" aria-label="关闭" onClick={onClose}>×</button>
+          <button className="mine-modal-close" type="button" aria-label="关闭" onClick={onClose}>
+            <CloseSoftIcon size={20} aria-hidden="true" />
+          </button>
         </header>
         <div className="mine-sheet-content">
           {type === 'preferences' ? (
             <PreferencesForm userProfile={userProfile} onSave={onUserProfileChange} onClose={onClose} />
           ) : null}
-          {type === 'relationship' ? <RelationshipDetail /> : null}
+          {type === 'relationship' ? <RelationshipDetail summary={deriveRelationshipSummary(dayRecords, recentMoments)} /> : null}
           {type === 'memory' ? <MemoryManager memoryItems={memoryItems} onChange={onMemoryItemsChange} /> : null}
           {type === 'privacy' ? <PrivacyPanel /> : null}
         </div>
@@ -116,10 +128,6 @@ function MineDetailSheet({
 
 function PreferencesForm({ userProfile, onSave, onClose }: { userProfile: UserProfile; onSave: (profile: UserProfile) => void; onClose: () => void }) {
   const [form, setForm] = useState(userProfile);
-
-  useEffect(() => {
-    setForm(userProfile);
-  }, [userProfile]);
 
   const updateField = (key: keyof UserProfile['preferences'], value: string) => {
     setForm((current) => ({
@@ -140,7 +148,6 @@ function PreferencesForm({ userProfile, onSave, onClose }: { userProfile: UserPr
           nickname: form.nickname.trim() || userProfile.nickname,
           preferences: {
             companionStyle: form.preferences.companionStyle.trim(),
-            commonScenes: form.preferences.commonScenes.trim(),
             chatPace: form.preferences.chatPace.trim(),
             dislikes: form.preferences.dislikes.trim(),
           },
@@ -149,23 +156,19 @@ function PreferencesForm({ userProfile, onSave, onClose }: { userProfile: UserPr
       }}
     >
       <label>
-        <span className="setting-label">你希望澈如何称呼你</span>
+        <span className="setting-label">澈怎么称呼我</span>
         <input className="setting-input" value={form.nickname} onChange={(event) => setForm((current) => ({ ...current, nickname: event.target.value }))} />
       </label>
       <label>
-        <span className="setting-label">喜欢的陪伴方式</span>
+        <span className="setting-label">希望怎么回应我</span>
         <input className="setting-input" value={form.preferences.companionStyle} onChange={(event) => updateField('companionStyle', event.target.value)} />
-      </label>
-      <label>
-        <span className="setting-label">常用场景</span>
-        <input className="setting-input" value={form.preferences.commonScenes} onChange={(event) => updateField('commonScenes', event.target.value)} />
       </label>
       <label>
         <span className="setting-label">聊天节奏</span>
         <input className="setting-input" value={form.preferences.chatPace} onChange={(event) => updateField('chatPace', event.target.value)} />
       </label>
       <label>
-        <span className="setting-label">不喜欢</span>
+        <span className="setting-label">希望避免</span>
         <input className="setting-input" value={form.preferences.dislikes} onChange={(event) => updateField('dislikes', event.target.value)} />
       </label>
       <button className="mine-sheet-action" type="submit">保存偏好</button>
@@ -173,21 +176,16 @@ function PreferencesForm({ userProfile, onSave, onClose }: { userProfile: UserPr
   );
 }
 
-function RelationshipDetail() {
+function RelationshipDetail({ summary }: { summary: RelationshipSummary }) {
+  if (summary.recordedDays === 0) return <p className="mine-empty-state">暂无记录</p>;
+
   return (
     <div className="mine-detail-list">
-      <ReadOnlyField label="已相伴" value={`${relationshipStats.companionDays} 天`} />
-      <ReadOnlyField label="深聊" value={`${relationshipStats.deepChatCount} 次`} />
-      <ReadOnlyField label="一起完成" value={`${relationshipStats.completedTogetherCount} 件小事`} />
-      <ReadOnlyField label="最近一次陪伴" value={relationshipStats.recentCompanion} />
-      <ReadOnlyField label="最近一次深聊" value={relationshipStats.recentDeepChat} />
-      <div className="setting-field setting-sync-field">
-        <div>
-          <div className="setting-label">同步状态</div>
-          <div className="setting-value">尚未同步</div>
-        </div>
-        <button className="mine-light-action" type="button">重新同步</button>
-      </div>
+      <ReadOnlyField label="有记录的日子" value={`${summary.recordedDays} 天`} />
+      <ReadOnlyField label="安静聊聊" value={`${summary.quietTalkCount} 次`} />
+      <ReadOnlyField label="一起完成" value={`${summary.completedTogetherCount} 件`} />
+      <ReadOnlyField label="最近一起" value={summary.recentTogether ?? '暂无记录'} />
+      {summary.recentMoment ? <ReadOnlyField label="最近片段" value={summary.recentMoment} /> : null}
     </div>
   );
 }
@@ -250,9 +248,20 @@ function MemoryManager({ memoryItems, onChange }: { memoryItems: string[]; onCha
 
   return (
     <div className="mine-memory-editor">
+      <div className="mine-memory-intro">
+        <p>这些是澈会带进之后聊天里的事实。</p>
+      </div>
+      {memoryItems.length === 0 ? (
+        <div className="mine-memory-empty">
+          <strong>还没有记住什么。</strong>
+          <p>你可以先告诉澈一件希望他别忘的事。</p>
+        </div>
+      ) : null}
       {memoryItems.map((item, index) => (
         <div className={`memory-card${editingIndex === index ? ' is-editing' : ''}`} key={`${item}-${index}`}>
-          <button className="memory-delete" type="button" aria-label="删除记忆" onClick={() => setDeleteIndex(index)}>×</button>
+          <button className="memory-delete" type="button" aria-label="删除记忆" onClick={() => setDeleteIndex(index)}>
+            <CloseSoftIcon size={18} aria-hidden="true" />
+          </button>
           {editingIndex === index ? (
             <textarea className="memory-input" value={editingDraft} aria-label={`编辑记忆 ${index + 1}`} onChange={(event) => setEditingDraft(event.target.value)} />
           ) : (
@@ -277,7 +286,7 @@ function MemoryManager({ memoryItems, onChange }: { memoryItems: string[]; onCha
       {error ? <p className="memory-error">{error}</p> : null}
       <div className="setting-field mine-memory-add memory-add-card">
         <label className="setting-label" htmlFor="new-memory">新增一条记忆</label>
-        <input id="new-memory" className="setting-input" placeholder="写一件澈需要记住的小事" value={draft} onChange={(event) => setDraft(event.target.value)} />
+        <input id="new-memory" className="setting-input" placeholder="例如：我养了一只叫……的狗" value={draft} onChange={(event) => setDraft(event.target.value)} />
         <button className="mine-sheet-action" type="button" onClick={addItem}>新增记忆</button>
       </div>
     </div>
@@ -285,26 +294,53 @@ function MemoryManager({ memoryItems, onChange }: { memoryItems: string[]; onCha
 }
 
 function PrivacyPanel() {
-  const [confirmText, setConfirmText] = useState('');
-
   return (
     <div className="mine-privacy-actions">
-      {privacyActions.map((item, index) => (
+      {privacyActions.map((item) => (
         <div className="setting-field action-row" key={item}>
           <div>
             <div className="setting-label">{item}</div>
-            <div className="setting-value">点击后先确认</div>
+            <div className="setting-value">暂未开放</div>
           </div>
           <button
-            className={index < 2 ? 'is-warm-danger' : ''}
             type="button"
-            onClick={() => setConfirmText(`${item} 只是预留入口，本轮不会真的执行。`)}
+            disabled
           >
-            操作
+            暂未开放
           </button>
         </div>
       ))}
-      {confirmText ? <p className="mine-privacy-confirm">{confirmText}</p> : null}
     </div>
   );
+}
+
+interface RelationshipSummary {
+  recordedDays: number;
+  quietTalkCount: number;
+  completedTogetherCount: number;
+  recentTogether: string | null;
+  recentMoment: string | null;
+}
+
+function deriveRelationshipSummary(dayRecords: DayRecord[], recentMoments: RecentMoment[]): RelationshipSummary {
+  const activityRecords = dayRecords.filter((record) => record.kind === 'activity');
+  const completedTogether = activityRecords.filter(
+    (record) => record.owner !== 'che' && record.sceneType !== 'deep_room' && record.status === 'completed',
+  );
+  const recentTogether = [...completedTogether].sort((a, b) => getRecordTimestamp(b) - getRecordTimestamp(a))[0];
+  const recentMoment = [...recentMoments].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )[0];
+
+  return {
+    recordedDays: new Set(dayRecords.map((record) => record.dateKey)).size,
+    quietTalkCount: activityRecords.filter((record) => record.sceneType === 'deep_room').length,
+    completedTogetherCount: completedTogether.length,
+    recentTogether: recentTogether?.title ?? null,
+    recentMoment: recentMoment?.text ?? null,
+  };
+}
+
+function getRecordTimestamp(record: DayRecord): number {
+  return new Date(`${record.dateKey}T${record.endedAt ?? record.startedAt ?? '00:00'}`).getTime() || 0;
 }

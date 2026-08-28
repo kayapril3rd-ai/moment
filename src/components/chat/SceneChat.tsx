@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CheCurrentState, SceneData } from '../../types/che';
 import { useSceneChatMessages } from '../../hooks/useSceneChatMessages';
-import { ChatIcon } from '../icons';
+import { ChatSoftIcon } from '../icons';
 import { ChatPanel } from './ChatPanel';
 import { SceneVisual } from './SceneVisual';
 
@@ -53,7 +53,7 @@ export function SceneChat({ scene, cheCurrentState, activeStartedAt, onBack, onE
         {!isChatOpen ? (
           <div className="chat-launcher">
             <button className="chat-launcher-button" type="button" aria-label="打开聊天" onClick={() => setIsChatOpen(true)}>
-              <ChatIcon size={29} aria-hidden="true" />
+              <ChatSoftIcon size={28} aria-hidden="true" />
             </button>
           </div>
         ) : (

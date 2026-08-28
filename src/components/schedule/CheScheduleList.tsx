@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react';
 import type { CheScheduleItem } from '../../types/che';
-import { ChatSoftIcon, ClockSoftIcon, SproutIcon, TodayBubbleIcon } from '../icons';
 import { getWorldSceneImage } from '../../utils/sceneImages';
 
 interface CheScheduleListProps {
@@ -9,7 +8,7 @@ interface CheScheduleListProps {
 
 export function CheScheduleList({ schedule }: CheScheduleListProps) {
   return (
-    <div className="che-scene-list" aria-label="澈的今日安排">
+    <div className="che-scene-list" aria-label="澈的安排">
       {schedule.map((item) => {
         const image = getWorldSceneImage(item.worldScene, item.sceneType);
         const action = item.actionLabel?.trim();
@@ -24,9 +23,6 @@ export function CheScheduleList({ schedule }: CheScheduleListProps) {
             <img className="scene-card-image" src={item.cardImage ?? image.arrangeSrc} alt="" />
             <span className="scene-card-overlay" aria-hidden="true" />
             <div className="che-scene-content">
-              <span className="che-scene-icon" aria-hidden="true">
-                <CheIcon icon={item.iconKey ?? item.sceneType ?? ''} />
-              </span>
               <span className="che-scene-copy">
                 <small>{item.timeLabel || item.startTime}</small>
                 <strong>{item.title}</strong>
@@ -48,11 +44,4 @@ export function CheScheduleList({ schedule }: CheScheduleListProps) {
 
 function getStatusText(item: CheScheduleItem): string {
   return item.status === 'completed' ? '已完成' : '';
-}
-
-function CheIcon({ icon }: { icon: string }) {
-  if (icon === 'sun' || icon === 'study') return <ClockSoftIcon size={26} />;
-  if (icon === 'coffee') return <TodayBubbleIcon size={26} />;
-  if (icon === 'walk') return <SproutIcon size={26} />;
-  return <ChatSoftIcon size={26} />;
 }

@@ -108,7 +108,7 @@ Acceptance criteria:
 - reply examples follow the conversation system
 - 澈 may share his own state when appropriate
 
-## Phase 5: Deep Room
+## Phase 5: 安静聊聊
 Implement explicit deep-chat entry.
 
 Entry labels:

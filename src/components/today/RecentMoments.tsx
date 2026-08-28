@@ -2,6 +2,7 @@
 // Edit the actual copy in src/data/mockMoments.ts.
 import type { RecentMoment } from '../../types/che';
 import { formatMomentTime } from '../../utils/date';
+import { ArrowRightSoftIcon } from '../icons';
 
 interface RecentMomentsProps {
   title: string;
@@ -16,7 +17,10 @@ export function RecentMoments({ title, archiveLabel, moments, now, onOpenMoments
     <section className="moments-section" aria-labelledby="moments-title">
       <div className="section-heading section-heading-inline">
         <h2 id="moments-title">{title}</h2>
-        <button className="text-link-button" type="button" onClick={onOpenMoments}>{archiveLabel}</button>
+        <button className="text-link-button" type="button" onClick={onOpenMoments}>
+          <span>{archiveLabel}</span>
+          <ArrowRightSoftIcon size={16} aria-hidden="true" />
+        </button>
       </div>
 
       <div className="moment-list">

@@ -51,8 +51,9 @@ There is no chat tab. Chat is entered from a scene.
 ```text
 我的
   ├─ 澈的角色设定简介
-  ├─ 我的偏好
-  ├─ 记忆管理
+  ├─ 聊天偏好
+  ├─ 一起的记录
+  ├─ 澈记得的事
   └─ 隐私与删除记录
 ```
 

@@ -170,7 +170,7 @@ export const sceneRegistry = {
   },
   deep_room: {
     id: 'deep_room',
-    title: 'Deep Room',
+    title: '安静聊聊',
     shortTitle: '安静聊聊',
     conversationMode: 'deep',
     entryLabel: '安静聊聊',

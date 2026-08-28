@@ -1,4 +1,4 @@
-// QuietChatEntry is the low-pressure Deep Room entrance below the hero.
+// QuietChatEntry is the low-pressure quiet-chat entrance below the hero.
 // It should feel like "come sit for a while", not a therapy or tool module.
 import { ArrowRightSoftIcon } from '../icons';
 
@@ -17,7 +17,6 @@ export function QuietChatEntry({ onOpen }: QuietChatEntryProps) {
       <span className="quiet-copy">
         <span className="quiet-title-row">
           <strong>安静聊聊</strong>
-          <small>Deep Room</small>
         </span>
         <em>如果今天有点满，可以来这里慢慢说。</em>
       </span>

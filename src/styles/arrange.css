@@ -2438,3 +2438,396 @@ body {
   height: 25px;
   object-fit: contain;
 }
+
+/* Pre-Dify UI pass: truthful hierarchy, shared controls, and stable mobile layout. */
+.main-scroll-content {
+  padding-bottom: calc(var(--bottom-bar-height) + var(--bottom-bar-offset) + 24px + env(safe-area-inset-bottom)) !important;
+  scroll-padding-bottom: calc(var(--bottom-bar-height) + var(--bottom-bar-offset) + 24px + env(safe-area-inset-bottom));
+}
+
+.app-top-bar {
+  gap: 0;
+}
+
+.hero-card .hero-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-color: var(--line-hero-action);
+  background: var(--surface-hero-action);
+  color: var(--text-hero-action);
+  box-shadow: 0 10px 26px rgba(31, 48, 43, 0.14);
+  line-height: 1;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-card .hero-action::after {
+  content: none;
+}
+
+.hero-card .hero-action svg,
+.drawer-close svg,
+.mine-modal-close svg,
+.echo-modal header button svg,
+.scene-back-button svg,
+.chat-launcher-button svg,
+.chat-input-row button svg,
+.bottom-nav-icon svg,
+.page-title-icon,
+.schedule-title-icon {
+  display: block;
+}
+
+.drawer-close,
+.mine-modal-close,
+.echo-modal header button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: var(--bg-soft);
+  color: var(--primary-dark);
+  line-height: 0;
+}
+
+.drawer-handle,
+.chat-panel-handle {
+  width: 44px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(47, 81, 71, 0.2);
+}
+
+.day-overview-content,
+.mine-modal,
+.chat-message-list {
+  scrollbar-width: none;
+}
+
+.day-overview-content::-webkit-scrollbar,
+.mine-modal::-webkit-scrollbar,
+.chat-message-list::-webkit-scrollbar {
+  display: none;
+}
+
+.day-overview-content {
+  padding-bottom: calc(36px + env(safe-area-inset-bottom));
+}
+
+.che-day-row {
+  grid-template-columns: 104px minmax(0, 1fr);
+  column-gap: 14px;
+}
+
+.user-day-row {
+  grid-template-columns: 20px 92px minmax(0, 1fr);
+  column-gap: 10px;
+}
+
+.day-time-anchor {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.che-day-row > div,
+.user-day-row-copy {
+  min-width: 0;
+}
+
+.day-overview-manage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.text-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.schedule-brand,
+.page-title-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-lockup .header-line-icon,
+.page-title-icon,
+.schedule-title-icon {
+  width: 40px !important;
+  height: 40px !important;
+  padding: 8px;
+  border-radius: 13px;
+}
+
+.arrange-compact-page .schedule-brand h1,
+.mine-page-header h1 {
+  margin: 0 !important;
+  font-size: 28px !important;
+  font-weight: 680;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.arrange-compact-page .schedule-header,
+.mine-page-header {
+  min-height: 40px;
+  height: auto !important;
+  margin-bottom: 28px !important;
+}
+
+.arrange-compact-page .my-plan-card {
+  grid-template-columns: 36px minmax(0, 1fr) 72px !important;
+  grid-template-rows: auto !important;
+  gap: 12px !important;
+  min-height: 88px !important;
+  padding: 13px 14px !important;
+  align-items: center !important;
+}
+
+.arrange-compact-page .my-plan-icon {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.arrange-compact-page .my-plan-main {
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.my-plan-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 4px;
+  color: var(--text-soft);
+}
+
+.my-plan-meta time {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrange-compact-page .my-plan-duration {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 3px;
+  margin: 0 !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+}
+
+.arrange-compact-page .my-plan-title {
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+}
+
+.arrange-compact-page .my-plan-desc {
+  display: -webkit-box !important;
+  margin-top: 3px !important;
+  overflow: hidden !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.arrange-compact-page .my-plan-action {
+  width: 72px !important;
+  min-width: 72px !important;
+  height: 38px !important;
+  padding: 0 8px !important;
+  font-size: 13px !important;
+}
+
+.arrange-compact-page .che-arrange-panel {
+  margin-top: 0 !important;
+}
+
+.arrange-page .che-scene-list {
+  gap: 12px;
+}
+
+.arrange-page .che-scene-card {
+  height: 112px !important;
+  border-radius: 22px;
+}
+
+.arrange-page .scene-card-overlay {
+  background: linear-gradient(90deg, rgba(22, 34, 29, 0.78) 0%, rgba(22, 34, 29, 0.52) 52%, rgba(22, 34, 29, 0.12) 100%);
+}
+
+.arrange-page .che-scene-content {
+  display: block;
+  width: min(72%, 270px);
+  padding: 14px 16px;
+}
+
+.arrange-page .che-scene-copy {
+  display: grid;
+  align-content: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.arrange-page .che-scene-copy small {
+  color: rgba(255, 252, 247, 0.78);
+  font-size: 12px;
+}
+
+.arrange-page .che-scene-copy strong {
+  margin-top: 3px;
+  color: #fffaf2;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.arrange-page .che-scene-copy p {
+  overflow: hidden;
+  margin: 4px 0 0;
+  color: rgba(255, 252, 247, 0.82);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrange-page .che-scene-copy em.che-status-available {
+  width: fit-content;
+  margin-top: 5px;
+  padding: 0;
+  background: transparent;
+  color: rgba(255, 252, 247, 0.82);
+  font-size: 11px;
+  font-style: normal;
+}
+
+.mine-empty-summary,
+.mine-empty-state,
+.mine-memory-intro p,
+.mine-memory-empty p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mine-memory-intro,
+.mine-memory-empty {
+  padding: 14px 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: rgba(255, 252, 247, 0.62);
+}
+
+.mine-memory-empty strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.mine-privacy-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.memory-delete {
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+.chat-panel,
+.chat-frame:has(.scene-visual[data-scene="deep_room"]) .chat-panel {
+  border-top-color: rgba(255, 255, 255, 0.24);
+  background: rgba(246, 245, 242, 0.32);
+  box-shadow: 0 -14px 36px rgba(31, 48, 43, 0.09);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.scene-back-button,
+.chat-launcher-button,
+.chat-input-row button {
+  padding: 0;
+  line-height: 0;
+}
+
+.scene-back-button {
+  width: 44px;
+  height: 44px;
+}
+
+.scene-chat-header {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+}
+
+.scene-chat-header > span {
+  font-size: 18px;
+}
+
+.scene-end-button {
+  min-width: 52px;
+  height: 36px;
+  padding: 0 12px;
+  font-weight: 600;
+}
+
+.chat-launcher-button {
+  width: 64px;
+  height: 64px;
+}
+
+.chat-input-row button {
+  width: 42px;
+  height: 42px;
+}
+
+.bottom-nav-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  line-height: 0;
+}
+
+@media (max-width: 374px) {
+  .che-day-row {
+    grid-template-columns: 100px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  .user-day-row {
+    grid-template-columns: 18px 76px minmax(0, 1fr);
+    column-gap: 8px;
+  }
+
+  .arrange-compact-page .my-plan-card {
+    grid-template-columns: 34px minmax(0, 1fr) 66px !important;
+    gap: 9px !important;
+    min-height: 86px !important;
+    padding: 12px !important;
+  }
+
+  .arrange-compact-page .my-plan-action {
+    width: 66px !important;
+    min-width: 66px !important;
+    font-size: 12px !important;
+  }
+}

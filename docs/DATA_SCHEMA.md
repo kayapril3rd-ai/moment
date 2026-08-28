@@ -244,6 +244,18 @@ Example:
 }
 ```
 
+## `UserProfile` and manual memory
+
+`UserProfile.preferences` describes how the user wants 澈 to respond. It contains
+only `companionStyle`, `chatPace`, and `dislikes`; old stored fields outside this
+shape are ignored when localStorage is parsed.
+
+Manual `memoryItems` are a separate `string[]` containing facts about the user that
+may be useful in later conversations. Response preferences such as “少追问” or
+“不要油腻” belong in `UserProfile.preferences`, not in memory. Memory remains a
+manual local add/edit/delete feature in this phase; no automatic extraction or
+remote synchronization is implied.
+
 ## `RecentMoment`
 Represents a visible memory fragment. It shows relationship growth without exposing levels.
 

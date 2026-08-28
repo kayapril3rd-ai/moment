@@ -1,6 +1,7 @@
 // CompanionshipDrawer 负责「今日相伴」的只读事件列表。
 // 它展示有效陪伴事件，不展示 App 打开时长或数据面板。
 import type { DayRecord, SceneCard } from '../../types/che';
+import { CloseSoftIcon } from '../icons';
 
 interface CompanionshipDrawerProps {
   isOpen: boolean;
@@ -34,7 +35,9 @@ export function CompanionshipDrawer({
           <div>
             <h2 id="companionship-title">今日相伴</h2>
           </div>
-          <button className="drawer-close" type="button" aria-label="关闭" onClick={onClose}>×</button>
+          <button className="drawer-close" type="button" aria-label="关闭" onClick={onClose}>
+            <CloseSoftIcon size={20} aria-hidden="true" />
+          </button>
         </div>
 
         <div className="day-overview-content">

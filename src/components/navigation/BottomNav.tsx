@@ -1,9 +1,7 @@
 // BottomNav keeps the MVP to three main entrances: Today, Arrange, Mine.
 // Icons use the local Che vector system so the app avoids mixed icon styles.
-import type { ReactElement } from 'react';
-import { ArrangeIcon, MineIcon, TodayIcon, type IconProps } from '../icons';
-
-const todayNavIconUrl = new URL('../../assets/today-nav-bubble.png', import.meta.url).href;
+import type { ReactElement, SVGProps } from 'react';
+import { CalendarSoftIcon, TodayBubbleIcon, UserSoftIcon } from '../icons';
 
 export type MainTab = 'today' | 'arrange' | 'mine';
 
@@ -13,10 +11,10 @@ interface BottomNavProps {
 }
 
 const tabs = [
-  { id: 'today', label: '今天', Icon: TodayIcon },
-  { id: 'arrange', label: '安排', Icon: ArrangeIcon },
-  { id: 'mine', label: '我的', Icon: MineIcon },
-] satisfies Array<{ id: MainTab; label: string; Icon: (props: IconProps) => ReactElement }>;
+  { id: 'today', label: '今天', Icon: TodayBubbleIcon },
+  { id: 'arrange', label: '安排', Icon: CalendarSoftIcon },
+  { id: 'mine', label: '我的', Icon: UserSoftIcon },
+] satisfies Array<{ id: MainTab; label: string; Icon: (props: SVGProps<SVGSVGElement> & { size?: number }) => ReactElement }>;
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
@@ -30,7 +28,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           aria-current={activeTab === id ? 'page' : undefined}
         >
           <span className="bottom-nav-icon" aria-hidden="true">
-            {id === 'today' ? <img className="bottom-nav-image-icon" src={todayNavIconUrl} alt="" /> : <Icon size={23} />}
+            <Icon size={24} />
           </span>
           <span>{label}</span>
         </button>

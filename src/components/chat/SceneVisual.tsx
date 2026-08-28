@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { SceneData } from '../../types/che';
 import { getSceneImage } from '../../utils/sceneImages';
 import { getSceneStatus } from '../../utils/sceneStatus';
-import { BackIcon } from '../icons';
+import { BackSoftIcon } from '../icons';
 
 interface SceneVisualProps {
   scene: SceneData;
@@ -36,7 +36,7 @@ export function SceneVisual({ scene, activeStartedAt, onBack, onEndActivity }: S
     >
       <header className="scene-chat-header">
         <button className="scene-back-button" type="button" onClick={onBack} aria-label="返回">
-          <BackIcon size={25} aria-hidden="true" />
+          <BackSoftIcon size={22} aria-hidden="true" />
         </button>
         <span id="scene-chat-title">{getSceneStatus(scene, activeStartedAt, now)}</span>
         <button className="scene-end-button" type="button" onClick={onEndActivity ?? onBack}>

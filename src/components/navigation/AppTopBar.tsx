@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CheNotification } from '../../types/che';
-import { BellIcon, CalendarSoftIcon, UserSoftIcon } from '../icons';
+import { BellSoftIcon, CloseSoftIcon } from '../icons';
 
 const headerLogoUrl = new URL('../../../场景图/logo.png', import.meta.url).href;
 
 interface AppTopBarProps {
-  greeting?: string;
-  subtitle?: string;
-  description?: string;
   title?: string;
-  iconType?: 'logo' | 'calendar' | 'user';
   notifications?: CheNotification[];
   showNotification?: boolean;
 }
@@ -24,11 +20,7 @@ function formatEchoContent(content: string) {
 }
 
 export function AppTopBar({
-  greeting,
-  subtitle,
-  description,
   title = '此刻',
-  iconType = 'logo',
   notifications = [],
   showNotification = false,
 }: AppTopBarProps) {
@@ -51,7 +43,9 @@ export function AppTopBar({
                 <h2 className="echo-title">回响</h2>
                 <p className="echo-subtitle">澈留给你的几句话</p>
               </div>
-              <button type="button" aria-label="关闭回响" onClick={toggleEcho}>×</button>
+              <button type="button" aria-label="关闭回响" onClick={toggleEcho}>
+                <CloseSoftIcon size={20} aria-hidden="true" />
+              </button>
             </header>
             <div className="echo-list">
               {notifications.length > 0 ? notifications.map((item) => <p className="echo-item" key={item.id}>{formatEchoContent(item.content)}</p>) : <p className="echo-item">暂时没有新消息。</p>}
@@ -66,33 +60,17 @@ export function AppTopBar({
     <header className="app-top-bar">
       <div className="brand-row">
         <span className="brand-lockup">
-          <HeaderIcon type={iconType} />
+          <img className="header-logo-image" src={headerLogoUrl} alt="" aria-hidden="true" />
           <strong>{title}</strong>
         </span>
         {showNotification ? (
           <button className={`notification-button${hasUnread ? ' has-unread' : ''}`} type="button" aria-label="回响" onClick={toggleEcho}>
-            <BellIcon size={26} aria-hidden="true" />
+            <BellSoftIcon size={24} aria-hidden="true" />
           </button>
         ) : null}
       </div>
       {echoModal}
 
-      {greeting || subtitle || description ? (
-        <div className="top-greeting">
-          {greeting ? (
-            <p>{greeting}</p>
-          ) : null}
-          {subtitle ? <h1>{subtitle}</h1> : null}
-          {description ? <span className="top-greeting-description">{description}</span> : null}
-        </div>
-      ) : null}
     </header>
   );
-}
-
-function HeaderIcon({ type }: { type: 'logo' | 'calendar' | 'user' }) {
-  if (type === 'calendar') return <CalendarSoftIcon className="header-line-icon" size={32} aria-hidden="true" />;
-  if (type === 'user') return <UserSoftIcon className="header-line-icon" size={32} aria-hidden="true" />;
-
-  return <img className="header-logo-image" src={headerLogoUrl} alt="" aria-hidden="true" />;
 }

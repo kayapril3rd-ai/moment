@@ -2,6 +2,7 @@
 // 后续可以扩展为共同活动摘要、轻量聊天摘要和澈记得的小事。
 import type { RecentMoment } from '../../types/che';
 import { formatMomentTime } from '../../utils/date';
+import { BackSoftIcon } from '../icons';
 
 interface TogetherMomentsProps {
   moments: RecentMoment[];
@@ -15,7 +16,7 @@ export function TogetherMoments({ moments, onBack }: TogetherMomentsProps) {
       <div className="phone-frame moments-frame">
         <header className="moments-page-header">
           <button className="scene-back-button moments-back" type="button" onClick={onBack} aria-label="返回 Today">
-            ←
+            <BackSoftIcon size={22} aria-hidden="true" />
           </button>
           <div>
             <p>这些天</p>

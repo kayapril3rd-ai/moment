@@ -34,7 +34,6 @@ function readStoredProfile(): UserProfile {
       nickname: normalizeText(parsed.nickname, defaultUserProfile.nickname),
       preferences: {
         companionStyle: normalizeText(parsed.preferences?.companionStyle, defaultUserProfile.preferences.companionStyle),
-        commonScenes: normalizeText(parsed.preferences?.commonScenes, defaultUserProfile.preferences.commonScenes),
         chatPace: normalizeText(parsed.preferences?.chatPace, defaultUserProfile.preferences.chatPace),
         dislikes: normalizeText(parsed.preferences?.dislikes, defaultUserProfile.preferences.dislikes),
       },

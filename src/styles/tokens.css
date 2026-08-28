@@ -7,6 +7,7 @@
   --surface-strong: rgba(255, 252, 247, 0.94);
   --surface-mist: #eee7de;
   --surface-glass: rgba(255, 252, 247, 0.72);
+  --surface-hero-action: rgba(255, 252, 247, 0.84);
   --text-main: #1f302b;
   --text-soft: #6e7c76;
   --text-faint: #9aa7a1;
@@ -20,6 +21,8 @@
   --warm-light: #efcb78;
   --wood-soft: #a89279;
   --line-soft: rgba(47, 95, 71, 0.14);
+  --line-hero-action: rgba(255, 252, 247, 0.42);
+  --text-hero-action: #355c4a;
   --shadow-soft-color: rgba(49, 72, 63, 0.08);
 
   --color-bg: var(--bg-app);
