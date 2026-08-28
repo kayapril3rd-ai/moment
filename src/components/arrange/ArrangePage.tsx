@@ -48,11 +48,7 @@ export function ArrangePage({
   );
 
   return (
-    <section className="tab-page arrange-page schedule-page arrange-compact-page" aria-labelledby="arrange-title">
-      <header className="schedule-header">
-        <h1 id="arrange-title">安排</h1>
-      </header>
-
+    <section className="tab-page arrange-page schedule-page arrange-compact-page" aria-label="安排">
       <ArrangeDateStrip
         calendarMonthLabel={calendarMonthLabel}
         contentDateKeys={contentDateKeys}

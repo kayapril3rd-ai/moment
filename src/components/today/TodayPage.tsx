@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityDetail } from '../activity/ActivityDetail';
 import { ActivitySetup } from '../activity/ActivitySetup';
 import { ArrangePage } from '../arrange/ArrangePage';
@@ -40,6 +40,7 @@ export function TodayPage({
   onUserProfileChange,
   onMemoryItemsChange,
 }: TodayPageProps) {
+  const mainScrollRef = useRef<HTMLDivElement>(null);
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('today');
   const [dayOverviewType, setDayOverviewType] = useState<'user' | 'che' | null>(null);
   const [isCompanionshipOpen, setIsCompanionshipOpen] = useState(false);
@@ -119,10 +120,14 @@ export function TodayPage({
   };
   const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
 
+  useEffect(() => {
+    mainScrollRef.current?.scrollTo({ top: 0 });
+  }, [activeMainTab]);
+
   return (
     <main className="app-shell" aria-labelledby="app-title">
       <div className="phone-frame">
-        <div className="main-scroll-content">
+        <div className="main-scroll-content" ref={mainScrollRef}>
           <h1 className="sr-only" id="app-title">此刻</h1>
 
           {activeMainTab === 'today' ? (

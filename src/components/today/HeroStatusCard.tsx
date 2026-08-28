@@ -20,7 +20,6 @@ export function HeroStatusCard({ state, onOpenScene }: HeroStatusCardProps) {
         <p className="hero-status-line">{state.location}</p>
         <div className="hero-copy">
           <h2 id="hero-status-title" className="hero-title">{state.activity}</h2>
-          <span className="hero-divider" aria-hidden="true" />
           <p className="hero-detail hero-desc">{state.detail}</p>
         </div>
       </div>

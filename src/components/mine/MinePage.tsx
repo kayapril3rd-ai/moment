@@ -30,15 +30,11 @@ export function MinePage({ userProfile, memoryItems, dayRecords, recentMoments, 
   const relationshipSummary = deriveRelationshipSummary(dayRecords, recentMoments);
 
   return (
-    <div className="tab-page mine-page">
-      <header className="tab-page-header mine-page-header">
-        <h1>我的</h1>
-      </header>
-
-      <section className="mine-entry-stack" aria-label="我的">
+    <div className="tab-page mine-page" aria-label="我的">
+      <section className="mine-entry-group" aria-label="设置与记录">
         {entryCards.map((card) => (
           <button
-            className={`mine-entry-card${card.id === 'relationship' ? ' mine-entry-card-stats' : ''}`}
+            className="mine-entry-row"
             type="button"
             key={card.id}
             onClick={() => setActiveSheet(card.id)}
@@ -71,20 +67,9 @@ function RelationshipStats({ summary }: { summary: RelationshipSummary }) {
   if (summary.recordedDays === 0) return <small className="mine-empty-summary">暂无记录</small>;
 
   return (
-    <div className="mine-stat-row" aria-label="一起的记录">
-      <span>
-        <small>有记录的日子</small>
-        <strong>{summary.recordedDays}<em>天</em></strong>
-      </span>
-      <span>
-        <small>安静聊聊</small>
-        <strong>{summary.quietTalkCount}<em>次</em></strong>
-      </span>
-      <span>
-        <small>一起完成</small>
-        <strong>{summary.completedTogetherCount}<em>件</em></strong>
-      </span>
-    </div>
+    <small className="mine-relationship-summary">
+      {summary.recordedDays} 天 · 安静聊聊 {summary.quietTalkCount} 次 · 一起完成 {summary.completedTogetherCount} 件
+    </small>
   );
 }
 

@@ -26,10 +26,9 @@ export function CheScheduleList({ schedule }: CheScheduleListProps) {
               <span className="che-scene-copy">
                 <small>{item.timeLabel || item.startTime}</small>
                 <strong>{item.title}</strong>
-                <p>{item.detail}</p>
-                {statusText ? <em className="che-status-available">{statusText}</em> : null}
               </span>
             </div>
+            {statusText ? <span className="che-schedule-completed">{statusText}</span> : null}
             {action ? (
               <button className="che-scene-action" type="button">
                 {action}

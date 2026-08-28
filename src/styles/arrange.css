@@ -3220,3 +3220,236 @@ time,
     height: 104px !important;
   }
 }
+
+/* Pre-Dify visual polish follow-up: remove repeated hierarchy and reduce copy weight. */
+.arrange-page.schedule-page {
+  padding-top: 4px !important;
+}
+
+.mine-page {
+  gap: 0 !important;
+  padding-top: 4px;
+}
+
+.mine-entry-group {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 22px;
+  background: rgba(255, 253, 252, 0.88);
+  box-shadow: var(--shadow-subtle);
+}
+
+.mine-entry-row {
+  position: relative;
+  display: grid;
+  align-content: center;
+  width: 100%;
+  min-height: 72px;
+  padding: 14px 18px;
+  border: 0;
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.mine-entry-row + .mine-entry-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 18px;
+  left: 18px;
+  height: 1px;
+  background: var(--line-soft);
+}
+
+.mine-entry-row:hover,
+.mine-entry-row:focus-visible,
+.mine-entry-row:active {
+  background: rgba(230, 238, 232, 0.48);
+}
+
+.mine-entry-row .mine-entry-head {
+  display: block;
+}
+
+.mine-entry-row .mine-entry-head strong {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.mine-entry-row > small,
+.mine-relationship-summary,
+.mine-empty-summary {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.hero-content {
+  top: 20px !important;
+  bottom: 22px !important;
+  display: flex !important;
+  max-width: 58% !important;
+  flex-direction: column;
+  justify-content: flex-end !important;
+}
+
+.hero-status-line {
+  margin-bottom: 18px !important;
+  padding: 6px 11px !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 8px !important;
+  margin-top: 0 !important;
+}
+
+.hero-card .hero-title {
+  max-width: 220px;
+  font-size: clamp(26px, 7vw, 28px) !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+}
+
+.hero-card .hero-desc {
+  display: -webkit-box;
+  max-width: 180px;
+  overflow: hidden;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.hero-card .hero-action {
+  height: 45px !important;
+  min-height: 45px !important;
+  padding: 0 19px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.companion-grid-card h3,
+.summary-card-value {
+  font-size: clamp(19px, 5.4vw, 21px) !important;
+  font-weight: 600 !important;
+}
+
+.day-overview-group h3 {
+  color: var(--green-main);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.day-time-anchor {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.user-day-row-copy p,
+.che-day-row p {
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+.user-day-row-copy small,
+.che-day-row small {
+  font-size: 12.5px;
+  font-weight: 400;
+}
+
+.arrange-page .che-scene-card {
+  height: 100px !important;
+}
+
+.arrange-page .che-scene-card > .scene-card-image {
+  filter: saturate(0.88) contrast(0.98) brightness(0.95) !important;
+}
+
+.arrange-page .che-scene-card > .scene-card-overlay {
+  background: linear-gradient(28deg, rgba(20, 31, 26, 0.6) 0%, rgba(20, 31, 26, 0.3) 44%, rgba(20, 31, 26, 0.04) 76%);
+}
+
+.arrange-page .che-scene-content {
+  align-items: end !important;
+  width: min(74%, 250px) !important;
+  padding: 16px 18px !important;
+}
+
+.arrange-page .che-scene-copy {
+  display: grid;
+  align-content: end;
+  min-width: 0;
+}
+
+.arrange-page .che-scene-copy small {
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+.arrange-page .che-scene-copy strong {
+  margin-top: 6px !important;
+  font-size: 18.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+}
+
+.che-schedule-completed {
+  position: absolute;
+  top: 10px;
+  right: 11px;
+  z-index: 3;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(24, 36, 30, 0.18);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 374px) {
+  .mine-entry-row {
+    min-height: 68px;
+    padding: 12px 16px;
+  }
+
+  .hero-content {
+    bottom: 64px !important;
+    max-width: 60% !important;
+  }
+
+  .hero-card .hero-title {
+    font-size: 26px !important;
+  }
+
+  .hero-card .hero-action {
+    right: 16px !important;
+    bottom: 16px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 17px !important;
+  }
+
+  .arrange-page .che-scene-card {
+    height: 96px !important;
+  }
+
+  .arrange-page .che-scene-content {
+    padding: 14px 16px !important;
+  }
+}
