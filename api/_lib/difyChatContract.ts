@@ -1,4 +1,4 @@
-import type { ChatRequest, ChatResponse, ChatUserContext } from '../src/types/chat.ts';
+import type { ChatRequest, ChatResponse, ChatUserContext } from '../../src/types/chat';
 
 const MAX_MEMORY_ITEMS = 20;
 const MAX_MEMORY_ITEM_LENGTH = 300;

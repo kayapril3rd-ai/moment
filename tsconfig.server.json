@@ -10,5 +10,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["api/**/*.ts", "server/**/*.ts", "src/types/chat.ts", "src/types/che.ts"]
+  "include": ["api/**/*.ts", "src/types/chat.ts", "src/types/che.ts"]
 }

@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { ChatErrorResponse } from '../src/types/chat.ts';
+import type { ChatErrorResponse } from '../src/types/chat';
 import {
   buildDifyBlockingRequest,
   parseDifyBlockingResponse,
   parseMomentChatRequest,
-} from '../server/difyChatContract.ts';
+} from './_lib/difyChatContract.js';
 
 const DEFAULT_DIFY_API_BASE_URL = 'https://api.dify.ai/v1';
 const UPSTREAM_TIMEOUT_MS = 45_000;

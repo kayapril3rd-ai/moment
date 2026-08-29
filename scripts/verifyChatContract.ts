@@ -7,7 +7,7 @@ import {
   normalizeChatUserContext,
   parseDifyBlockingResponse,
   parseMomentChatRequest,
-} from '../server/difyChatContract.ts';
+} from '../api/_lib/difyChatContract.ts';
 import type { ChatRequest } from '../src/types/chat.ts';
 import {
   getChatStorageKeys,
@@ -210,6 +210,12 @@ else process.env.DIFY_API_KEY = previousApiKey;
 const clientSource = await readFile(new URL('../src/services/chatClient.ts', import.meta.url), 'utf8');
 assert.equal(clientSource.includes('DIFY_API_KEY'), false);
 
+const apiSource = await readFile(new URL('../api/chat.ts', import.meta.url), 'utf8');
+assert.equal(apiSource.includes("from './_lib/difyChatContract.js'"), true);
+assert.equal(apiSource.includes('../server/'), false);
+assert.equal(/from\s+['"][^'"]+\.ts['"]/.test(apiSource), false);
+await assert.rejects(readFile(new URL('../server/difyChatContract.ts', import.meta.url), 'utf8'));
+
 console.log(JSON.stringify({
   stableUserId: firstUserId,
   storageKeys,
@@ -227,4 +233,5 @@ console.log(JSON.stringify({
     upstream: upstreamFailureResponse.statusCode,
   },
   serverSuccess: successResponse.body,
+  deploymentImport: './_lib/difyChatContract.js',
 }, null, 2));
