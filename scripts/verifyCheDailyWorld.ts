@@ -7,7 +7,7 @@ import { buildChatRuntimeContext } from '../src/utils/agentSceneContext.ts';
 import { createCheScheduleItemFromPlan, createSharedSceneFromPlan, createUserPlanFromInput, restoreCheScheduleItemFromPlan } from '../src/utils/plan.ts';
 import { completeCheScheduleForActivity, syncCheScheduleForActive } from '../src/utils/activityState.ts';
 import { mockSceneCards, sceneRegistry } from '../src/data/mockScenes.ts';
-import type { SceneCard, UserPlan } from '../src/types/che.ts';
+import type { CheScheduleItem, SceneCard, UserPlan } from '../src/types/che.ts';
 
 const weekdayKey = '2026-08-27';
 const weekendKey = '2026-08-29';
@@ -114,6 +114,33 @@ for (const [name, visual] of [['park', parkVisual], ['seaside', seasideVisual], 
   assert.notEqual(visual.heroImage, idleVisual.heroImage, `${name} hero visual must not use idle/sofa`);
   assert.notEqual(visual.arrangeSrc, idleVisual.arrangeSrc, `${name} schedule visual must not use idle/sofa`);
 }
+
+const seasideWorldOnlyItem: CheScheduleItem = {
+  id: 'verify-world-only-seaside',
+  dateKey: weekdayKey,
+  title: '在海边散步',
+  startTime: '14:00',
+  endTime: '17:00',
+  timeLabel: '14:00–17:00',
+  type: 'life',
+  source: 'che',
+  sceneType: null,
+  worldScene: { sceneKey: 'hangout', sceneVariant: 'seaside' },
+  linkedPlanId: null,
+  detail: '在海边慢慢走一会儿。',
+};
+const seasideWorldOnlyState = resolveCheCurrentState({
+  now: at(weekdayKey, '15:00'),
+  cheSchedule: [seasideWorldOnlyItem],
+  activeActivityCard: null,
+});
+assert.equal(seasideWorldOnlyState.entrySceneType, 'idle');
+assert.deepEqual(seasideWorldOnlyState.worldScene, { sceneKey: 'hangout', sceneVariant: 'seaside' });
+const seasideWorldOnlyContext = buildChatRuntimeContext(sceneRegistry.idle, seasideWorldOnlyState);
+assert.deepEqual(
+  { sceneKey: seasideWorldOnlyContext.sceneKey, sceneVariant: seasideWorldOnlyContext.sceneVariant },
+  { sceneKey: 'hangout', sceneVariant: 'seaside' },
+);
 
 const moviePlan = requirePlan(createUserPlanFromInput('20:00 看电影', at(weekdayKey, '09:00'), weekdayKey));
 const acceptedMoviePlan: UserPlan = { ...moviePlan, durationMinutes: 90, inviteStatus: 'accepted' };
@@ -297,6 +324,14 @@ console.log(JSON.stringify({
   scheduledCardDoesNotOverrideHero: summarizeState(commuteWithScheduledCard),
   futureScheduleDateKey: futureSchedule[0]?.dateKey,
   worldVisualOverrides: ['park', 'seaside', 'grocery'],
+  worldOnlyHeroEntry: {
+    entrySceneType: seasideWorldOnlyState.entrySceneType,
+    worldScene: seasideWorldOnlyState.worldScene,
+    chatContext: {
+      sceneKey: seasideWorldOnlyContext.sceneKey,
+      sceneVariant: seasideWorldOnlyContext.sceneVariant,
+    },
+  },
   acceptedMovieSchedule: summarizeSchedule(scheduleWithMovie),
   waitingForMovieState: summarizeState(waitingForMovieState),
   activeMovieState: summarizeState(activeMovieState),

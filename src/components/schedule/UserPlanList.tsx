@@ -52,7 +52,7 @@ export function UserPlanList({ plans, selectedDateKey, onAddPlan, onInvite, onSe
         <input
           id="new-plan-input"
           type="text"
-          placeholder="想和澈一起做些什么？"
+          placeholder="今天想做些什么？"
           value={planInput}
           onChange={(event) => {
             setPlanInput(event.target.value);

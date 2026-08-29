@@ -11,7 +11,7 @@ export const todayCopy: TodayCopy = {
   cheOverviewTitle: '澈的状态',
   sharedOverlapLabel: '今晚交汇',
   sceneSectionTitle: '今天可以一起',
-  momentsSectionTitle: '最近的小片段',
+  momentsSectionTitle: '记录摘要',
   momentsArchiveLabel: '更多',
   scheduleBarTitle: '安排',
   scheduleBarSubtitle: '晚点的安排在这里',

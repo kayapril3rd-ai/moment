@@ -15,6 +15,7 @@ import { QuietChatEntry } from './QuietChatEntry';
 import { RecentMoments } from './RecentMoments';
 import { SceneCardList } from './SceneCardList';
 import { todayCopy } from '../../data';
+import type { ArrangeTab } from '../../hooks/useArrangeDateState';
 import type { UserProfile } from '../../data/mockProfile';
 import type { SceneCard, SceneType } from '../../types/che';
 import type { CheDayState } from '../../hooks/useCheDayState';
@@ -42,6 +43,7 @@ export function TodayPage({
 }: TodayPageProps) {
   const mainScrollRef = useRef<HTMLDivElement>(null);
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('today');
+  const [arrangeInitialTab, setArrangeInitialTab] = useState<ArrangeTab>('mine');
   const [dayOverviewType, setDayOverviewType] = useState<'user' | 'che' | null>(null);
   const [isCompanionshipOpen, setIsCompanionshipOpen] = useState(false);
   const [isDeepSummaryOpen, setIsDeepSummaryOpen] = useState(false);
@@ -120,6 +122,16 @@ export function TodayPage({
   };
   const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
 
+  const openCheSchedule = () => {
+    setArrangeInitialTab('che');
+    setActiveMainTab('arrange');
+  };
+
+  const handleMainTabChange = (tab: MainTab) => {
+    if (tab === 'arrange') setArrangeInitialTab('mine');
+    setActiveMainTab(tab);
+  };
+
   useEffect(() => {
     mainScrollRef.current?.scrollTo({ top: 0 });
   }, [activeMainTab]);
@@ -156,12 +168,19 @@ export function TodayPage({
                 onOpenChe={() => setDayOverviewType('che')}
               />
               <SceneCardList title={todayCopy.sceneSectionTitle} cards={sceneCards} onSelectScene={handleSceneCardSelect} />
-              <RecentMoments title={todayCopy.momentsSectionTitle} archiveLabel={todayCopy.momentsArchiveLabel} moments={recentMoments} now={now} onOpenMoments={() => setActiveMainTab('arrange')} />
+              <RecentMoments
+                title={todayCopy.momentsSectionTitle}
+                archiveLabel={todayCopy.momentsArchiveLabel}
+                moments={recentMoments}
+                now={now}
+                onOpenArchive={onOpenMoments}
+                onOpenCheSchedule={openCheSchedule}
+              />
             </>
           ) : null}
 
           {activeMainTab === 'arrange' ? (
-            <ArrangePage userPlans={userPlans} getCheScheduleForDate={getCheScheduleForDate} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={(plan) => setSelectedPlanId(plan.id)} />
+            <ArrangePage initialTab={arrangeInitialTab} userPlans={userPlans} getCheScheduleForDate={getCheScheduleForDate} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={(plan) => setSelectedPlanId(plan.id)} />
           ) : null}
 
           {activeMainTab === 'mine' ? (
@@ -177,7 +196,7 @@ export function TodayPage({
         </div>
 
         <div className="bottom-fixed-area">
-          <BottomNav activeTab={activeMainTab} onTabChange={setActiveMainTab} />
+          <BottomNav activeTab={activeMainTab} onTabChange={handleMainTabChange} />
         </div>
 
         <CompanionshipDrawer

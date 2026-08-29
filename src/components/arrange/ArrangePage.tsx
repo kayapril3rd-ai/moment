@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { CheScheduleItem, DayRecord, UserPlan } from '../../types/che';
-import { useArrangeDateState } from '../../hooks/useArrangeDateState';
+import { useArrangeDateState, type ArrangeTab } from '../../hooks/useArrangeDateState';
 import { CheScheduleList } from '../schedule/CheScheduleList';
 import { UserPlanList } from '../schedule/UserPlanList';
 import { ArrangeDateStrip } from './ArrangeDateStrip';
@@ -14,6 +14,7 @@ interface ArrangePageProps {
   onAddPlan: (input: string, selectedDateKey?: string) => boolean;
   onInvitePlan: (planId: string) => void;
   onSelectPlan: (plan: UserPlan) => void;
+  initialTab?: ArrangeTab;
 }
 
 export function ArrangePage({
@@ -23,6 +24,7 @@ export function ArrangePage({
   onAddPlan,
   onInvitePlan,
   onSelectPlan,
+  initialTab = 'mine',
 }: ArrangePageProps) {
   const {
     activeTab,
@@ -39,7 +41,7 @@ export function ArrangePage({
     selectDate,
     setActiveTab,
     toggleCalendarExpanded,
-  } = useArrangeDateState(dayRecords, userPlans);
+  } = useArrangeDateState(dayRecords, userPlans, initialTab);
 
   const visibleUserPlans = userPlans.filter((plan) => (plan.dateKey ?? selectedDateKey) === selectedDateKey);
   const visibleCheSchedule = useMemo(

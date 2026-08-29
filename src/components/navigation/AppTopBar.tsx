@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CheNotification } from '../../types/che';
+import {
+  getNotificationReadKey,
+  markNotificationsRead,
+  readNotificationReadKeys,
+} from '../../utils/notificationReadState';
 import { BellSoftIcon, CloseSoftIcon } from '../icons';
 
 const headerLogoUrl = new URL('../../../场景图/logo.png', import.meta.url).href;
@@ -25,13 +30,17 @@ export function AppTopBar({
   showNotification = false,
 }: AppTopBarProps) {
   const [isEchoOpen, setIsEchoOpen] = useState(false);
-  const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
-  const hasUnread = notifications.some((item) => !item.isRead && !readIds.has(item.id));
+  const [readKeys, setReadKeys] = useState<Set<string>>(() => readNotificationReadKeys());
+  const hasUnread = notifications.some((item) => !item.isRead && !readKeys.has(getNotificationReadKey(item)));
+
+  useEffect(() => {
+    if (!isEchoOpen) return;
+    setReadKeys(markNotificationsRead(notifications));
+  }, [isEchoOpen, notifications]);
 
   const toggleEcho = () => {
     const nextOpen = !isEchoOpen;
     setIsEchoOpen(nextOpen);
-    if (nextOpen) setReadIds(new Set(notifications.map((item) => item.id)));
   };
 
   const echoModal = isEchoOpen

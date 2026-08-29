@@ -2,7 +2,7 @@
 // It should feel like "come sit for a while", not a therapy or tool module.
 import { ArrowRightSoftIcon } from '../icons';
 
-const deepTalkCatIconUrl = new URL('../../assets/deep-talk-cat-cropped.png', import.meta.url).href;
+const dogChatIconUrl = new URL('../../assets/dog-chat.png', import.meta.url).href;
 
 interface QuietChatEntryProps {
   onOpen: () => void;
@@ -12,7 +12,7 @@ export function QuietChatEntry({ onOpen }: QuietChatEntryProps) {
   return (
     <button className="quiet-chat-entry" type="button" onClick={onOpen}>
       <span className="quiet-icon" aria-hidden="true">
-        <img className="deep-talk-cat-icon" src={deepTalkCatIconUrl} alt="" />
+        <img className="dog-soft-icon" src={dogChatIconUrl} alt="" />
       </span>
       <span className="quiet-copy">
         <span className="quiet-title-row">

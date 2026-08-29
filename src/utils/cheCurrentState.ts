@@ -47,7 +47,7 @@ export function resolveCheCurrentState({
       location: getWorldLocation(currentItem.worldScene),
       availability: getWorldAvailability(currentItem.worldScene),
       worldScene: { ...currentItem.worldScene },
-      entrySceneType: currentItem.sceneType,
+      entrySceneType: currentItem.sceneType ?? 'idle',
       scheduleItemId: currentItem.id,
       startedAt: toDateTime(dateKey, currentItem.startTime),
       endsAt: toDateTime(dateKey, currentItem.endTime),

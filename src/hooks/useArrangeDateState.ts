@@ -13,9 +13,13 @@ import {
 
 export type ArrangeTab = 'mine' | 'che';
 
-export function useArrangeDateState(dayRecords: DayRecord[], userPlans: UserPlan[] = []) {
+export function useArrangeDateState(
+  dayRecords: DayRecord[],
+  userPlans: UserPlan[] = [],
+  initialTab: ArrangeTab = 'mine',
+) {
   const todayKey = toDateKey(new Date());
-  const [activeTab, setActiveTab] = useState<ArrangeTab>('mine');
+  const [activeTab, setActiveTab] = useState<ArrangeTab>(initialTab);
   const [selectedDateKey, setSelectedDateKey] = useState(todayKey);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => parseDateKey(todayKey));

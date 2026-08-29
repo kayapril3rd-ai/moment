@@ -57,7 +57,7 @@ export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt
     >
       <div className={`phone-frame chat-frame${isChatOpen ? ' is-chat-open' : ''}`}>
         <div onClick={() => isChatOpen && !isDeep && setIsChatOpen(false)}>
-          <SceneVisual scene={scene} activeStartedAt={activeStartedAt} onBack={onBack} onEndActivity={handleEndActivity} />
+          <SceneVisual scene={scene} cheCurrentState={cheCurrentState} activeStartedAt={activeStartedAt} onBack={onBack} onEndActivity={handleEndActivity} />
         </div>
         {!isChatOpen ? (
           <div className="chat-launcher">

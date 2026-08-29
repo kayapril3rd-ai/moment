@@ -2247,6 +2247,16 @@ body {
   border-radius: 10px;
 }
 
+.dog-soft-icon {
+  display: block;
+  object-fit: contain;
+}
+
+.quiet-icon .dog-soft-icon {
+  width: 32px;
+  height: 32px;
+}
+
 /* Mine memory manager. */
 .memory-card {
   position: relative;

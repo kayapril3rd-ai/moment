@@ -1,20 +1,29 @@
 import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
-import type { SceneData } from '../../types/che';
-import { getSceneImage } from '../../utils/sceneImages';
+import type { CheCurrentState, SceneData } from '../../types/che';
+import { getSceneImage, getWorldSceneImage } from '../../utils/sceneImages';
 import { getSceneStatus } from '../../utils/sceneStatus';
 import { BackSoftIcon } from '../icons';
 
 interface SceneVisualProps {
   scene: SceneData;
+  cheCurrentState: CheCurrentState;
   activeStartedAt?: string | null;
   onBack: () => void;
   onEndActivity?: () => void;
 }
 
-export function SceneVisual({ scene, activeStartedAt, onBack, onEndActivity }: SceneVisualProps) {
+export function SceneVisual({ scene, cheCurrentState, activeStartedAt, onBack, onEndActivity }: SceneVisualProps) {
   const [now, setNow] = useState(() => Date.now());
-  const image = getSceneImage(scene.id);
+  const usesCurrentWorldScene = scene.conversationMode !== 'deep'
+    && (cheCurrentState.source === 'shared_activity' || cheCurrentState.entrySceneType === scene.id);
+  const image = usesCurrentWorldScene
+    ? getWorldSceneImage(cheCurrentState.worldScene, cheCurrentState.entrySceneType)
+    : getSceneImage(scene.id);
+  const sceneImage = usesCurrentWorldScene ? image.sceneImage : scene.sceneImage ?? image.sceneImage;
+  const sceneFocus = usesCurrentWorldScene
+    ? image.sceneFocus
+    : scene.sceneFocus ?? image.sceneFocus ?? scene.focalPoint ?? 'center center';
 
   useEffect(() => {
     if (!activeStartedAt) return undefined;
@@ -26,11 +35,13 @@ export function SceneVisual({ scene, activeStartedAt, onBack, onEndActivity }: S
     <section
       className="scene-visual"
       data-scene={scene.id}
+      data-world-scene={usesCurrentWorldScene ? cheCurrentState.worldScene.sceneKey : undefined}
+      data-world-variant={usesCurrentWorldScene ? cheCurrentState.worldScene.sceneVariant : undefined}
       aria-labelledby="scene-chat-title"
       style={
         {
-          '--scene-image': `url("${scene.sceneImage ?? image.sceneImage}")`,
-          '--scene-position': scene.sceneFocus ?? image.sceneFocus ?? scene.focalPoint ?? 'center center',
+          '--scene-image': `url("${sceneImage}")`,
+          '--scene-position': sceneFocus,
         } as CSSProperties
       }
     >
@@ -45,7 +56,7 @@ export function SceneVisual({ scene, activeStartedAt, onBack, onEndActivity }: S
       </header>
 
       <div className="scene-visual-copy scene-caption">
-        <span>{scene.cheStatusHint}</span>
+        <span>{usesCurrentWorldScene ? cheCurrentState.detail : scene.cheStatusHint}</span>
       </div>
     </section>
   );
