@@ -1,8 +1,17 @@
 import type { ChatRuntimeContext } from './che';
 
+export interface ChatUserContext {
+  nickname: string;
+  companionStyle: string;
+  chatPace: string;
+  dislikes: string;
+  memoryItems: string[];
+}
+
 export interface ChatRequest {
   query: string;
   context: ChatRuntimeContext;
+  userContext: ChatUserContext;
   conversationId?: string;
   userId: string;
 }

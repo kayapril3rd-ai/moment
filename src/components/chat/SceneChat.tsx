@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CheCurrentState, SceneData } from '../../types/che';
+import type { ChatUserContext } from '../../types/chat';
 import { useSceneChatMessages } from '../../hooks/useSceneChatMessages';
 import { ChatSoftIcon } from '../icons';
 import { ChatPanel } from './ChatPanel';
@@ -8,12 +9,13 @@ import { SceneVisual } from './SceneVisual';
 interface SceneChatProps {
   scene: SceneData;
   cheCurrentState: CheCurrentState;
+  userContext: ChatUserContext;
   activeStartedAt?: string | null;
   onBack: () => void;
   onEndActivity?: (hasChat?: boolean) => void;
 }
 
-export function SceneChat({ scene, cheCurrentState, activeStartedAt, onBack, onEndActivity }: SceneChatProps) {
+export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt, onBack, onEndActivity }: SceneChatProps) {
   const {
     chatRuntimeContext,
     error,
@@ -21,7 +23,7 @@ export function SceneChat({ scene, cheCurrentState, activeStartedAt, onBack, onE
     messages,
     retryLastMessage,
     sendMessage,
-  } = useSceneChatMessages(scene, cheCurrentState);
+  } = useSceneChatMessages(scene, cheCurrentState, userContext);
   const isDeep = scene.conversationMode === 'deep';
   const [isChatOpen, setIsChatOpen] = useState(isDeep);
 

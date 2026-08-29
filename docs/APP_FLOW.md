@@ -95,7 +95,7 @@ completed
 ```text
 Scene Chat
   ├─ 返回 → 今天
-  ├─ 输入消息 → optimistic user message → POST /api/chat → append Dify answer
+  ├─ 输入消息 → runtime context + explicit user context → POST /api/chat → append Dify answer
   ├─ 请求失败 → 保留 user message → 显示重试，不生成 fake reply
   └─ 安静聊聊 → Deep Talk
 ```
@@ -107,6 +107,9 @@ Rules:
 - no mode labels
 - no avatar frame
 - duration comes from `activeStartedAt` when the activity is active
+- explicit user context comes from App-owned `userProfile` and manual `memoryItems`
+- preference changes and Daily World changes update future requests without resetting messages
+- memory stays manual-only; chat does not extract or write memory
 
 ## Deep Talk
 

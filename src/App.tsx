@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SceneChat } from './components/chat/SceneChat';
 import { TogetherMoments } from './components/moments/TogetherMoments';
 import { TodayPage } from './components/today/TodayPage';
@@ -14,6 +14,13 @@ export default function App() {
   const [currentSceneType, setCurrentSceneType] = useState<SceneType>('study');
   const [recentMoments, setRecentMoments] = useState<RecentMoment[]>(mockRecentMoments);
   const { userProfile, memoryItems, setUserProfile, setMemoryItems } = useUserProfile();
+  const chatUserContext = useMemo(() => ({
+    nickname: userProfile.nickname,
+    companionStyle: userProfile.preferences.companionStyle,
+    chatPace: userProfile.preferences.chatPace,
+    dislikes: userProfile.preferences.dislikes,
+    memoryItems,
+  }), [memoryItems, userProfile]);
   const dayState = useCheDayState({ recentMoments, onRecentMomentsChange: setRecentMoments });
   const currentScene = sceneRegistry[currentSceneType];
   const currentActiveCard = currentScene.conversationMode !== 'deep'
@@ -46,6 +53,7 @@ export default function App() {
         <SceneChat
           scene={currentScene}
           cheCurrentState={dayState.cheCurrentState}
+          userContext={chatUserContext}
           activeStartedAt={currentSceneActiveStartedAt}
           onBack={() => setView('today')}
           onEndActivity={

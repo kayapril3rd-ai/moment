@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { sendChatMessage } from '../services/chatClient';
+import type { ChatRequest, ChatUserContext } from '../types/chat';
 import type { ChatMessage, CheCurrentState, SceneData } from '../types/che';
 import { buildChatRuntimeContext } from '../utils/agentSceneContext';
 import {
@@ -12,7 +13,16 @@ import { getSceneOpeningMessage } from '../utils/reply';
 
 const CHAT_ERROR_MESSAGE = '刚刚没连上，再试一次。';
 
-export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurrentState) {
+interface FailedChatRequest {
+  dateKey: string;
+  request: ChatRequest;
+}
+
+export function useSceneChatMessages(
+  scene: SceneData,
+  cheCurrentState: CheCurrentState,
+  userContext: ChatUserContext,
+) {
   const chatRuntimeContext = useMemo(
     () => buildChatRuntimeContext(scene, cheCurrentState),
     [cheCurrentState, scene],
@@ -21,7 +31,7 @@ export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurre
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userId] = useState(() => getOrCreateAnonymousChatUserId());
-  const failedQueryRef = useRef<string | null>(null);
+  const failedRequestRef = useRef<FailedChatRequest | null>(null);
   const requestInFlightRef = useRef(false);
   const sceneIdRef = useRef(scene.id);
 
@@ -29,10 +39,14 @@ export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurre
     sceneIdRef.current = scene.id;
     setMessages([createInitialMessage(scene)]);
     setError(null);
-    failedQueryRef.current = null;
+    failedRequestRef.current = null;
   }, [scene.id]);
 
-  const requestReply = useCallback(async (query: string, appendUserMessage: boolean) => {
+  const requestReply = useCallback(async (
+    query: string,
+    appendUserMessage: boolean,
+    retryAttempt?: FailedChatRequest,
+  ) => {
     if (requestInFlightRef.current) return;
     requestInFlightRef.current = true;
     setIsSending(true);
@@ -40,6 +54,14 @@ export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurre
 
     const now = Date.now();
     const requestSceneId = scene.id;
+    const dateKey = retryAttempt?.dateKey ?? toDateKey(new Date(now));
+    const request: ChatRequest = retryAttempt?.request ?? {
+      query,
+      context: chatRuntimeContext,
+      userContext,
+      conversationId: getDailyConversationId(dateKey),
+      userId,
+    };
     if (appendUserMessage) {
       const userMessage: ChatMessage = {
         id: `user-${now}-${crypto.randomUUID()}`,
@@ -51,13 +73,7 @@ export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurre
     }
 
     try {
-      const dateKey = toDateKey(new Date());
-      const response = await sendChatMessage({
-        query,
-        context: chatRuntimeContext,
-        conversationId: getDailyConversationId(dateKey),
-        userId,
-      });
+      const response = await sendChatMessage(request);
       saveDailyConversationId(dateKey, response.conversationId);
 
       if (sceneIdRef.current !== requestSceneId) return;
@@ -68,17 +84,17 @@ export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurre
         createdAt: new Date().toISOString(),
       };
       setMessages((currentMessages) => [...currentMessages, cheMessage]);
-      failedQueryRef.current = null;
+      failedRequestRef.current = null;
     } catch {
       if (sceneIdRef.current === requestSceneId) {
-        failedQueryRef.current = query;
+        failedRequestRef.current = { dateKey, request };
         setError(CHAT_ERROR_MESSAGE);
       }
     } finally {
       requestInFlightRef.current = false;
       if (sceneIdRef.current === requestSceneId) setIsSending(false);
     }
-  }, [chatRuntimeContext, scene.id, userId]);
+  }, [chatRuntimeContext, scene.id, userContext, userId]);
 
   const sendMessage = useCallback(async (text: string) => {
     const query = text.trim();
@@ -87,9 +103,9 @@ export function useSceneChatMessages(scene: SceneData, cheCurrentState: CheCurre
   }, [requestReply]);
 
   const retryLastMessage = useCallback(async () => {
-    const failedQuery = failedQueryRef.current;
-    if (!failedQuery) return;
-    await requestReply(failedQuery, false);
+    const failedRequest = failedRequestRef.current;
+    if (!failedRequest) return;
+    await requestReply(failedRequest.request.query, false, failedRequest);
   }, [requestReply]);
 
   return {

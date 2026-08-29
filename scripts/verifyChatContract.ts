@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import chatHandler from '../api/chat.ts';
 import {
   buildDifyBlockingRequest,
+  formatMemoryContext,
+  normalizeChatUserContext,
   parseDifyBlockingResponse,
   parseMomentChatRequest,
 } from '../server/difyChatContract.ts';
@@ -69,12 +72,48 @@ const momentRequest: ChatRequest = {
     sceneVariant: 'work_desk',
     cheCurrentState: '澈现在在书桌前处理体验方案。',
   },
+  userContext: {
+    nickname: '小琪',
+    companionStyle: '具体一点、自然接话',
+    chatPace: '慢一点、少催促',
+    dislikes: '太油腻、说教、空泛安慰',
+    memoryItems: ['我养了一只狗', '最近在准备面试'],
+  },
   conversationId: 'conversation-day-one',
   userId: firstUserId,
 };
 
 assert.deepEqual(parseMomentChatRequest(momentRequest), momentRequest);
 assert.equal(parseMomentChatRequest({ ...momentRequest, query: '' }), null);
+assert.equal(parseMomentChatRequest({
+  ...momentRequest,
+  userContext: { ...momentRequest.userContext, memoryItems: ['valid', 42] },
+}), null);
+
+assert.deepEqual(normalizeChatUserContext({
+  nickname: '  小琪  ',
+  companionStyle: '  自然接话 ',
+  chatPace: '',
+  dislikes: '  ',
+  memoryItems: ['  我养了一只狗 ', '', '  最近在准备面试  '],
+}), {
+  nickname: '小琪',
+  companionStyle: '自然接话',
+  chatPace: '',
+  dislikes: '',
+  memoryItems: ['我养了一只狗', '最近在准备面试'],
+});
+assert.equal(
+  formatMemoryContext(['我养了一只狗', '最近在准备面试']),
+  '我明确记得的用户事实：\n\n- 我养了一只狗\n- 最近在准备面试',
+);
+assert.equal(formatMemoryContext([]), '暂无明确记忆。');
+const boundedUserContext = normalizeChatUserContext({
+  ...momentRequest.userContext,
+  memoryItems: Array.from({ length: 24 }, (_, index) => `${index}-${'x'.repeat(320)}`),
+});
+assert.equal(boundedUserContext?.memoryItems.length, 20);
+assert.equal(boundedUserContext?.memoryItems[0]?.length, 300);
 
 const difyRequest = buildDifyBlockingRequest(momentRequest);
 assert.deepEqual(difyRequest, {
@@ -83,6 +122,11 @@ assert.deepEqual(difyRequest, {
     sceneKey: 'focus',
     sceneVariant: 'work_desk',
     cheCurrentState: '澈现在在书桌前处理体验方案。',
+    nickname: '小琪',
+    companionStyle: '具体一点、自然接话',
+    chatPace: '慢一点、少催促',
+    dislikes: '太油腻、说教、空泛安慰',
+    memoryContext: '我明确记得的用户事实：\n\n- 我养了一只狗\n- 最近在准备面试',
   },
   query: '今天工作还顺利吗',
   response_mode: 'blocking',
@@ -91,6 +135,12 @@ assert.deepEqual(difyRequest, {
   files: [],
 });
 assert.equal('query' in difyRequest.inputs, false);
+
+const emptyMemoryRequest = buildDifyBlockingRequest({
+  ...momentRequest,
+  userContext: { ...momentRequest.userContext, memoryItems: [] },
+});
+assert.equal(emptyMemoryRequest.inputs.memoryContext, '暂无明确记忆。');
 
 const firstDifyRequest = buildDifyBlockingRequest({ ...momentRequest, conversationId: undefined });
 assert.equal(firstDifyRequest.conversation_id, '');
@@ -116,6 +166,13 @@ assert.equal(methodResponse.headers.get('Allow'), 'POST');
 const invalidResponse = new MockServerResponse();
 await chatHandler({ method: 'POST', body: { query: '' } } as never, invalidResponse as never);
 assert.equal(invalidResponse.statusCode, 400);
+
+const invalidMemoryResponse = new MockServerResponse();
+await chatHandler({
+  method: 'POST',
+  body: { ...momentRequest, userContext: { ...momentRequest.userContext, memoryItems: 'not-an-array' } },
+} as never, invalidMemoryResponse as never);
+assert.equal(invalidMemoryResponse.statusCode, 400);
 
 const previousApiKey = process.env.DIFY_API_KEY;
 const previousFetch = globalThis.fetch;
@@ -150,6 +207,9 @@ globalThis.fetch = previousFetch;
 if (previousApiKey === undefined) delete process.env.DIFY_API_KEY;
 else process.env.DIFY_API_KEY = previousApiKey;
 
+const clientSource = await readFile(new URL('../src/services/chatClient.ts', import.meta.url), 'utf8');
+assert.equal(clientSource.includes('DIFY_API_KEY'), false);
+
 console.log(JSON.stringify({
   stableUserId: firstUserId,
   storageKeys,
@@ -162,6 +222,7 @@ console.log(JSON.stringify({
   serverErrors: {
     method: methodResponse.statusCode,
     invalid: invalidResponse.statusCode,
+    invalidMemory: invalidMemoryResponse.statusCode,
     config: configResponse.statusCode,
     upstream: upstreamFailureResponse.statusCode,
   },

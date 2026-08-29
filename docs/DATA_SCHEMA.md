@@ -62,6 +62,7 @@ The browser sends a Moment-owned `ChatRequest` to same-origin `POST /api/chat`:
 |---|---|---|
 | `query` | `string` | User message; it is not duplicated inside Dify `inputs` |
 | `context` | `ChatRuntimeContext` | Existing scene/runtime context built by `buildChatRuntimeContext` |
+| `userContext` | `ChatUserContext` | Explicit profile preferences and user-maintained factual memory |
 | `conversationId` | `string \| undefined` | Dify conversation for the current natural day |
 | `userId` | `string` | Stable anonymous ID stored under `moment.chat.userId` |
 
@@ -69,6 +70,15 @@ The server returns only `answer`, `conversationId`, and `messageId`. Dify API ke
 raw metadata, workflow internals, and Authorization headers never enter the Vite
 client bundle. Conversation IDs are stored by local date under
 `moment.chat.conversations`; Scene and 安静聊聊 share the same ID on the same day.
+
+`ChatUserContext` remains separate from `ChatRuntimeContext`. It contains `nickname`,
+`companionStyle`, `chatPace`, `dislikes`, and `memoryItems`. Preferences are explicit,
+soft instructions about how the user wants to be addressed and answered; they do not
+override safety, character boundaries, conversation mode, or known facts. Memory items
+are explicit facts manually maintained by the user. The server trims them, removes empty
+items, preserves their order, and formats them into the Dify-only `memoryContext` string.
+The client cannot supply `memoryContext` directly. Empty memory is formatted as
+`暂无明确记忆。`; automatic extraction, summarization, and inferred profile data are not implemented.
 
 Reserved Agent families include `home_idle`, `focus`, `meal`, `fitness`, `errand`,
 `commute`, `hangout`, and `deep_room`. Future contexts such as `errand / grocery`,
