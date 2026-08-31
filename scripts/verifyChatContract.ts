@@ -405,6 +405,15 @@ await assert.rejects(readFile(new URL('../server/difyChatContract.ts', import.me
 const summaryApiSource = await readFile(new URL('../api/chat-summary.ts', import.meta.url), 'utf8');
 assert.equal(summaryApiSource.includes("from './_lib/chatSummaryContract.js'"), true);
 assert.equal(/from\s+['"][^'"]+\.ts['"]/.test(summaryApiSource), false);
+const arrangePageSource = await readFile(new URL('../src/components/arrange/ArrangePage.tsx', import.meta.url), 'utf8');
+assert.equal(
+  arrangePageSource.includes('isToday && letterRecords.length > 0'),
+  true,
+  'Today Che tab must surface ended chat letters without showing an empty future section',
+);
+const deepSummarySource = await readFile(new URL('../src/components/today/DeepChatSummaryDrawer.tsx', import.meta.url), 'utf8');
+assert.equal(deepSummarySource.includes('summary: latest.summary.trim()'), true);
+assert.equal(deepSummarySource.includes('latest.detail ?? latest.summary'), false);
 
 console.log(JSON.stringify({
   stableUserId: firstUserId,

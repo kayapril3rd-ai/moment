@@ -1071,6 +1071,10 @@ button.letter-card {
   margin-top: 12px;
 }
 
+.che-arrange-panel .chat-letter-section {
+  margin-top: 26px;
+}
+
 .letter-copy {
   position: relative;
   z-index: 1;

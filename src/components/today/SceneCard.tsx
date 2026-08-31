@@ -2,7 +2,7 @@
 // The thumbnail follows the card scene and uses cardFocus to preserve faces.
 import type { CSSProperties } from 'react';
 import type { SceneCard as SceneCardType } from '../../types/che';
-import { getSceneImage } from '../../utils/sceneImages';
+import { getSceneCardImage } from '../../utils/sceneImages';
 import { FitnessIcon, MovieIcon, ParkIcon, StudyIcon } from '../icons';
 
 interface SceneCardProps {
@@ -11,7 +11,7 @@ interface SceneCardProps {
 }
 
 export function SceneCard({ card, onSelect }: SceneCardProps) {
-  const image = getSceneImage(card.sceneType);
+  const image = getSceneCardImage(card.sceneType, card.worldSceneOverride);
 
   return (
     <button className="scene-card" data-scene={card.sceneType} type="button" onClick={() => onSelect(card)}>

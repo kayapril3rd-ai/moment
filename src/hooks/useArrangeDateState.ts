@@ -69,6 +69,7 @@ export function useArrangeDateState(
     isCalendarExpanded,
     isFuture,
     isPastRecord,
+    isToday: selectedDateKey === todayKey,
     letterRecords,
     monthDays,
     selectDate,

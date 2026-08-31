@@ -4,7 +4,7 @@ import { useArrangeDateState, type ArrangeTab } from '../../hooks/useArrangeDate
 import { CheScheduleList } from '../schedule/CheScheduleList';
 import { UserPlanList } from '../schedule/UserPlanList';
 import { ArrangeDateStrip } from './ArrangeDateStrip';
-import { ArrangeRecordView } from './ArrangeRecordView';
+import { ArrangeRecordView, ChatLetterSection } from './ArrangeRecordView';
 import { ArrangeSegmentedTabs } from './ArrangeSegmentedTabs';
 import { getUserPlanDateKey } from '../../utils/plan';
 
@@ -35,6 +35,7 @@ export function ArrangePage({
     dateStrip,
     isCalendarExpanded,
     isPastRecord,
+    isToday,
     letterRecords,
     monthDays,
     selectedDateKey,
@@ -80,6 +81,7 @@ export function ArrangePage({
           ) : (
             <section className="che-arrange-panel" aria-label="澈的安排">
               {visibleCheSchedule.length > 0 ? <CheScheduleList schedule={visibleCheSchedule} /> : <p className="arrange-empty-text">这一天还没有安排。</p>}
+              {isToday && letterRecords.length > 0 ? <ChatLetterSection letterRecords={letterRecords} /> : null}
             </section>
           )}
         </>

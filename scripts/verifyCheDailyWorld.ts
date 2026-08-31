@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { buildCheScheduleForDate } from '../src/data/cheSchedule.ts';
 import { formatCheCurrentStateForAgent, resolveCheCurrentState } from '../src/utils/cheCurrentState.ts';
 import { getCheScheduleForDate } from '../src/utils/cheSchedule.ts';
-import { getSceneImage, getWorldSceneImage } from '../src/utils/sceneImages.ts';
+import { getSceneCardImage, getSceneImage, getWorldSceneImage } from '../src/utils/sceneImages.ts';
 import { buildChatRuntimeContext } from '../src/utils/agentSceneContext.ts';
 import {
   createCheScheduleItemFromPlan,
@@ -120,6 +120,22 @@ for (const [name, visual] of [['park', parkVisual], ['seaside', seasideVisual], 
   assert.notEqual(visual.heroImage, idleVisual.heroImage, `${name} hero visual must not use idle/sofa`);
   assert.notEqual(visual.arrangeSrc, idleVisual.arrangeSrc, `${name} schedule visual must not use idle/sofa`);
 }
+for (const worldScene of [
+  { sceneKey: 'hangout', sceneVariant: 'park' },
+  { sceneKey: 'hangout', sceneVariant: 'seaside' },
+  { sceneKey: 'errand', sceneVariant: 'grocery' },
+] as const) {
+  const worldVisual = getWorldSceneImage(worldScene, 'idle');
+  const sharedCardVisual = getSceneCardImage('idle', worldScene);
+  assert.equal(sharedCardVisual.cardImage, worldVisual.cardImage, `${worldScene.sceneVariant} shared card must use its world image`);
+  assert.equal(sharedCardVisual.sceneImage, worldVisual.sceneImage, `${worldScene.sceneVariant} Scene Chat visual must stay aligned`);
+  assert.equal(sharedCardVisual.heroImage, worldVisual.heroImage, `${worldScene.sceneVariant} Hero visual must stay aligned`);
+}
+assert.equal(
+  getSceneCardImage('study').cardImage,
+  getSceneImage('study').cardImage,
+  'a SceneCard without worldSceneOverride must keep its SceneType image',
+);
 
 const seasideWorldOnlyItem: CheScheduleItem = {
   id: 'verify-world-only-seaside',

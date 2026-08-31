@@ -76,7 +76,7 @@ function createDeepChatSummary(records: DayRecord[], now: number): DeepChatSumma
 
   return {
     title: latest.dateKey === todayKey ? '今天聊到' : '上次聊到',
-    summary: latest.detail ?? latest.summary,
+    summary: latest.summary.trim() || '这次聊过的内容还没有留下摘要。',
     source: 'record',
   };
 }

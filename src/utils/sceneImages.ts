@@ -68,6 +68,15 @@ export function getSceneImage(sceneType: SceneType): SceneImageConfig {
   return sceneImageConfig[sceneType];
 }
 
+export function getSceneCardImage(
+  sceneType: SceneType,
+  worldSceneOverride?: AgentSceneDefinition,
+): SceneImageConfig {
+  return worldSceneOverride
+    ? getWorldSceneImage(worldSceneOverride, sceneType)
+    : getSceneImage(sceneType);
+}
+
 export function getWorldSceneImage(worldScene: AgentSceneDefinition, entrySceneType: SceneType | null): SceneImageConfig {
   const override = worldSceneImageOverrides[worldScene.sceneVariant];
   if (override) return override;

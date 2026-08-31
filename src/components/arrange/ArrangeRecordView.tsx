@@ -22,9 +22,6 @@ export function ArrangeRecordView({
   selectedMonthDay,
   onTabChange,
 }: ArrangeRecordViewProps) {
-  const [selectedLetterId, setSelectedLetterId] = useState<string | null>(null);
-  const selectedLetter = letterRecords.find((letter) => letter.id === selectedLetterId) ?? null;
-
   return (
     <section className="day-record-view" aria-labelledby="day-record-title">
       <h2 className="sr-only" id="day-record-title">{selectedMonthDay}的记录</h2>
@@ -72,7 +69,18 @@ export function ArrangeRecordView({
         )}
       </div>
 
-      <div className="record-block">
+      <ChatLetterSection letterRecords={letterRecords} />
+    </section>
+  );
+}
+
+export function ChatLetterSection({ letterRecords }: { letterRecords: DayRecord[] }) {
+  const [selectedLetterId, setSelectedLetterId] = useState<string | null>(null);
+  const selectedLetter = letterRecords.find((letter) => letter.id === selectedLetterId) ?? null;
+
+  return (
+    <>
+      <div className="record-block chat-letter-section">
         <h3>聊天信件</h3>
         {letterRecords.length > 0 ? (
           letterRecords.map((letter) => (
@@ -118,7 +126,7 @@ export function ArrangeRecordView({
           </section>
         </div>
       ) : null}
-    </section>
+    </>
   );
 }
 
