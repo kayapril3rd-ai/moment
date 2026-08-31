@@ -10,6 +10,7 @@ import {
   parseDateKey,
   toDateKey,
 } from '../utils/date';
+import { getUserPlanDateKey } from '../utils/plan';
 
 export type ArrangeTab = 'mine' | 'che';
 
@@ -36,7 +37,7 @@ export function useArrangeDateState(
   const contentDateKeys = useMemo(() => {
     const keys = new Set<string>();
     userPlans.forEach((plan) => {
-      if (plan.dateKey) keys.add(plan.dateKey);
+      keys.add(getUserPlanDateKey(plan));
     });
     dayRecords.forEach((record) => {
       keys.add(record.dateKey);

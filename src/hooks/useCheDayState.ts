@@ -19,6 +19,7 @@ import {
   createSharedSceneFromPlan,
   createUserPlanFromInput,
   getCheInviteReply,
+  getUserPlanDateKey,
   restoreCheScheduleItemFromPlan,
 } from '../utils/plan';
 import { useCheDayDerivedState } from './useCheDayDerivedState';
@@ -35,8 +36,10 @@ import {
 } from '../utils/dayStateStorage';
 
 export function useCheDayState() {
+  const [now, setNow] = useState(() => Date.now());
+  const todayKey = toDateKey(new Date(now));
   const [userPlans, setUserPlans] = useState<UserPlan[]>(() => readUserPlans());
-  const restoredActivePlan = userPlans.find((plan) => plan.status === 'active' && plan.inviteStatus === 'accepted');
+  const restoredActivePlan = findActiveSharedPlanForDate(userPlans, todayKey);
   const [activeActivityId, setActiveActivityId] = useState<string | null>(
     () => restoredActivePlan ? `scene-shared-${restoredActivePlan.id}` : null,
   );
@@ -45,10 +48,9 @@ export function useCheDayState() {
   const [runtimeCheScheduleItems, setRuntimeCheScheduleItems] = useState<CheScheduleItem[]>(
     () => restoreRuntimeCheSchedule(userPlans),
   );
-  const [sceneCards, setSceneCards] = useState<SceneCard[]>(() => restoreSceneCards(userPlans));
+  const [sceneCards, setSceneCards] = useState<SceneCard[]>(() => restoreSceneCards(userPlans, todayKey));
   const [dayRecords, setDayRecords] = useState<DayRecord[]>(() => readDayRecords());
   const [recentMoments, setRecentMoments] = useState<RecentMoment[]>(() => readRecentMoments());
-  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const timerId = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -59,8 +61,32 @@ export function useCheDayState() {
   useEffect(() => writeDayRecords(dayRecords), [dayRecords]);
   useEffect(() => writeRecentMoments(recentMoments), [recentMoments]);
 
+  useEffect(() => {
+    setSceneCards((currentCards) => restoreSceneCards(
+      userPlans,
+      todayKey,
+      currentCards.filter((card) => card.linkedPlanId === null),
+    ));
+  }, [todayKey, userPlans]);
+
+  useEffect(() => {
+    const activePlanForToday = findActiveSharedPlanForDate(userPlans, todayKey);
+    const isCurrentActivityShared = activeActivityId?.startsWith('scene-shared-') ?? false;
+
+    if (isCurrentActivityShared) {
+      const nextActivityId = activePlanForToday ? `scene-shared-${activePlanForToday.id}` : null;
+      if (nextActivityId !== activeActivityId) setActiveActivityId(nextActivityId);
+      setActiveStartedAt(activePlanForToday?.updatedAt ?? null);
+      return;
+    }
+
+    if (!activeActivityId && activePlanForToday) {
+      setActiveActivityId(`scene-shared-${activePlanForToday.id}`);
+      setActiveStartedAt(activePlanForToday.updatedAt);
+    }
+  }, [activeActivityId, todayKey, userPlans]);
+
   const selectedPlan = userPlans.find((plan) => plan.id === selectedPlanId) ?? null;
-  const todayKey = toDateKey(new Date(now));
   const cheSchedule = useMemo(
     () => mergeCheScheduleForDate(todayKey, runtimeCheScheduleItems),
     [runtimeCheScheduleItems, todayKey],
@@ -105,16 +131,18 @@ export function useCheDayState() {
 
     setUserPlans((currentPlans) => currentPlans.map((item) => (item.id === planId ? acceptedPlan : item)));
 
-    setSceneCards((currentCards) => {
-      if (currentCards.some((card) => card.linkedPlanId === planId && card.status === 'scheduled')) return currentCards;
-      const shiftedCards = currentCards.map((card) => ({ ...card, sortOrder: card.sortOrder + 1 }));
-      if (currentCards.some((card) => card.linkedPlanId === planId)) {
-        return shiftedCards.map((card) =>
-          card.linkedPlanId === planId ? { ...createSharedSceneFromPlan(acceptedPlan, 1), id: card.id } : card,
-        );
-      }
-      return [createSharedSceneFromPlan(acceptedPlan, 1), ...shiftedCards];
-    });
+    if (getUserPlanDateKey(acceptedPlan) === todayKey) {
+      setSceneCards((currentCards) => {
+        if (currentCards.some((card) => card.linkedPlanId === planId && card.status === 'scheduled')) return currentCards;
+        const shiftedCards = currentCards.map((card) => ({ ...card, sortOrder: card.sortOrder + 1 }));
+        if (currentCards.some((card) => card.linkedPlanId === planId)) {
+          return shiftedCards.map((card) =>
+            card.linkedPlanId === planId ? { ...createSharedSceneFromPlan(acceptedPlan, 1), id: card.id } : card,
+          );
+        }
+        return [createSharedSceneFromPlan(acceptedPlan, 1), ...shiftedCards];
+      });
+    }
 
     setRuntimeCheScheduleItems((currentSchedule) => {
       if (currentSchedule.some((item) => item.linkedPlanId === planId)) return currentSchedule;
@@ -350,9 +378,17 @@ function getCompletedChatMomentText(card: SceneCard) {
   }
 }
 
-function restoreSceneCards(plans: UserPlan[]): SceneCard[] {
+function restoreSceneCards(
+  plans: UserPlan[],
+  todayKey: string,
+  baseCards: SceneCard[] = mockSceneCards,
+): SceneCard[] {
   const sharedCards = plans
-    .filter((plan) => plan.inviteStatus === 'accepted' && plan.status !== 'cancelled')
+    .filter((plan) => (
+      plan.inviteStatus === 'accepted'
+      && plan.status !== 'cancelled'
+      && getUserPlanDateKey(plan) === todayKey
+    ))
     .map((plan, index) => {
       const card = createSharedSceneFromPlan(plan, index + 1);
       if (plan.status === 'done') return { ...card, status: 'completed' as const, timeLabel: '已完成' };
@@ -361,8 +397,16 @@ function restoreSceneCards(plans: UserPlan[]): SceneCard[] {
     });
   return [
     ...sharedCards,
-    ...mockSceneCards.map((card) => ({ ...card, sortOrder: card.sortOrder + sharedCards.length })),
+    ...baseCards.map((card, index) => ({ ...card, sortOrder: sharedCards.length + index + 1 })),
   ];
+}
+
+function findActiveSharedPlanForDate(plans: UserPlan[], dateKey: string): UserPlan | undefined {
+  return plans.find((plan) => (
+    plan.status === 'active'
+    && plan.inviteStatus === 'accepted'
+    && getUserPlanDateKey(plan) === dateKey
+  ));
 }
 
 function restoreRuntimeCheSchedule(plans: UserPlan[]): CheScheduleItem[] {

@@ -20,6 +20,7 @@ import type { UserProfile } from '../../data/mockProfile';
 import type { SceneCard, SceneType } from '../../types/che';
 import type { CheDayState } from '../../hooks/useCheDayState';
 import { toDateKey } from '../../utils/date';
+import { getUserPlanDateKey } from '../../utils/plan';
 
 interface TodayPageProps {
   onOpenScene: (sceneType: SceneType) => void;
@@ -124,7 +125,7 @@ export function TodayPage({
   const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
   const todayKey = toDateKey(new Date(now));
   const todayUserPlans = useMemo(
-    () => userPlans.filter((plan) => (plan.dateKey ?? toDateKey(new Date(plan.createdAt))) === todayKey),
+    () => userPlans.filter((plan) => getUserPlanDateKey(plan) === todayKey),
     [todayKey, userPlans],
   );
 

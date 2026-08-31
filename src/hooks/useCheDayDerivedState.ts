@@ -3,6 +3,7 @@ import type { CheCurrentState, CheNotification, CheScheduleItem, DayRecord, Scen
 import { resolveCheCurrentState } from '../utils/cheCurrentState.ts';
 import { toDateKey } from '../utils/date';
 import { parseClockMinutes } from '../utils/eventStatus';
+import { getUserPlanDateKey } from '../utils/plan';
 
 interface UseCheDayDerivedStateInput {
   activeActivityId: string | null;
@@ -24,7 +25,10 @@ export function useCheDayDerivedState({
   userPlans,
 }: UseCheDayDerivedStateInput) {
   const todayKey = toDateKey(new Date(now));
-  const todayPlans = useMemo(() => userPlans.filter((plan) => (plan.dateKey ?? todayKey) === todayKey), [todayKey, userPlans]);
+  const todayPlans = useMemo(
+    () => userPlans.filter((plan) => getUserPlanDateKey(plan) === todayKey),
+    [todayKey, userPlans],
+  );
   const todayCheSchedule = useMemo(() => cheSchedule.filter((item) => item.dateKey === todayKey), [cheSchedule, todayKey]);
 
   const activeActivityCard = useMemo(

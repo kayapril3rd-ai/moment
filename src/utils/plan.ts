@@ -51,6 +51,10 @@ export function inferSceneTypeFromPlan(text: string): SceneType {
   return inferPlanScene(text).sceneType;
 }
 
+export function getUserPlanDateKey(plan: Pick<UserPlan, 'createdAt' | 'dateKey'>): string {
+  return plan.dateKey ?? toDateKey(new Date(plan.createdAt));
+}
+
 export function createUserPlanFromInput(input: string, now = new Date(), selectedDateKey?: string): UserPlan | null {
   const parsed = parsePlanInput(input, now, selectedDateKey ?? toDateKey(now));
   if (!parsed) return null;
@@ -158,7 +162,7 @@ export function createCheScheduleItemFromPlan(plan: UserPlan): CheScheduleItem {
     sceneType,
     worldScene: { ...plan.worldScene },
     linkedPlanId: plan.id,
-    dateKey: plan.dateKey ?? toDateKey(new Date(plan.createdAt)),
+    dateKey: getUserPlanDateKey(plan),
     detail: getCheScheduleDetail(plan),
   };
 }

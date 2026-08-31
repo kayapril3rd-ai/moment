@@ -4,7 +4,13 @@ import { formatCheCurrentStateForAgent, resolveCheCurrentState } from '../src/ut
 import { getCheScheduleForDate } from '../src/utils/cheSchedule.ts';
 import { getSceneImage, getWorldSceneImage } from '../src/utils/sceneImages.ts';
 import { buildChatRuntimeContext } from '../src/utils/agentSceneContext.ts';
-import { createCheScheduleItemFromPlan, createSharedSceneFromPlan, createUserPlanFromInput, restoreCheScheduleItemFromPlan } from '../src/utils/plan.ts';
+import {
+  createCheScheduleItemFromPlan,
+  createSharedSceneFromPlan,
+  createUserPlanFromInput,
+  getUserPlanDateKey,
+  restoreCheScheduleItemFromPlan,
+} from '../src/utils/plan.ts';
 import { completeCheScheduleForActivity, syncCheScheduleForActive } from '../src/utils/activityState.ts';
 import { mockSceneCards, sceneRegistry } from '../src/data/mockScenes.ts';
 import type { CheScheduleItem, SceneCard, UserPlan } from '../src/types/che.ts';
@@ -151,6 +157,36 @@ assert.deepEqual(movieScheduleItem.worldScene, { sceneKey: 'home_idle', sceneVar
 assert.equal(movieScheduleItem.status, 'planned');
 assert.match(movieScheduleItem.title, /^等你/);
 assert.doesNotMatch(movieScheduleItem.title, /正在/);
+
+const futureAcceptedPlan: UserPlan = {
+  ...acceptedMoviePlan,
+  id: 'verify-future-accepted-plan',
+  dateKey: futureKey,
+};
+const legacyTodayPlan: UserPlan = {
+  ...acceptedMoviePlan,
+  id: 'verify-legacy-today-plan',
+  dateKey: undefined,
+  createdAt: `${weekdayKey}T09:00:00+08:00`,
+};
+assert.equal(getUserPlanDateKey(legacyTodayPlan), weekdayKey, 'legacy plan date must fall back to createdAt');
+const scopedTodayPlans = [acceptedMoviePlan, futureAcceptedPlan, legacyTodayPlan]
+  .filter((plan) => getUserPlanDateKey(plan) === weekdayKey);
+assert.deepEqual(
+  scopedTodayPlans.map((plan) => plan.id),
+  [acceptedMoviePlan.id, legacyTodayPlan.id],
+  'Today plan consumers must exclude accepted plans from another date',
+);
+const restoredActiveTomorrow = [
+  { ...acceptedMoviePlan, status: 'active' as const },
+  { ...futureAcceptedPlan, status: 'active' as const },
+].find((plan) => getUserPlanDateKey(plan) === futureKey);
+assert.equal(restoredActiveTomorrow?.id, futureAcceptedPlan.id, 'active shared plan restoration must use the current date');
+const futureSharedSchedule = getCheScheduleForDate(futureKey, [createCheScheduleItemFromPlan(futureAcceptedPlan)]);
+assert.ok(
+  futureSharedSchedule.some((item) => item.linkedPlanId === futureAcceptedPlan.id),
+  'a future accepted plan must remain available in its Arrange schedule',
+);
 
 const scheduleWithMovie = getCheScheduleForDate(weekdayKey, [movieScheduleItem]);
 assert.ok(scheduleWithMovie.includes(movieScheduleItem));
