@@ -26,6 +26,12 @@ import { useCheDayDerivedState } from './useCheDayDerivedState';
 import { toDateKey } from '../utils/date';
 import { getCheScheduleForDate as mergeCheScheduleForDate } from '../utils/cheSchedule.ts';
 import type { StoredChatSession } from '../utils/chatStorage';
+import { summarizeEndedChat } from '../services/chatSummaryClient';
+import {
+  applyChatSummaryToRecord,
+  createChatSummaryFallback,
+  formatChatTranscript,
+} from '../utils/chatSummary';
 import {
   readDayRecords,
   readRecentMoments,
@@ -313,22 +319,33 @@ export function useCheDayState() {
   const recordEndedChat = (session: StoredChatSession, scene: SceneData, linkedPlanId: string | null) => {
     if (!session.messages.some((message) => message.role === 'user')) return;
     const endedAt = new Date();
-    const lastCheMessage = [...session.messages].reverse().find((message) => message.role === 'che');
+    const fallback = createChatSummaryFallback(session.messages);
     const record: DayRecord = {
       id: `record-${session.id}`,
       dateKey: toDateKey(endedAt),
       owner: 'che',
       kind: 'letter',
-      title: scene.id === 'deep_room' ? '安静聊聊' : scene.shortTitle,
+      title: fallback.topicTitle,
       timeLabel: formatClockTime(endedAt),
-      summary: truncateText(lastCheMessage?.text ?? session.messages.at(-1)?.text ?? '', 80),
-      detail: session.messages.map((message) => `${message.role === 'che' ? '澈' : '我'}：${message.text}`).join('\n'),
+      summary: fallback.summary,
+      detail: formatChatTranscript(session.messages),
       sceneType: scene.id,
       linkedPlanId,
       startedAt: formatClockTime(new Date(session.createdAt)),
       endedAt: formatClockTime(endedAt),
     };
     setDayRecords((currentRecords) => addUniqueRecord(currentRecords, record));
+
+    void summarizeEndedChat({
+      sceneTitle: scene.shortTitle,
+      messages: session.messages.map(({ role, text }) => ({ role, text })),
+    })
+      .then((summary) => {
+        setDayRecords((currentRecords) => applyChatSummaryToRecord(currentRecords, record.id, summary));
+      })
+      .catch(() => {
+        // The saved fallback remains the truthful history when summary service is unavailable.
+      });
   };
 
   return {
@@ -428,9 +445,4 @@ function restoreRuntimeCheSchedule(plans: UserPlan[]): CheScheduleItem[] {
 
 function formatClockTime(date: Date): string {
   return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
-function truncateText(text: string, maxLength: number): string {
-  const normalized = text.trim();
-  return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}…` : normalized;
 }
