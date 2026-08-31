@@ -319,7 +319,7 @@ function deriveRelationshipSummary(dayRecords: DayRecord[], recentMoments: Recen
 
   return {
     recordedDays: new Set(dayRecords.map((record) => record.dateKey)).size,
-    quietTalkCount: activityRecords.filter((record) => record.sceneType === 'deep_room').length,
+    quietTalkCount: dayRecords.filter((record) => record.kind === 'letter' && record.sceneType === 'deep_room').length,
     completedTogetherCount: completedTogether.length,
     recentTogether: recentTogether?.title ?? null,
     recentMoment: recentMoment?.text ?? null,

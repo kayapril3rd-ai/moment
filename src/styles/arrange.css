@@ -964,6 +964,7 @@ body {
 
 .letter-card {
   position: relative;
+  width: 100%;
   min-height: 132px;
   padding: 22px;
   overflow: hidden;
@@ -971,6 +972,13 @@ body {
   border-radius: 26px;
   background: var(--surface);
   box-shadow: 0 18px 48px rgba(49, 72, 63, 0.06);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.letter-card {
+  cursor: pointer;
 }
 
 .letter-copy {
@@ -1006,6 +1014,82 @@ body {
   color: var(--wood-soft);
   opacity: 0.20;
   pointer-events: none;
+}
+
+.letter-transcript {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: 20px;
+  background: var(--surface-strong);
+}
+
+.letter-transcript header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.letter-transcript header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.letter-transcript header strong {
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: var(--weight-semibold);
+}
+
+.letter-transcript header span {
+  color: var(--text-soft);
+  font-size: var(--text-meta-size);
+}
+
+.letter-transcript header button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-main);
+}
+
+.letter-transcript > p {
+  margin: 16px 0 0;
+  color: var(--text-main);
+  font-size: var(--text-body-size);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.moments-back-button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(47, 81, 71, 0.12);
+  border-radius: 50%;
+  background: rgba(69, 103, 94, 0.10);
+  color: var(--green-dark);
+  line-height: 0;
+}
+
+.moments-back-button svg {
+  display: block;
+}
+
+.moments-empty {
+  margin: 0;
+  padding: 20px 0;
+  color: var(--text-soft);
+  font-size: var(--text-body-size);
 }
 
 /* Bugfix overrides: real hero overlay, compact Arrange spacing, readable plan cards. */

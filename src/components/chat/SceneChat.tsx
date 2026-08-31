@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { CheCurrentState, SceneData } from '../../types/che';
 import type { ChatUserContext } from '../../types/chat';
 import { useSceneChatMessages } from '../../hooks/useSceneChatMessages';
+import type { StoredChatSession } from '../../utils/chatStorage';
 import { ChatSoftIcon } from '../icons';
 import { ChatPanel } from './ChatPanel';
 import { SceneVisual } from './SceneVisual';
@@ -12,12 +13,13 @@ interface SceneChatProps {
   userContext: ChatUserContext;
   activeStartedAt?: string | null;
   onBack: () => void;
-  onEndActivity?: (hasChat?: boolean) => void;
+  onEnd: (session: StoredChatSession) => void;
 }
 
-export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt, onBack, onEndActivity }: SceneChatProps) {
+export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt, onBack, onEnd }: SceneChatProps) {
   const {
     chatRuntimeContext,
+    endSession,
     error,
     isSending,
     messages,
@@ -39,13 +41,11 @@ export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt
     return () => window.removeEventListener('popstate', handlePopState);
   }, [isChatOpen, isDeep]);
 
-  const handleEndActivity = onEndActivity
-    ? () => {
-        const hasChat = messages.some((message) => message.role === 'user');
-        setIsChatOpen(false);
-        onEndActivity(hasChat);
-      }
-    : undefined;
+  const handleEnd = () => {
+    const endedSession = endSession();
+    setIsChatOpen(false);
+    onEnd(endedSession);
+  };
 
   return (
     <main
@@ -57,7 +57,7 @@ export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt
     >
       <div className={`phone-frame chat-frame${isChatOpen ? ' is-chat-open' : ''}`}>
         <div onClick={() => isChatOpen && !isDeep && setIsChatOpen(false)}>
-          <SceneVisual scene={scene} cheCurrentState={cheCurrentState} activeStartedAt={activeStartedAt} onBack={onBack} onEndActivity={handleEndActivity} />
+          <SceneVisual scene={scene} cheCurrentState={cheCurrentState} activeStartedAt={activeStartedAt} onBack={onBack} onEnd={handleEnd} />
         </div>
         {!isChatOpen ? (
           <div className="chat-launcher">

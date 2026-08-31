@@ -6,6 +6,7 @@ import { UserPlanList } from '../schedule/UserPlanList';
 import { ArrangeDateStrip } from './ArrangeDateStrip';
 import { ArrangeRecordView } from './ArrangeRecordView';
 import { ArrangeSegmentedTabs } from './ArrangeSegmentedTabs';
+import { toDateKey } from '../../utils/date';
 
 interface ArrangePageProps {
   userPlans: UserPlan[];
@@ -43,10 +44,12 @@ export function ArrangePage({
     toggleCalendarExpanded,
   } = useArrangeDateState(dayRecords, userPlans, initialTab);
 
-  const visibleUserPlans = userPlans.filter((plan) => (plan.dateKey ?? selectedDateKey) === selectedDateKey);
+  const visibleUserPlans = userPlans.filter(
+    (plan) => (plan.dateKey ?? toDateKey(new Date(plan.createdAt))) === selectedDateKey,
+  );
   const visibleCheSchedule = useMemo(
-    () => isPastRecord ? [] : getCheScheduleForDate(selectedDateKey),
-    [getCheScheduleForDate, isPastRecord, selectedDateKey],
+    () => getCheScheduleForDate(selectedDateKey),
+    [getCheScheduleForDate, selectedDateKey],
   );
 
   return (
@@ -67,6 +70,7 @@ export function ArrangePage({
           activeTab={activeTab}
           activityRecords={activityRecords}
           letterRecords={letterRecords}
+          cheSchedule={visibleCheSchedule}
           selectedMonthDay={selectedMonthDay}
           onTabChange={setActiveTab}
         />

@@ -10,10 +10,13 @@ import {
 } from '../api/_lib/difyChatContract.ts';
 import type { ChatRequest } from '../src/types/chat.ts';
 import {
+  clearChatSession,
+  createChatSession,
+  getChatSession,
+  getChatSessionSlotKey,
   getChatStorageKeys,
-  getDailyConversationId,
   getOrCreateAnonymousChatUserId,
-  saveDailyConversationId,
+  saveChatSession,
 } from '../src/utils/chatStorage.ts';
 
 class MemoryStorage {
@@ -25,6 +28,10 @@ class MemoryStorage {
 
   setItem(key: string, value: string) {
     this.values.set(key, value);
+  }
+
+  removeItem(key: string) {
+    this.values.delete(key);
   }
 }
 
@@ -50,19 +57,56 @@ class MockServerResponse {
 const storage = new MemoryStorage();
 const storageKeys = getChatStorageKeys();
 assert.equal(storageKeys.userId, 'moment.chat.userId');
-assert.equal(storageKeys.conversations, 'moment.chat.conversations');
+assert.equal(storageKeys.sessions, 'moment.chat.sessions');
 
 const firstUserId = getOrCreateAnonymousChatUserId(storage, () => 'fixed-uuid');
 const secondUserId = getOrCreateAnonymousChatUserId(storage, () => 'unused-uuid');
 assert.equal(firstUserId, 'moment-anon-fixed-uuid');
 assert.equal(secondUserId, firstUserId);
 
-saveDailyConversationId('2026-08-28', 'conversation-day-one', storage);
-assert.equal(getDailyConversationId('2026-08-28', storage), 'conversation-day-one');
-assert.equal(getDailyConversationId('2026-08-29', storage), undefined);
-saveDailyConversationId('2026-08-29', 'conversation-day-two', storage);
-assert.equal(getDailyConversationId('2026-08-28', storage), 'conversation-day-one');
-assert.equal(getDailyConversationId('2026-08-29', storage), 'conversation-day-two');
+const openingMessage = {
+  id: 'opening-study',
+  role: 'che' as const,
+  text: '我在书桌边。',
+  createdAt: '2026-08-28T09:00:00.000Z',
+};
+const studySession = createChatSession(
+  '2026-08-28',
+  'study',
+  [openingMessage],
+  new Date('2026-08-28T09:00:00.000Z'),
+  () => 'study-session',
+);
+saveChatSession(studySession, storage);
+assert.deepEqual(getChatSession('2026-08-28', 'study', storage), studySession);
+assert.equal(getChatSession('2026-08-28', 'watch', storage), undefined);
+assert.equal(getChatSession('2026-08-29', 'study', storage), undefined);
+assert.equal(getChatSessionSlotKey('2026-08-28', 'study'), '2026-08-28:study');
+
+const continuedStudySession = {
+  ...studySession,
+  conversationId: 'conversation-study',
+  messages: [
+    ...studySession.messages,
+    { id: 'user-one', role: 'user' as const, text: '今天有点冷。', createdAt: '2026-08-28T09:01:00.000Z' },
+  ],
+  updatedAt: '2026-08-28T09:01:00.000Z',
+};
+saveChatSession(continuedStudySession, storage);
+assert.equal(getChatSession('2026-08-28', 'study', storage)?.conversationId, 'conversation-study');
+assert.equal(getChatSession('2026-08-28', 'study', storage)?.messages.length, 2);
+
+const watchSession = createChatSession('2026-08-28', 'watch', [], new Date('2026-08-28T10:00:00.000Z'), () => 'watch-session');
+const nextDayStudySession = createChatSession('2026-08-29', 'study', [], new Date('2026-08-29T10:00:00.000Z'), () => 'next-day-study');
+saveChatSession(watchSession, storage);
+saveChatSession(nextDayStudySession, storage);
+assert.equal(getChatSession('2026-08-28', 'watch', storage)?.id, watchSession.id);
+assert.equal(getChatSession('2026-08-29', 'study', storage)?.id, nextDayStudySession.id);
+
+clearChatSession('2026-08-28', 'study', storage);
+assert.equal(getChatSession('2026-08-28', 'study', storage), undefined);
+assert.equal(getChatSession('2026-08-28', 'watch', storage)?.id, watchSession.id);
+assert.equal(getChatSession('2026-08-29', 'study', storage)?.id, nextDayStudySession.id);
 
 const momentRequest: ChatRequest = {
   query: '今天工作还顺利吗',
@@ -219,9 +263,11 @@ await assert.rejects(readFile(new URL('../server/difyChatContract.ts', import.me
 console.log(JSON.stringify({
   stableUserId: firstUserId,
   storageKeys,
-  dailyConversations: {
-    '2026-08-28': getDailyConversationId('2026-08-28', storage),
-    '2026-08-29': getDailyConversationId('2026-08-29', storage),
+  chatSessions: {
+    restoredConversationId: continuedStudySession.conversationId,
+    endedStudyCleared: getChatSession('2026-08-28', 'study', storage) === undefined,
+    separateScene: getChatSession('2026-08-28', 'watch', storage)?.id,
+    separateDate: getChatSession('2026-08-29', 'study', storage)?.id,
   },
   difyRequest,
   mappedResponse,

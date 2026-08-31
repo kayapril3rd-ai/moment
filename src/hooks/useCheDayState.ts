@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { mockDayRecords, mockSceneCards, mockUserPlans } from '../data';
-import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, UserPlan } from '../types/che';
+import { mockSceneCards } from '../data';
+import type { CheScheduleItem, DayRecord, RecentMoment, SceneCard, SceneData, UserPlan } from '../types/che';
 import {
   addUniqueMoment,
   addUniqueRecord,
@@ -24,26 +24,40 @@ import {
 import { useCheDayDerivedState } from './useCheDayDerivedState';
 import { toDateKey } from '../utils/date';
 import { getCheScheduleForDate as mergeCheScheduleForDate } from '../utils/cheSchedule.ts';
+import type { StoredChatSession } from '../utils/chatStorage';
+import {
+  readDayRecords,
+  readRecentMoments,
+  readUserPlans,
+  writeDayRecords,
+  writeRecentMoments,
+  writeUserPlans,
+} from '../utils/dayStateStorage';
 
-interface UseCheDayStateInput {
-  recentMoments: RecentMoment[];
-  onRecentMomentsChange: (moments: RecentMoment[]) => void;
-}
-
-export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheDayStateInput) {
-  const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
-  const [activeStartedAt, setActiveStartedAt] = useState<string | null>(null);
+export function useCheDayState() {
+  const [userPlans, setUserPlans] = useState<UserPlan[]>(() => readUserPlans());
+  const restoredActivePlan = userPlans.find((plan) => plan.status === 'active' && plan.inviteStatus === 'accepted');
+  const [activeActivityId, setActiveActivityId] = useState<string | null>(
+    () => restoredActivePlan ? `scene-shared-${restoredActivePlan.id}` : null,
+  );
+  const [activeStartedAt, setActiveStartedAt] = useState<string | null>(() => restoredActivePlan?.updatedAt ?? null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [userPlans, setUserPlans] = useState<UserPlan[]>(mockUserPlans);
-  const [runtimeCheScheduleItems, setRuntimeCheScheduleItems] = useState<CheScheduleItem[]>([]);
-  const [sceneCards, setSceneCards] = useState<SceneCard[]>(mockSceneCards);
-  const [dayRecords, setDayRecords] = useState<DayRecord[]>(mockDayRecords);
+  const [runtimeCheScheduleItems, setRuntimeCheScheduleItems] = useState<CheScheduleItem[]>(
+    () => restoreRuntimeCheSchedule(userPlans),
+  );
+  const [sceneCards, setSceneCards] = useState<SceneCard[]>(() => restoreSceneCards(userPlans));
+  const [dayRecords, setDayRecords] = useState<DayRecord[]>(() => readDayRecords());
+  const [recentMoments, setRecentMoments] = useState<RecentMoment[]>(() => readRecentMoments());
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const timerId = window.setInterval(() => setNow(Date.now()), 60_000);
     return () => window.clearInterval(timerId);
   }, []);
+
+  useEffect(() => writeUserPlans(userPlans), [userPlans]);
+  useEffect(() => writeDayRecords(dayRecords), [dayRecords]);
+  useEffect(() => writeRecentMoments(recentMoments), [recentMoments]);
 
   const selectedPlan = userPlans.find((plan) => plan.id === selectedPlanId) ?? null;
   const todayKey = toDateKey(new Date(now));
@@ -67,7 +81,7 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
   });
 
   const updateRecentMoments = (updater: (currentMoments: RecentMoment[]) => RecentMoment[]) => {
-    onRecentMomentsChange(updater(recentMoments));
+    setRecentMoments(updater);
   };
 
   const handleAddPlan = (input: string, selectedDateKey?: string) => {
@@ -268,6 +282,27 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     );
   };
 
+  const recordEndedChat = (session: StoredChatSession, scene: SceneData, linkedPlanId: string | null) => {
+    if (!session.messages.some((message) => message.role === 'user')) return;
+    const endedAt = new Date();
+    const lastCheMessage = [...session.messages].reverse().find((message) => message.role === 'che');
+    const record: DayRecord = {
+      id: `record-${session.id}`,
+      dateKey: toDateKey(endedAt),
+      owner: 'che',
+      kind: 'letter',
+      title: scene.id === 'deep_room' ? '安静聊聊' : scene.shortTitle,
+      timeLabel: formatClockTime(endedAt),
+      summary: truncateText(lastCheMessage?.text ?? session.messages.at(-1)?.text ?? '', 80),
+      detail: session.messages.map((message) => `${message.role === 'che' ? '澈' : '我'}：${message.text}`).join('\n'),
+      sceneType: scene.id,
+      linkedPlanId,
+      startedAt: formatClockTime(new Date(session.createdAt)),
+      endedAt: formatClockTime(endedAt),
+    };
+    setDayRecords((currentRecords) => addUniqueRecord(currentRecords, record));
+  };
+
   return {
     ...derivedState,
     activeActivityId,
@@ -285,6 +320,7 @@ export function useCheDayState({ recentMoments, onRecentMomentsChange }: UseCheD
     activateActivity,
     now,
     recentMoments,
+    recordEndedChat,
     restoreTodo,
     sceneCards,
     selectedPlan,
@@ -312,4 +348,45 @@ function getCompletedChatMomentText(card: SceneCard) {
     default:
       return `你们完成了${card.title}，也聊了几句。`;
   }
+}
+
+function restoreSceneCards(plans: UserPlan[]): SceneCard[] {
+  const sharedCards = plans
+    .filter((plan) => plan.inviteStatus === 'accepted' && plan.status !== 'cancelled')
+    .map((plan, index) => {
+      const card = createSharedSceneFromPlan(plan, index + 1);
+      if (plan.status === 'done') return { ...card, status: 'completed' as const, timeLabel: '已完成' };
+      if (plan.status === 'active') return { ...card, status: 'active' as const, timeLabel: '进行中' };
+      return card;
+    });
+  return [
+    ...sharedCards,
+    ...mockSceneCards.map((card) => ({ ...card, sortOrder: card.sortOrder + sharedCards.length })),
+  ];
+}
+
+function restoreRuntimeCheSchedule(plans: UserPlan[]): CheScheduleItem[] {
+  let schedule = plans
+    .filter((plan) => plan.inviteStatus === 'accepted' && plan.status !== 'cancelled')
+    .map((plan) => {
+      const item = createCheScheduleItemFromPlan(plan);
+      return plan.status === 'done' ? { ...item, status: 'completed' as const } : item;
+    });
+
+  plans
+    .filter((plan) => plan.inviteStatus === 'accepted' && plan.status === 'active')
+    .forEach((plan) => {
+      const card = { ...createSharedSceneFromPlan(plan), status: 'active' as const };
+      schedule = syncCheScheduleForActive(schedule, card, plan.updatedAt);
+    });
+  return schedule;
+}
+
+function formatClockTime(date: Date): string {
+  return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function truncateText(text: string, maxLength: number): string {
+  const normalized = text.trim();
+  return normalized.length > maxLength ? `${normalized.slice(0, maxLength)}…` : normalized;
 }

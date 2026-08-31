@@ -10,10 +10,10 @@ interface SceneVisualProps {
   cheCurrentState: CheCurrentState;
   activeStartedAt?: string | null;
   onBack: () => void;
-  onEndActivity?: () => void;
+  onEnd: () => void;
 }
 
-export function SceneVisual({ scene, cheCurrentState, activeStartedAt, onBack, onEndActivity }: SceneVisualProps) {
+export function SceneVisual({ scene, cheCurrentState, activeStartedAt, onBack, onEnd }: SceneVisualProps) {
   const [now, setNow] = useState(() => Date.now());
   const usesCurrentWorldScene = scene.conversationMode !== 'deep'
     && (cheCurrentState.source === 'shared_activity' || cheCurrentState.entrySceneType === scene.id);
@@ -50,7 +50,7 @@ export function SceneVisual({ scene, cheCurrentState, activeStartedAt, onBack, o
           <BackSoftIcon size={22} aria-hidden="true" />
         </button>
         <span id="scene-chat-title">{getSceneStatus(scene, activeStartedAt, now)}</span>
-        <button className="scene-end-button" type="button" onClick={onEndActivity ?? onBack}>
+        <button className="scene-end-button" type="button" onClick={onEnd}>
           结束
         </button>
       </header>

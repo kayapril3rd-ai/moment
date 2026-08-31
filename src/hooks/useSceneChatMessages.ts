@@ -4,9 +4,12 @@ import type { ChatRequest, ChatUserContext } from '../types/chat';
 import type { ChatMessage, CheCurrentState, SceneData } from '../types/che';
 import { buildChatRuntimeContext } from '../utils/agentSceneContext';
 import {
-  getDailyConversationId,
+  clearChatSession,
+  createChatSession,
+  getChatSession,
   getOrCreateAnonymousChatUserId,
-  saveDailyConversationId,
+  saveChatSession,
+  type StoredChatSession,
 } from '../utils/chatStorage';
 import { toDateKey } from '../utils/date';
 import { getSceneOpeningMessage } from '../utils/reply';
@@ -14,7 +17,7 @@ import { getSceneOpeningMessage } from '../utils/reply';
 const CHAT_ERROR_MESSAGE = '刚刚没连上，再试一次。';
 
 interface FailedChatRequest {
-  dateKey: string;
+  sessionId: string;
   request: ChatRequest;
 }
 
@@ -27,20 +30,36 @@ export function useSceneChatMessages(
     () => buildChatRuntimeContext(scene, cheCurrentState),
     [cheCurrentState, scene],
   );
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [createInitialMessage(scene)]);
+  const [session, setSession] = useState<StoredChatSession>(() => loadOrCreateSession(scene));
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userId] = useState(() => getOrCreateAnonymousChatUserId());
+  const sessionRef = useRef(session);
+  const activeSessionIdRef = useRef<string | null>(session.id);
   const failedRequestRef = useRef<FailedChatRequest | null>(null);
   const requestInFlightRef = useRef(false);
-  const sceneIdRef = useRef(scene.id);
+  const currentDateKey = toDateKey(new Date());
 
   useEffect(() => {
-    sceneIdRef.current = scene.id;
-    setMessages([createInitialMessage(scene)]);
+    if (sessionRef.current.sceneId === scene.id && sessionRef.current.dateKey === currentDateKey) return;
+    const nextSession = loadOrCreateSession(scene, currentDateKey);
+    sessionRef.current = nextSession;
+    activeSessionIdRef.current = nextSession.id;
+    setSession(nextSession);
     setError(null);
+    setIsSending(false);
     failedRequestRef.current = null;
-  }, [scene.id]);
+    requestInFlightRef.current = false;
+  }, [currentDateKey, scene]);
+
+  const updateSession = useCallback((updater: (current: StoredChatSession) => StoredChatSession) => {
+    const current = sessionRef.current;
+    if (activeSessionIdRef.current !== current.id) return;
+    const next = { ...updater(current), updatedAt: new Date().toISOString() };
+    sessionRef.current = next;
+    saveChatSession(next);
+    setSession(next);
+  }, []);
 
   const requestReply = useCallback(async (
     query: string,
@@ -48,53 +67,57 @@ export function useSceneChatMessages(
     retryAttempt?: FailedChatRequest,
   ) => {
     if (requestInFlightRef.current) return;
+    const sessionSnapshot = sessionRef.current;
+    const requestSessionId = retryAttempt?.sessionId ?? sessionSnapshot.id;
+    if (activeSessionIdRef.current !== requestSessionId) return;
+
     requestInFlightRef.current = true;
     setIsSending(true);
     setError(null);
 
-    const now = Date.now();
-    const requestSceneId = scene.id;
-    const dateKey = retryAttempt?.dateKey ?? toDateKey(new Date(now));
+    const now = new Date();
     const request: ChatRequest = retryAttempt?.request ?? {
       query,
       context: chatRuntimeContext,
       userContext,
-      conversationId: getDailyConversationId(dateKey),
+      conversationId: sessionSnapshot.conversationId,
       userId,
     };
     if (appendUserMessage) {
       const userMessage: ChatMessage = {
-        id: `user-${now}-${crypto.randomUUID()}`,
+        id: `user-${now.getTime()}-${crypto.randomUUID()}`,
         role: 'user',
         text: query,
-        createdAt: new Date(now).toISOString(),
+        createdAt: now.toISOString(),
       };
-      setMessages((currentMessages) => [...currentMessages, userMessage]);
+      updateSession((current) => ({ ...current, messages: [...current.messages, userMessage] }));
     }
 
     try {
       const response = await sendChatMessage(request);
-      saveDailyConversationId(dateKey, response.conversationId);
-
-      if (sceneIdRef.current !== requestSceneId) return;
+      if (activeSessionIdRef.current !== requestSessionId) return;
       const cheMessage: ChatMessage = {
         id: `che-${response.messageId}`,
         role: 'che',
         text: response.answer,
         createdAt: new Date().toISOString(),
       };
-      setMessages((currentMessages) => [...currentMessages, cheMessage]);
+      updateSession((current) => ({
+        ...current,
+        conversationId: response.conversationId,
+        messages: [...current.messages, cheMessage],
+      }));
       failedRequestRef.current = null;
     } catch {
-      if (sceneIdRef.current === requestSceneId) {
-        failedRequestRef.current = { dateKey, request };
+      if (activeSessionIdRef.current === requestSessionId) {
+        failedRequestRef.current = { sessionId: requestSessionId, request };
         setError(CHAT_ERROR_MESSAGE);
       }
     } finally {
       requestInFlightRef.current = false;
-      if (sceneIdRef.current === requestSceneId) setIsSending(false);
+      if (activeSessionIdRef.current === requestSessionId) setIsSending(false);
     }
-  }, [chatRuntimeContext, scene.id, userContext, userId]);
+  }, [chatRuntimeContext, updateSession, userContext, userId]);
 
   const sendMessage = useCallback(async (text: string) => {
     const query = text.trim();
@@ -108,21 +131,40 @@ export function useSceneChatMessages(
     await requestReply(failedRequest.request.query, false, failedRequest);
   }, [requestReply]);
 
+  const endSession = useCallback((): StoredChatSession => {
+    const endedSession = sessionRef.current;
+    activeSessionIdRef.current = null;
+    failedRequestRef.current = null;
+    clearChatSession(endedSession.dateKey, endedSession.sceneId);
+    return endedSession;
+  }, []);
+
   return {
     chatRuntimeContext,
+    endSession,
     error,
     isSending,
-    messages,
+    messages: session.messages,
     retryLastMessage,
     sendMessage,
   };
 }
 
-function createInitialMessage(scene: SceneData): ChatMessage {
+function loadOrCreateSession(scene: SceneData, dateKey = toDateKey(new Date())): StoredChatSession {
+  const storedSession = getChatSession(dateKey, scene.id);
+  if (storedSession) return storedSession;
+
+  const now = new Date();
+  const session = createChatSession(dateKey, scene.id, [createInitialMessage(scene, now)], now);
+  saveChatSession(session);
+  return session;
+}
+
+function createInitialMessage(scene: SceneData, now: Date): ChatMessage {
   return {
-    id: `che-opening-${scene.id}`,
+    id: `che-opening-${scene.id}-${now.getTime()}`,
     role: 'che',
     text: getSceneOpeningMessage(scene),
-    createdAt: new Date().toISOString(),
+    createdAt: now.toISOString(),
   };
 }

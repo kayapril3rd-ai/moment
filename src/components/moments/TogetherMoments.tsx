@@ -15,7 +15,7 @@ export function TogetherMoments({ moments, onBack }: TogetherMomentsProps) {
     <main className="app-shell" aria-labelledby="moments-page-title">
       <div className="phone-frame moments-frame">
         <header className="moments-page-header">
-          <button className="scene-back-button moments-back" type="button" onClick={onBack} aria-label="返回 Today">
+          <button className="moments-back-button" type="button" onClick={onBack} aria-label="返回 Today">
             <BackSoftIcon size={22} aria-hidden="true" />
           </button>
           <div>
@@ -29,12 +29,12 @@ export function TogetherMoments({ moments, onBack }: TogetherMomentsProps) {
         </p>
 
         <div className="moments-page-list">
-          {moments.map((moment) => (
-            <article className="moment-card" key={moment.id}>
-              <time dateTime={moment.createdAt}>{formatMomentTime(moment.createdAt, now)}</time>
-              <p>{moment.text}</p>
-            </article>
-          ))}
+          {moments.length > 0 ? moments.map((moment) => (
+              <article className="moment-card" key={moment.id}>
+                <time dateTime={moment.createdAt}>{formatMomentTime(moment.createdAt, now)}</time>
+                <p>{moment.text}</p>
+              </article>
+            )) : <p className="moments-empty">还没有留下记录。</p>}
         </div>
       </div>
     </main>

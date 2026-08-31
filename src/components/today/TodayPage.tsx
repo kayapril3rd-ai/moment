@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityDetail } from '../activity/ActivityDetail';
 import { ActivitySetup } from '../activity/ActivitySetup';
 import { ArrangePage } from '../arrange/ArrangePage';
@@ -19,6 +19,7 @@ import type { ArrangeTab } from '../../hooks/useArrangeDateState';
 import type { UserProfile } from '../../data/mockProfile';
 import type { SceneCard, SceneType } from '../../types/che';
 import type { CheDayState } from '../../hooks/useCheDayState';
+import { toDateKey } from '../../utils/date';
 
 interface TodayPageProps {
   onOpenScene: (sceneType: SceneType) => void;
@@ -121,6 +122,11 @@ export function TodayPage({
     if (activeActivityCard) onOpenScene(activeActivityCard.sceneType);
   };
   const deepChatSummary = getDeepChatCardSummary(dayRecords, now);
+  const todayKey = toDateKey(new Date(now));
+  const todayUserPlans = useMemo(
+    () => userPlans.filter((plan) => (plan.dateKey ?? toDateKey(new Date(plan.createdAt))) === todayKey),
+    [todayKey, userPlans],
+  );
 
   const openCheSchedule = () => {
     setArrangeInitialTab('che');
@@ -220,7 +226,7 @@ export function TodayPage({
         <DayOverviewDrawer
           isOpen={dayOverviewType !== null}
           type={dayOverviewType ?? 'user'}
-          userPlans={userPlans}
+          userPlans={todayUserPlans}
           cheSchedule={cheSchedule}
           onClose={() => setDayOverviewType(null)}
           onManageToday={() => {

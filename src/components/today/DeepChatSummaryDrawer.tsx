@@ -61,7 +61,7 @@ export function getDeepChatCardSummary(records: DayRecord[], now: number) {
 
 function createDeepChatSummary(records: DayRecord[], now: number): DeepChatSummary {
   const deepRecords = records
-    .filter((record) => record.sceneType === 'deep_room' && record.kind === 'activity')
+    .filter((record) => record.sceneType === 'deep_room' && record.kind === 'letter')
     .sort((a, b) => getRecordTime(b) - getRecordTime(a));
   const todayKey = toDateKey(new Date(now));
   const latest = deepRecords[0];
