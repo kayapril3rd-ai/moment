@@ -9,7 +9,9 @@ export interface ChatSummaryRequest {
 }
 
 export interface ChatSummaryResponse {
+  /** Semantic topic, not a scene label or a mechanical copy of the first message. */
   topicTitle: string;
+  /** One concise recollection in 澈's natural voice. */
   summary: string;
 }
 

@@ -38,12 +38,13 @@ There is no chat tab. Chat is entered from a scene.
   ├─ 我的
   │   ├─ 添加计划
   │   ├─ plan card → Plan Detail
-  │   └─ 邀请澈 → accepted → update sceneCards / cheSchedule / recentMoments
+  │   ├─ 邀请澈 → accepted → update sceneCards / cheSchedule / recentMoments
+  │   └─ 聊天信件 → 话题与澈口吻回顾 → detail sheet 查看完整 transcript
   ├─ 澈的
   │   └─ read-only che schedule
-  └─ 当天记录
-      ├─ 活动记录 → expand summary
-      └─ 聊天信件 → expand quiet summary
+  └─ 过去日期
+      ├─ 我的 → 活动记录 + 聊天信件
+      └─ 澈的 → deterministic activity timeline
 ```
 
 ## Mine Flow
@@ -115,8 +116,10 @@ Rules:
 
 ```text
 安静聊聊
-  ├─ 返回 → 今天
-  └─ 输入消息 → 使用同一天共享的 Dify conversation
+  ├─ 收起面板 → 保留 session，显示完整场景与 launcher
+  ├─ 返回 → 今天并保留 session
+  ├─ 结束 → 归档聊天信件并清除 session
+  └─ 输入消息 → 继续当前 date + scene session 的 Dify conversation
 ```
 
 Rules:

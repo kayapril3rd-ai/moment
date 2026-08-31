@@ -16,7 +16,8 @@ export function writeUserPlans(plans: UserPlan[], storage: DayStateStorage = win
 }
 
 export function readDayRecords(storage: DayStateStorage = window.localStorage): DayRecord[] {
-  return readStoredArray(storage, DAY_RECORDS_STORAGE_KEY, isDayRecord);
+  return readStoredArray(storage, DAY_RECORDS_STORAGE_KEY, isDayRecord)
+    .map((record) => record.kind === 'letter' ? { ...record, owner: 'mine' } : record);
 }
 
 export function writeDayRecords(records: DayRecord[], storage: DayStateStorage = window.localStorage): void {

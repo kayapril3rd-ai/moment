@@ -34,12 +34,12 @@ export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt
   }, [scene.id, isDeep]);
 
   useEffect(() => {
-    if (!isChatOpen || isDeep) return undefined;
+    if (!isChatOpen) return undefined;
     window.history.pushState({ sceneChat: 'chat_open' }, '');
     const handlePopState = () => setIsChatOpen(false);
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [isChatOpen, isDeep]);
+  }, [isChatOpen]);
 
   const handleEnd = () => {
     const endedSession = endSession();
@@ -56,7 +56,7 @@ export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt
       data-chat-mode={chatRuntimeContext.chatMode}
     >
       <div className={`phone-frame chat-frame${isChatOpen ? ' is-chat-open' : ''}`}>
-        <div onClick={() => isChatOpen && !isDeep && setIsChatOpen(false)}>
+        <div onClick={() => isChatOpen && setIsChatOpen(false)}>
           <SceneVisual scene={scene} cheCurrentState={cheCurrentState} activeStartedAt={activeStartedAt} onBack={onBack} onEnd={handleEnd} />
         </div>
         {!isChatOpen ? (

@@ -77,11 +77,13 @@ export function ArrangePage({
         <>
           <ArrangeSegmentedTabs activeTab={activeTab} onTabChange={setActiveTab} />
           {activeTab === 'mine' ? (
-            <UserPlanList plans={visibleUserPlans} selectedDateKey={selectedDateKey} onAddPlan={onAddPlan} onInvite={onInvitePlan} onSelectPlan={onSelectPlan} />
+            <section className="my-arrange-content" aria-label="我的安排">
+              <UserPlanList plans={visibleUserPlans} selectedDateKey={selectedDateKey} onAddPlan={onAddPlan} onInvite={onInvitePlan} onSelectPlan={onSelectPlan} />
+              {isToday && letterRecords.length > 0 ? <ChatLetterSection letterRecords={letterRecords} /> : null}
+            </section>
           ) : (
             <section className="che-arrange-panel" aria-label="澈的安排">
               {visibleCheSchedule.length > 0 ? <CheScheduleList schedule={visibleCheSchedule} /> : <p className="arrange-empty-text">这一天还没有安排。</p>}
-              {isToday && letterRecords.length > 0 ? <ChatLetterSection letterRecords={letterRecords} /> : null}
             </section>
           )}
         </>

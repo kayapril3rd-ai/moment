@@ -319,11 +319,11 @@ export function useCheDayState() {
   const recordEndedChat = (session: StoredChatSession, scene: SceneData, linkedPlanId: string | null) => {
     if (!session.messages.some((message) => message.role === 'user')) return;
     const endedAt = new Date();
-    const fallback = createChatSummaryFallback(session.messages);
+    const fallback = createChatSummaryFallback(session.messages, scene.id);
     const record: DayRecord = {
       id: `record-${session.id}`,
       dateKey: toDateKey(endedAt),
-      owner: 'che',
+      owner: 'mine',
       kind: 'letter',
       title: fallback.topicTitle,
       timeLabel: formatClockTime(endedAt),

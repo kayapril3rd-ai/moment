@@ -31,6 +31,7 @@ import {
   getOrCreateAnonymousChatUserId,
   saveChatSession,
 } from '../src/utils/chatStorage.ts';
+import { readDayRecords } from '../src/utils/dayStateStorage.ts';
 
 class MemoryStorage {
   private values = new Map<string, string>();
@@ -253,22 +254,33 @@ const parsedSummary = parseDifySummaryWorkflowResponse({
   data: {
     outputs: {
       topicTitle: '**工作太多，想去打游戏**',
-      summary: '最近事情很多，你有点不想继续工作。也聊到想打游戏放松一下。第三句不会保留。',
+      summary: '你今天被一堆事情压得有点烦。后来一直惦记着想去打两局放松一下。第三句不会保留。',
     },
   },
 });
 assert.deepEqual(parsedSummary, {
   topicTitle: '工作太多，想去打游戏',
-  summary: '最近事情很多，你有点不想继续工作。也聊到想打游戏放松一下。',
+  summary: '你今天被一堆事情压得有点烦。后来一直惦记着想去打两局放松一下。',
 });
-const fallbackSummary = createChatSummaryFallback(summaryMessages);
+const fallbackSummary = createChatSummaryFallback(summaryMessages, 'deep_room');
 assert.ok(fallbackSummary.topicTitle.length > 0);
 assert.ok(fallbackSummary.summary.length > 0);
+assert.equal(fallbackSummary.topicTitle, '这次安静聊到的事');
+assert.notEqual(fallbackSummary.topicTitle, summaryMessages[1].text, 'fallback title must not copy the first user message');
 assert.notEqual(fallbackSummary.summary, summaryMessages[0].text, 'fallback must be based on real user messages');
+const stomachMessages: ChatMessage[] = [
+  { id: 'stomach-user-one', role: 'user', text: '我肚子痛痛', createdAt: '2026-08-31T13:12:00.000Z' },
+  { id: 'stomach-che-one', role: 'che', text: '是不是很难受', createdAt: '2026-08-31T13:13:00.000Z' },
+  { id: 'stomach-user-two', role: 'user', text: '难受坏了', createdAt: '2026-08-31T13:14:00.000Z' },
+];
+const stomachFallback = createChatSummaryFallback(stomachMessages, 'deep_room');
+assert.equal(stomachFallback.topicTitle, '这次安静聊到的事');
+assert.notEqual(stomachFallback.topicTitle, '我肚子痛痛');
+assert.equal(stomachFallback.summary, '你刚才提到“我肚子痛痛”，后来又说“难受坏了”。');
 const fallbackRecord: DayRecord = {
   id: 'record-summary-session',
   dateKey: '2026-08-28',
-  owner: 'che',
+  owner: 'mine',
   kind: 'letter',
   title: fallbackSummary.topicTitle,
   timeLabel: '22:14',
@@ -293,6 +305,20 @@ const recordsBeforeFailedSummary = [fallbackRecord];
 const recordsAfterFailedSummary = await Promise.reject(new Error('summary unavailable'))
   .catch(() => recordsBeforeFailedSummary);
 assert.deepEqual(recordsAfterFailedSummary, recordsBeforeFailedSummary, 'summary failure must leave the fallback record intact');
+
+const legacyRecordStorage = new MemoryStorage();
+const legacyLetter = { ...fallbackRecord, owner: 'che' as const };
+const cheActivityRecord: DayRecord = {
+  ...fallbackRecord,
+  id: 'record-che-activity',
+  owner: 'che',
+  kind: 'activity',
+};
+legacyRecordStorage.setItem('moment.dayRecords', JSON.stringify([legacyLetter, cheActivityRecord]));
+const normalizedDayRecords = readDayRecords(legacyRecordStorage);
+assert.equal(normalizedDayRecords[0].owner, 'mine', 'legacy letters must migrate to Mine when read');
+assert.equal(normalizedDayRecords[0].detail, transcript, 'letter migration must preserve the transcript');
+assert.equal(normalizedDayRecords[1].owner, 'che', 'activity ownership must not be migrated');
 
 const methodResponse = new MockServerResponse();
 await chatHandler({ method: 'GET' } as never, methodResponse as never);
@@ -373,7 +399,7 @@ globalThis.fetch = async (input, init) => {
     data: {
       outputs: {
         topicTitle: '工作很多，想去打游戏',
-        summary: '事情很多时有点不想工作，也想打游戏放松一下。',
+        summary: '你今天被一堆事情压得有点烦，后来一直惦记着想去打两局放松一下。',
       },
     },
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -385,7 +411,7 @@ assert.equal(summaryUpstreamUrl, 'https://api.dify.ai/v1/workflows/run');
 assert.deepEqual(summaryUpstreamBody, summaryWorkflowRequest);
 assert.deepEqual(summarySuccessResponse.body, {
   topicTitle: '工作很多，想去打游戏',
-  summary: '事情很多时有点不想工作，也想打游戏放松一下。',
+  summary: '你今天被一堆事情压得有点烦，后来一直惦记着想去打两局放松一下。',
 });
 
 globalThis.fetch = previousFetch;
@@ -406,14 +432,25 @@ const summaryApiSource = await readFile(new URL('../api/chat-summary.ts', import
 assert.equal(summaryApiSource.includes("from './_lib/chatSummaryContract.js'"), true);
 assert.equal(/from\s+['"][^'"]+\.ts['"]/.test(summaryApiSource), false);
 const arrangePageSource = await readFile(new URL('../src/components/arrange/ArrangePage.tsx', import.meta.url), 'utf8');
+const todayLetterConditionIndex = arrangePageSource.indexOf('isToday && letterRecords.length > 0');
+const minePanelIndex = arrangePageSource.indexOf('className="my-arrange-content"');
+const chePanelIndex = arrangePageSource.indexOf('className="che-arrange-panel"');
 assert.equal(
-  arrangePageSource.includes('isToday && letterRecords.length > 0'),
+  minePanelIndex >= 0 && todayLetterConditionIndex > minePanelIndex && todayLetterConditionIndex < chePanelIndex,
   true,
-  'Today Che tab must surface ended chat letters without showing an empty future section',
+  'Today Mine must surface ended chat letters before the Che panel branch',
 );
+const arrangeRecordSource = await readFile(new URL('../src/components/arrange/ArrangeRecordView.tsx', import.meta.url), 'utf8');
+assert.equal(arrangeRecordSource.includes("activeTab === 'mine' ? <ChatLetterSection"), true);
 const deepSummarySource = await readFile(new URL('../src/components/today/DeepChatSummaryDrawer.tsx', import.meta.url), 'utf8');
 assert.equal(deepSummarySource.includes('summary: latest.summary.trim()'), true);
 assert.equal(deepSummarySource.includes('latest.detail ?? latest.summary'), false);
+const dayStateSource = await readFile(new URL('../src/hooks/useCheDayState.ts', import.meta.url), 'utf8');
+assert.equal(dayStateSource.includes("owner: 'mine'"), true, 'new ended chat records must belong to Mine');
+const sceneChatSource = await readFile(new URL('../src/components/chat/SceneChat.tsx', import.meta.url), 'utf8');
+assert.equal(sceneChatSource.includes('if (!isChatOpen || isDeep)'), false);
+assert.equal(sceneChatSource.includes('isChatOpen && !isDeep'), false);
+assert.equal(sceneChatSource.includes('onCollapse={() => setIsChatOpen(false)}'), true);
 
 console.log(JSON.stringify({
   stableUserId: firstUserId,
@@ -436,6 +473,8 @@ console.log(JSON.stringify({
   serverSuccess: successResponse.body,
   chatSummary: {
     fallbackSummary,
+    stomachFallback,
+    normalizedOwners: normalizedDayRecords.map((record) => `${record.kind}:${record.owner}`),
     workflowRequest: summaryWorkflowRequest,
     upstreamFailure: summaryUpstreamFailureResponse.statusCode,
     serverSuccess: summarySuccessResponse.body,

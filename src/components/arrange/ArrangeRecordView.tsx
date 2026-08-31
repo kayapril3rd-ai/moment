@@ -69,7 +69,7 @@ export function ArrangeRecordView({
         )}
       </div>
 
-      <ChatLetterSection letterRecords={letterRecords} />
+      {activeTab === 'mine' ? <ChatLetterSection letterRecords={letterRecords} /> : null}
     </section>
   );
 }

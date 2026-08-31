@@ -1,18 +1,21 @@
-import type { ChatMessage, DayRecord } from '../types/che';
+import type { ChatMessage, DayRecord, SceneType } from '../types/che';
 import type { ChatSummaryResponse } from '../types/chatSummary';
 
 const FALLBACK_TITLE_MAX_LENGTH = 18;
 const FALLBACK_SUMMARY_MAX_LENGTH = 100;
 
-export function createChatSummaryFallback(messages: ChatMessage[]): ChatSummaryResponse {
+export function createChatSummaryFallback(messages: ChatMessage[], sceneType: SceneType): ChatSummaryResponse {
   const userMessages = messages
     .filter((message) => message.role === 'user')
     .map((message) => message.text.trim())
     .filter(Boolean);
-  const firstMessage = userMessages[0] ?? '聊了一会儿';
-  const summarySource = userMessages.slice(0, 2).join('；') || firstMessage;
+  const firstMessage = userMessages[0] ?? '刚才聊了一会儿';
+  const secondMessage = userMessages[1];
+  const summarySource = secondMessage
+    ? `你刚才提到“${firstMessage}”，后来又说“${secondMessage}”。`
+    : `你刚才提到“${firstMessage}”。`;
   return {
-    topicTitle: truncateText(firstMessage, FALLBACK_TITLE_MAX_LENGTH),
+    topicTitle: sceneType === 'deep_room' ? '这次安静聊到的事' : '这次聊到的事',
     summary: truncateText(summarySource, FALLBACK_SUMMARY_MAX_LENGTH),
   };
 }
