@@ -12,6 +12,7 @@ interface MinePageProps {
   recentMoments: RecentMoment[];
   onUserProfileChange: (profile: UserProfile) => void;
   onMemoryItemsChange: (items: string[]) => void;
+  onClearConversationMemories: () => void;
 }
 
 const entryCards: Array<{
@@ -25,7 +26,15 @@ const entryCards: Array<{
   { id: 'privacy', title: '隐私', subtitle: '数据与清除' },
 ];
 
-export function MinePage({ userProfile, memoryItems, dayRecords, recentMoments, onUserProfileChange, onMemoryItemsChange }: MinePageProps) {
+export function MinePage({
+  userProfile,
+  memoryItems,
+  dayRecords,
+  recentMoments,
+  onUserProfileChange,
+  onMemoryItemsChange,
+  onClearConversationMemories,
+}: MinePageProps) {
   const [activeSheet, setActiveSheet] = useState<MineSheetType | null>(null);
   const relationshipSummary = deriveRelationshipSummary(dayRecords, recentMoments);
 
@@ -60,6 +69,7 @@ export function MinePage({ userProfile, memoryItems, dayRecords, recentMoments, 
           recentMoments={recentMoments}
           onUserProfileChange={onUserProfileChange}
           onMemoryItemsChange={onMemoryItemsChange}
+          onClearConversationMemories={onClearConversationMemories}
           onClose={() => setActiveSheet(null)}
         />
       ) : null}
@@ -85,6 +95,7 @@ function MineDetailSheet({
   recentMoments,
   onUserProfileChange,
   onMemoryItemsChange,
+  onClearConversationMemories,
   onClose,
 }: MinePageProps & { type: MineSheetType; onClose: () => void }) {
   const title = entryCards.find((card) => card.id === type)?.title ?? '我的';
@@ -104,7 +115,7 @@ function MineDetailSheet({
           ) : null}
           {type === 'relationship' ? <RelationshipDetail summary={deriveRelationshipSummary(dayRecords, recentMoments)} /> : null}
           {type === 'memory' ? <MemoryManager memoryItems={memoryItems} onChange={onMemoryItemsChange} /> : null}
-          {type === 'privacy' ? <PrivacyPanel /> : null}
+          {type === 'privacy' ? <PrivacyPanel onClearConversationMemories={onClearConversationMemories} /> : null}
         </div>
       </section>
     </div>
@@ -234,7 +245,7 @@ function MemoryManager({ memoryItems, onChange }: { memoryItems: string[]; onCha
   return (
     <div className="mine-memory-editor">
       <div className="mine-memory-intro">
-        <p>这些是澈会带进之后聊天里的事实。</p>
+        <p>这些是你主动希望澈记住的事。</p>
       </div>
       {memoryItems.length === 0 ? (
         <div className="mine-memory-empty">
@@ -278,9 +289,37 @@ function MemoryManager({ memoryItems, onChange }: { memoryItems: string[]; onCha
   );
 }
 
-function PrivacyPanel() {
+function PrivacyPanel({ onClearConversationMemories }: { onClearConversationMemories: () => void }) {
+  const [isConfirming, setIsConfirming] = useState(false);
+
   return (
     <div className="mine-privacy-actions">
+      <div className="setting-field action-row">
+        <div>
+          <div className="setting-label">清除聊天形成的记忆</div>
+          <div className="setting-value">
+            清除澈从聊天中自然形成的长期记忆。你主动写在「澈记得的事」里的内容不会被删除。
+          </div>
+        </div>
+        {isConfirming ? (
+          <div className="memory-confirm">
+            <span>确定清除这些聊天记忆吗？</span>
+            <button type="button" onClick={() => setIsConfirming(false)}>取消</button>
+            <button
+              className="is-warm-danger"
+              type="button"
+              onClick={() => {
+                onClearConversationMemories();
+                setIsConfirming(false);
+              }}
+            >
+              清除
+            </button>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setIsConfirming(true)}>清除</button>
+        )}
+      </div>
       {privacyActions.map((item) => (
         <div className="setting-field action-row" key={item}>
           <div>

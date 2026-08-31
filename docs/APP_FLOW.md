@@ -96,7 +96,7 @@ completed
 ```text
 Scene Chat
   ├─ 返回 → 今天
-  ├─ 输入消息 → runtime context + explicit user context → POST /api/chat → append Dify answer
+  ├─ 输入消息 → runtime context + explicit/hidden memory context → POST /api/chat → append Dify answer
   ├─ 请求失败 → 保留 user message → 显示重试，不生成 fake reply
   └─ 安静聊聊 → Deep Talk
 ```
@@ -109,8 +109,9 @@ Rules:
 - no avatar frame
 - duration comes from `activeStartedAt` when the activity is active
 - explicit user context comes from App-owned `userProfile` and manual `memoryItems`
+- hidden conversation memory is extracted only after End, stored separately, and added to later chat context
 - preference changes and Daily World changes update future requests without resetting messages
-- memory stays manual-only; chat does not extract or write memory
+- Back and collapse never extract memory; End archives immediately and processes summary/memory asynchronously
 
 ## Deep Talk
 
@@ -118,7 +119,7 @@ Rules:
 安静聊聊
   ├─ 收起面板 → 保留 session，显示完整场景与 launcher
   ├─ 返回 → 今天并保留 session
-  ├─ 结束 → 归档聊天信件并清除 session
+  ├─ 结束 → 立即归档聊天信件并清除 session → 异步提取 Conversation Memory
   └─ 输入消息 → 继续当前 date + scene session 的 Dify conversation
 ```
 
@@ -157,3 +158,20 @@ Completing an activity updates:
 - activeActivity cleared if relevant
 - Hero returns to default Che status
 - recentMoments / dayRecords get a new record
+
+## Conversation Memory v1
+
+```text
+Ended real chat
+  ├─ save fallback DayRecord immediately
+  ├─ return to Today without waiting
+  └─ Summary Workflow
+      ├─ update letter topicTitle / summary
+      └─ add 0–3 grounded fact/event items to lumen.conversationMemories
+```
+
+`memoryItems` remains the user-visible, manually managed Explicit Memory source.
+Conversation Memory is a separate hidden local source: it is never listed in
+「澈记得的事」and can only be cleared as a whole from Privacy. Both sources are
+formatted into the existing Dify `memoryContext`; current user statements always
+override older memory, and dated events do not imply a present state or a pattern.

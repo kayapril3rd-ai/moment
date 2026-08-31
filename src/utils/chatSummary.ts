@@ -17,6 +17,7 @@ export function createChatSummaryFallback(messages: ChatMessage[], sceneType: Sc
   return {
     topicTitle: sceneType === 'deep_room' ? '这次安静聊到的事' : '这次聊到的事',
     summary: truncateText(summarySource, FALLBACK_SUMMARY_MAX_LENGTH),
+    conversationMemories: [],
   };
 }
 

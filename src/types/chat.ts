@@ -6,6 +6,7 @@ export interface ChatUserContext {
   chatPace: string;
   dislikes: string;
   memoryItems: string[];
+  conversationMemoryItems: string[];
 }
 
 export interface ChatRequest {

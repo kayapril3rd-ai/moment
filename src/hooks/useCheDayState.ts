@@ -26,6 +26,7 @@ import { useCheDayDerivedState } from './useCheDayDerivedState';
 import { toDateKey } from '../utils/date';
 import { getCheScheduleForDate as mergeCheScheduleForDate } from '../utils/cheSchedule.ts';
 import type { StoredChatSession } from '../utils/chatStorage';
+import type { EndedChatProcessingResult } from '../types/chatSummary';
 import { summarizeEndedChat } from '../services/chatSummaryClient';
 import {
   applyChatSummaryToRecord,
@@ -316,8 +317,12 @@ export function useCheDayState() {
     );
   };
 
-  const recordEndedChat = (session: StoredChatSession, scene: SceneData, linkedPlanId: string | null) => {
-    if (!session.messages.some((message) => message.role === 'user')) return;
+  const recordEndedChat = (
+    session: StoredChatSession,
+    scene: SceneData,
+    linkedPlanId: string | null,
+  ): Promise<EndedChatProcessingResult | null> => {
+    if (!session.messages.some((message) => message.role === 'user')) return Promise.resolve(null);
     const endedAt = new Date();
     const fallback = createChatSummaryFallback(session.messages, scene.id);
     const record: DayRecord = {
@@ -336,15 +341,17 @@ export function useCheDayState() {
     };
     setDayRecords((currentRecords) => addUniqueRecord(currentRecords, record));
 
-    void summarizeEndedChat({
+    return summarizeEndedChat({
       sceneTitle: scene.shortTitle,
       messages: session.messages.map(({ role, text }) => ({ role, text })),
     })
       .then((summary) => {
         setDayRecords((currentRecords) => applyChatSummaryToRecord(currentRecords, record.id, summary));
+        return { recordId: record.id, dateKey: record.dateKey, summary };
       })
       .catch(() => {
         // The saved fallback remains the truthful history when summary service is unavailable.
+        return null;
       });
   };
 

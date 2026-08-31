@@ -31,6 +31,7 @@ interface TodayPageProps {
   memoryItems: string[];
   onUserProfileChange: (profile: UserProfile) => void;
   onMemoryItemsChange: (items: string[]) => void;
+  onClearConversationMemories: () => void;
 }
 
 export function TodayPage({
@@ -42,6 +43,7 @@ export function TodayPage({
   memoryItems,
   onUserProfileChange,
   onMemoryItemsChange,
+  onClearConversationMemories,
 }: TodayPageProps) {
   const mainScrollRef = useRef<HTMLDivElement>(null);
   const [activeMainTab, setActiveMainTab] = useState<MainTab>('today');
@@ -198,6 +200,7 @@ export function TodayPage({
               recentMoments={recentMoments}
               onUserProfileChange={onUserProfileChange}
               onMemoryItemsChange={onMemoryItemsChange}
+              onClearConversationMemories={onClearConversationMemories}
             />
           ) : null}
         </div>

@@ -52,5 +52,6 @@ function isChatSummaryResponse(value: unknown): value is ChatSummaryResponse {
   return typeof response.topicTitle === 'string'
     && response.topicTitle.trim().length > 0
     && typeof response.summary === 'string'
-    && response.summary.trim().length > 0;
+    && response.summary.trim().length > 0
+    && Array.isArray(response.conversationMemories);
 }
