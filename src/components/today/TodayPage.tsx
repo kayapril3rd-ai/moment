@@ -66,6 +66,7 @@ export function TodayPage({
     completeActivity,
     completePlan,
     dayRecords,
+    deleteChatRecord,
     deletePlan,
     getCheScheduleForDate,
     handleAddPlan,
@@ -189,7 +190,7 @@ export function TodayPage({
           ) : null}
 
           {activeMainTab === 'arrange' ? (
-            <ArrangePage initialTab={arrangeInitialTab} userPlans={userPlans} getCheScheduleForDate={getCheScheduleForDate} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={(plan) => setSelectedPlanId(plan.id)} />
+            <ArrangePage initialTab={arrangeInitialTab} userPlans={userPlans} getCheScheduleForDate={getCheScheduleForDate} dayRecords={dayRecords} onAddPlan={handleAddPlan} onInvitePlan={handleInvitePlan} onSelectPlan={(plan) => setSelectedPlanId(plan.id)} onDeleteChatRecord={deleteChatRecord} />
           ) : null}
 
           {activeMainTab === 'mine' ? (

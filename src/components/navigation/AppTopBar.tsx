@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { CheNotification } from '../../types/che';
 import {
@@ -33,26 +33,23 @@ export function AppTopBar({
   const [readKeys, setReadKeys] = useState<Set<string>>(() => readNotificationReadKeys());
   const hasUnread = notifications.some((item) => !item.isRead && !readKeys.has(getNotificationReadKey(item)));
 
-  useEffect(() => {
-    if (!isEchoOpen) return;
+  const openEcho = () => {
     setReadKeys(markNotificationsRead(notifications));
-  }, [isEchoOpen, notifications]);
-
-  const toggleEcho = () => {
-    const nextOpen = !isEchoOpen;
-    setIsEchoOpen(nextOpen);
+    setIsEchoOpen(true);
   };
+
+  const closeEcho = () => setIsEchoOpen(false);
 
   const echoModal = isEchoOpen
     ? createPortal(
-        <div className="echo-overlay" role="presentation" onClick={toggleEcho}>
+        <div className="echo-overlay" role="presentation" onClick={closeEcho}>
           <section className="echo-modal" role="dialog" aria-modal="true" aria-label="回响" onClick={(event) => event.stopPropagation()}>
             <header>
               <div className="echo-title-block">
                 <h2 className="echo-title">回响</h2>
                 <p className="echo-subtitle">澈留给你的几句话</p>
               </div>
-              <button type="button" aria-label="关闭回响" onClick={toggleEcho}>
+              <button type="button" aria-label="关闭回响" onClick={closeEcho}>
                 <CloseSoftIcon size={20} aria-hidden="true" />
               </button>
             </header>
@@ -73,7 +70,7 @@ export function AppTopBar({
           <strong>{title}</strong>
         </span>
         {showNotification ? (
-          <button className={`notification-button${hasUnread ? ' has-unread' : ''}`} type="button" aria-label="回响" onClick={toggleEcho}>
+          <button className={`notification-button${hasUnread ? ' has-unread' : ''}`} type="button" aria-label="回响" onClick={openEcho}>
             <BellSoftIcon size={24} aria-hidden="true" />
           </button>
         ) : null}

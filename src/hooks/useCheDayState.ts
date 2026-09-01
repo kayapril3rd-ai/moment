@@ -355,6 +355,12 @@ export function useCheDayState() {
       });
   };
 
+  const deleteChatRecord = useCallback((recordId: string) => {
+    setDayRecords((currentRecords) => currentRecords.filter(
+      (record) => record.id !== recordId || record.kind !== 'letter',
+    ));
+  }, []);
+
   return {
     ...derivedState,
     activeActivityId,
@@ -365,6 +371,7 @@ export function useCheDayState() {
     completeActivity,
     completePlan,
     dayRecords,
+    deleteChatRecord,
     deletePlan,
     handleAddPlan,
     handleInvitePlan,

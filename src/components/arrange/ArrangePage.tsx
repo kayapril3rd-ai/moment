@@ -15,6 +15,7 @@ interface ArrangePageProps {
   onAddPlan: (input: string, selectedDateKey?: string) => boolean;
   onInvitePlan: (planId: string) => void;
   onSelectPlan: (plan: UserPlan) => void;
+  onDeleteChatRecord: (recordId: string) => void;
   initialTab?: ArrangeTab;
 }
 
@@ -25,6 +26,7 @@ export function ArrangePage({
   onAddPlan,
   onInvitePlan,
   onSelectPlan,
+  onDeleteChatRecord,
   initialTab = 'mine',
 }: ArrangePageProps) {
   const {
@@ -72,6 +74,7 @@ export function ArrangePage({
           cheSchedule={visibleCheSchedule}
           selectedMonthDay={selectedMonthDay}
           onTabChange={setActiveTab}
+          onDeleteChatRecord={onDeleteChatRecord}
         />
       ) : (
         <>
@@ -79,7 +82,7 @@ export function ArrangePage({
           {activeTab === 'mine' ? (
             <section className="my-arrange-content" aria-label="我的安排">
               <UserPlanList plans={visibleUserPlans} selectedDateKey={selectedDateKey} onAddPlan={onAddPlan} onInvite={onInvitePlan} onSelectPlan={onSelectPlan} />
-              {isToday && letterRecords.length > 0 ? <ChatLetterSection letterRecords={letterRecords} /> : null}
+              {isToday && letterRecords.length > 0 ? <ChatLetterSection letterRecords={letterRecords} onDeleteLetter={onDeleteChatRecord} /> : null}
             </section>
           ) : (
             <section className="che-arrange-panel" aria-label="澈的安排">

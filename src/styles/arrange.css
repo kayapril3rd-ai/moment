@@ -172,6 +172,10 @@ body {
 }
 
 .notification-button::after {
+  width: 6px;
+  height: 6px;
+  border-color: var(--bg-app);
+  background: var(--primary-dark);
   opacity: 0;
 }
 
@@ -1065,6 +1069,7 @@ body {
 
 button.letter-card {
   cursor: pointer;
+  touch-action: pan-y;
 }
 
 .letter-card + .letter-card {
@@ -1227,13 +1232,147 @@ button.letter-card {
   line-height: 1.4;
 }
 
-.letter-detail-content p {
-  margin: 13px 0 0;
+.letter-transcript {
+  display: grid;
+  gap: 18px;
+  margin-top: 17px;
+}
+
+.transcript-entry {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.transcript-role {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  line-height: 1.35;
+}
+
+.transcript-entry.is-che .transcript-role {
+  color: var(--primary-dark);
+}
+
+.transcript-entry p,
+.letter-transcript-fallback {
+  margin: 0;
   color: var(--text-main);
-  font-size: var(--text-body-size);
+  font-size: 15px;
   line-height: 1.7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.letter-transcript-fallback {
+  margin-top: 17px;
+}
+
+.letter-context-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 3100;
+}
+
+.letter-context-anchor {
+  position: fixed;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 44px;
+}
+
+.letter-context-menu {
+  display: grid;
+  place-items: center;
+  width: auto;
+  min-width: 48px;
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(45, 58, 52, 0.96);
+  box-shadow: 0 5px 14px rgba(30, 45, 38, 0.14);
+  color: #fffdf9;
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.letter-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(31, 48, 43, 0.22);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.letter-delete-dialog {
+  width: min(280px, calc(100vw - 48px));
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: 22px;
+  background: var(--surface-strong);
+  box-shadow: 0 18px 48px rgba(30, 45, 38, 0.14);
+}
+
+.letter-delete-copy {
+  padding: 22px 20px 18px;
+  text-align: center;
+}
+
+.letter-delete-copy h2 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 17px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+}
+
+.letter-delete-copy p {
+  margin: 6px 0 0;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.letter-delete-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--line-soft);
+}
+
+.letter-delete-actions button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--primary-dark);
+  font: inherit;
+  font-size: 14px;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.letter-delete-actions button + button {
+  border-left: 1px solid var(--line-soft);
+}
+
+.letter-delete-actions .is-danger {
+  color: #9a514d;
+}
+
+.letter-context-menu:focus-visible,
+.letter-delete-actions button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
 }
 
 @media (max-width: 340px) {

@@ -58,3 +58,62 @@ Post-fix evidence is recorded in the combined comparison and the latest 375px sc
 - Copy and content: unchanged.
 
 final result: passed
+
+---
+
+# Design QA — UX polish
+
+- Source visual truth: `E:\codex\generated_images\01a04254-3bc9-74e1-bb1f-0ba2bd7b3a2a\exec-6c20ff42-7519-416b-8003-8ec525aa6684.png`, with the user's latest written overrides taking precedence: keep the existing letter drawer, use left-aligned text records instead of bubbles, use a deep-green unread dot, and reduce the long-press menu.
+- Implementation screenshots:
+  - `E:\work\work\lumen\qa-ux-polish-today-375.png`
+  - `E:\work\work\lumen\qa-ux-polish-today-moments-375.png`
+  - `E:\work\work\lumen\qa-ux-polish-letter-detail-375.png`
+  - `E:\work\work\lumen\qa-ux-polish-letter-context-375.png`
+  - `E:\work\work\lumen\qa-ux-polish-letter-delete-375.png`
+- Combined comparison: `E:\work\work\lumen\qa-ux-polish-comparison.png`
+- Viewport: 375 × 812 CSS px, device scale factor 1.
+- Source pixels: 1536 × 1024. Implementation screenshots: 375 × 812 each. The combined board normalizes each source state and implementation screenshot into aligned columns; exact pixel comparison is not claimed because the user's written override intentionally changes three states from the earlier mock.
+- State: Today unread, Today recent moments copy, letter detail drawer, long-press delete menu, and delete confirmation.
+
+## Full-view comparison evidence
+
+- The existing Moment shell, bottom navigation, Arrange date state, cards, warm ivory surfaces, and sage/forest palette remain unchanged.
+- The letter detail stays in the existing overlay/sheet above the Arrange page. The background remains visible through the scrim and closing returns to the unchanged list state.
+- The long-press menu is a fixed overlay near the pressed letter. Browser measurements before and after opening were identical for both letter-card y positions, and list `scrollTop` remained 72.
+- The confirmation remains a compact centered modal rather than a bottom sheet.
+
+## Focused region evidence
+
+- Typography: transcript body is 15px with 1.7 line height; role labels are 12px. All entries are left aligned and use transparent backgrounds.
+- Spacing/layout: transcript gap is 18px. The drawer content scrolls to its exact bottom (`scrollTop` 184 / max 184) without horizontal overflow.
+- Colors/tokens: unread dot computes to `rgb(63, 94, 80)` (`var(--primary-dark)`) at 6 × 6px. Transcript and modal use existing semantic text/surface tokens.
+- Image/icon quality: no image or icon assets changed in this polish.
+- Copy/content: Today displays `最近的小片段`; `更多` remains. Transcript preserves all ten seeded messages in order.
+- Context menu: visible menu is 50 × 30px with 13px text and only `删除`; its 56 × 44px positioning wrapper preserves a usable touch region without enlarging the visible label. Final measured menu bounds (x 197.9, y 472.7) stay fully inside the pressed card bounds (x 40, y 440.3, width 295, height 135.5).
+- Confirmation: dialog measures 280 × 135px and contains only the requested title, helper copy, and two actions.
+
+## Interaction verification
+
+- Notification: unread before open; false after close; false after refresh; a newly added notification restored unread state.
+- Letter short press: opened the existing drawer.
+- Letter long press: opened the compact overlay menu without also opening detail.
+- Outside/menu cancellation: no deletion occurred.
+- Confirmation cancellation: both records remained.
+- Confirmation deletion: one record was removed immediately, persisted to `moment.dayRecords`, and stayed removed after refresh.
+- Console errors: none.
+- Runtime page errors: none.
+
+## Findings
+
+- No actionable P0, P1, or P2 mismatches remain against the user's latest overrides.
+- The differences from the earlier generated mock (red dot, alternating bubbles, larger context menu) are intentional and directly requested.
+
+## Comparison history
+
+- Initial implemented comparison: passed. No P0/P1/P2 visual fix loop was required after the browser-rendered comparison.
+
+## Follow-up polish
+
+- None required for this scoped change.
+
+final result: passed

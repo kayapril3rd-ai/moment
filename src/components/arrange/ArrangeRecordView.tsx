@@ -1,4 +1,11 @@
-import { useState } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
+import { createPortal } from 'react-dom';
 import type { ArrangeTab } from '../../hooks/useArrangeDateState';
 import type { CheScheduleItem, DayRecord } from '../../types/che';
 import { sceneRegistry } from '../../data';
@@ -12,6 +19,7 @@ interface ArrangeRecordViewProps {
   cheSchedule: CheScheduleItem[];
   selectedMonthDay: string;
   onTabChange: (tab: ArrangeTab) => void;
+  onDeleteChatRecord: (recordId: string) => void;
 }
 
 export function ArrangeRecordView({
@@ -21,6 +29,7 @@ export function ArrangeRecordView({
   cheSchedule,
   selectedMonthDay,
   onTabChange,
+  onDeleteChatRecord,
 }: ArrangeRecordViewProps) {
   return (
     <section className="day-record-view" aria-labelledby="day-record-title">
@@ -69,14 +78,138 @@ export function ArrangeRecordView({
         )}
       </div>
 
-      {activeTab === 'mine' ? <ChatLetterSection letterRecords={letterRecords} /> : null}
+      {activeTab === 'mine' ? <ChatLetterSection letterRecords={letterRecords} onDeleteLetter={onDeleteChatRecord} /> : null}
     </section>
   );
 }
 
-export function ChatLetterSection({ letterRecords }: { letterRecords: DayRecord[] }) {
+interface TranscriptMessage {
+  role: 'che' | 'user';
+  content: string;
+}
+
+interface LetterContextMenu {
+  letterId: string;
+  left: number;
+  top: number;
+}
+
+interface PressStart {
+  x: number;
+  y: number;
+}
+
+interface CardBounds {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+const longPressDelay = 480;
+const longPressMoveTolerance = 8;
+const contextMenuWidth = 56;
+const contextMenuTouchHeight = 44;
+const contextMenuViewportInset = 8;
+
+export function ChatLetterSection({
+  letterRecords,
+  onDeleteLetter,
+}: {
+  letterRecords: DayRecord[];
+  onDeleteLetter: (recordId: string) => void;
+}) {
   const [selectedLetterId, setSelectedLetterId] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<LetterContextMenu | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
+  const pressStartRef = useRef<PressStart | null>(null);
+  const suppressClickRef = useRef(false);
   const selectedLetter = letterRecords.find((letter) => letter.id === selectedLetterId) ?? null;
+  const transcript = selectedLetter ? parseLetterTranscript(selectedLetter.detail ?? '') : null;
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => () => clearLongPressTimer(), []);
+
+  const openContextMenu = (
+    letterId: string,
+    pointerX: number,
+    pointerY: number,
+    cardBounds: CardBounds,
+  ) => {
+    const minimumLeft = Math.max(cardBounds.left + 8, contextMenuViewportInset);
+    const maximumLeft = Math.min(
+      cardBounds.right - contextMenuWidth - 8,
+      window.innerWidth - contextMenuWidth - contextMenuViewportInset,
+    );
+    const left = Math.min(
+      Math.max(pointerX - contextMenuWidth / 2, minimumLeft),
+      Math.max(minimumLeft, maximumLeft),
+    );
+    const minimumTop = Math.max(cardBounds.top + 4, contextMenuViewportInset);
+    const maximumTop = Math.min(
+      cardBounds.bottom - contextMenuTouchHeight - 4,
+      window.innerHeight - contextMenuTouchHeight - contextMenuViewportInset,
+    );
+    const top = Math.min(
+      Math.max(pointerY - contextMenuTouchHeight / 2, minimumTop),
+      Math.max(minimumTop, maximumTop),
+    );
+    setContextMenu({ letterId, left, top });
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>, letterId: string) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    clearLongPressTimer();
+    setContextMenu(null);
+    suppressClickRef.current = false;
+    const pointerX = event.clientX;
+    const pointerY = event.clientY;
+    const { top, right, bottom, left } = event.currentTarget.getBoundingClientRect();
+    pressStartRef.current = { x: pointerX, y: pointerY };
+    longPressTimerRef.current = window.setTimeout(() => {
+      suppressClickRef.current = true;
+      openContextMenu(letterId, pointerX, pointerY, { top, right, bottom, left });
+      longPressTimerRef.current = null;
+    }, longPressDelay);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const pressStart = pressStartRef.current;
+    if (!pressStart) return;
+    if (Math.hypot(event.clientX - pressStart.x, event.clientY - pressStart.y) > longPressMoveTolerance) {
+      clearLongPressTimer();
+      pressStartRef.current = null;
+    }
+  };
+
+  const finishPointerPress = () => {
+    clearLongPressTimer();
+    pressStartRef.current = null;
+  };
+
+  const handleLetterClick = (event: ReactMouseEvent<HTMLButtonElement>, letterId: string) => {
+    if (suppressClickRef.current) {
+      event.preventDefault();
+      suppressClickRef.current = false;
+      return;
+    }
+    setContextMenu(null);
+    setSelectedLetterId(letterId);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return;
+    onDeleteLetter(pendingDeleteId);
+    if (selectedLetterId === pendingDeleteId) setSelectedLetterId(null);
+    setPendingDeleteId(null);
+  };
 
   return (
     <>
@@ -84,7 +217,18 @@ export function ChatLetterSection({ letterRecords }: { letterRecords: DayRecord[
         <h3>聊天信件</h3>
         {letterRecords.length > 0 ? (
           letterRecords.map((letter) => (
-            <button className="letter-card" key={letter.id} type="button" onClick={() => setSelectedLetterId(letter.id)}>
+            <button
+              className="letter-card"
+              key={letter.id}
+              type="button"
+              onClick={(event) => handleLetterClick(event, letter.id)}
+              onContextMenu={(event) => event.preventDefault()}
+              onPointerDown={(event) => handlePointerDown(event, letter.id)}
+              onPointerMove={handlePointerMove}
+              onPointerUp={finishPointerPress}
+              onPointerCancel={finishPointerPress}
+              onPointerLeave={finishPointerPress}
+            >
               <div className="letter-copy">
                 <strong>{letter.title}</strong>
                 <p>{letter.summary}</p>
@@ -121,13 +265,99 @@ export function ChatLetterSection({ letterRecords }: { letterRecords: DayRecord[
             </header>
             <div className="letter-detail-content">
               <h3>聊天记录</h3>
-              <p>{selectedLetter.detail}</p>
+              {transcript ? (
+                <div className="letter-transcript">
+                  {transcript.map((message, index) => (
+                    <div className={`transcript-entry is-${message.role}`} key={`${message.role}-${index}`}>
+                      <span className="transcript-role">{message.role === 'che' ? '澈' : '我'}</span>
+                      <p>{message.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="letter-transcript-fallback">{selectedLetter.detail}</p>
+              )}
             </div>
           </section>
         </div>
       ) : null}
+
+      {contextMenu ? createPortal(
+        <div className="letter-context-layer" role="presentation" onPointerDown={() => setContextMenu(null)}>
+          <div
+            className="letter-context-anchor"
+            style={{ left: contextMenu.left, top: contextMenu.top }}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <button
+              className="letter-context-menu"
+              type="button"
+              onClick={() => {
+                setPendingDeleteId(contextMenu.letterId);
+                setContextMenu(null);
+              }}
+            >
+              删除
+            </button>
+          </div>
+        </div>,
+        document.body,
+      ) : null}
+
+      {pendingDeleteId ? createPortal(
+        <div className="letter-delete-overlay" role="presentation" onClick={() => setPendingDeleteId(null)}>
+          <section
+            className="letter-delete-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="letter-delete-title"
+            aria-describedby="letter-delete-description"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="letter-delete-copy">
+              <h2 id="letter-delete-title">删除这条聊天记录？</h2>
+              <p id="letter-delete-description">删除后无法恢复。</p>
+            </div>
+            <div className="letter-delete-actions">
+              <button type="button" onClick={() => setPendingDeleteId(null)}>取消</button>
+              <button className="is-danger" type="button" onClick={confirmDelete}>删除</button>
+            </div>
+          </section>
+        </div>,
+        document.body,
+      ) : null}
     </>
   );
+}
+
+export function parseLetterTranscript(detail: string): TranscriptMessage[] | null {
+  const lines = detail.replace(/\r\n?/g, '\n').split('\n');
+  const messages: TranscriptMessage[] = [];
+  let currentMessage: TranscriptMessage | null = null;
+
+  for (const line of lines) {
+    const roleMatch = line.match(/^\s*(澈|我)\s*[:：]\s*(.*)$/);
+    if (roleMatch) {
+      if (currentMessage) messages.push(currentMessage);
+      currentMessage = {
+        role: roleMatch[1] === '澈' ? 'che' : 'user',
+        content: roleMatch[2] ?? '',
+      };
+      continue;
+    }
+
+    if (!currentMessage) {
+      if (line.trim()) return null;
+      continue;
+    }
+
+    currentMessage.content += `${currentMessage.content ? '\n' : ''}${line}`;
+  }
+
+  if (currentMessage) messages.push(currentMessage);
+  if (messages.length === 0) return null;
+
+  return messages.map((message) => ({ ...message, content: message.content.trim() }));
 }
 
 function getLetterSceneLabel(letter: DayRecord): string {
