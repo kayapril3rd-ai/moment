@@ -1,8 +1,6 @@
 // QuietChatEntry is the low-pressure quiet-chat entrance below the hero.
 // It should feel like "come sit for a while", not a therapy or tool module.
-import { ArrowRightSoftIcon } from '../icons';
-
-const dogChatIconUrl = new URL('../../assets/dog-chat.png', import.meta.url).href;
+import { ArrowRightSoftIcon, QuietChatCatBubbleIcon } from '../icons';
 
 interface QuietChatEntryProps {
   onOpen: () => void;
@@ -12,7 +10,7 @@ export function QuietChatEntry({ onOpen }: QuietChatEntryProps) {
   return (
     <button className="quiet-chat-entry" type="button" onClick={onOpen}>
       <span className="quiet-icon" aria-hidden="true">
-        <img className="dog-soft-icon" src={dogChatIconUrl} alt="" />
+        <QuietChatCatBubbleIcon size={30} />
       </span>
       <span className="quiet-copy">
         <span className="quiet-title-row">

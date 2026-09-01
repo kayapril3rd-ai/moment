@@ -3183,9 +3183,30 @@ button.letter-card {
 .summary-card-icon {
   width: 28px;
   height: 28px;
+  flex: 0 0 28px;
   margin-bottom: 7px;
   border-radius: 10px;
-  background: var(--green-soft);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.summary-card-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+@media (max-width: 340px) {
+  .overview-icon,
+  .summary-card-icon {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+  }
+
+  .summary-card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .companion-grid-card .overview-detail,
@@ -3839,5 +3860,41 @@ time,
 
   .arrange-page .che-scene-card {
     height: 94px;
+  }
+}
+
+/* Home/activity icon optical alignment and the Scene Chat glass control family. */
+.arrange-compact-page .my-plan-icon .activity-glyph {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.chat-frame .chat-launcher-button {
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 252, 247, 0.22);
+  background: rgba(255, 252, 247, 0.14);
+  box-shadow: 0 10px 26px rgba(22, 35, 29, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #fffaf2;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.chat-frame .chat-launcher-button .scene-chat-launcher-glyph {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 390px) {
+  .arrange-compact-page .my-plan-icon .activity-glyph {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  .arrange-compact-page .my-plan-icon .activity-glyph {
+    width: 22px !important;
+    height: 22px !important;
   }
 }

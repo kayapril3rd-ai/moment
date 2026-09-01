@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react';
 import type { SceneCard as SceneCardType } from '../../types/che';
 import { getSceneCardImage } from '../../utils/sceneImages';
-import { FitnessIcon, MovieIcon, ParkIcon, StudyIcon } from '../icons';
+import { ActivityIcon } from '../icons';
 
 interface SceneCardProps {
   card: SceneCardType;
@@ -21,7 +21,7 @@ export function SceneCard({ card, onSelect }: SceneCardProps) {
       <span className="scene-copy">
         <span className="scene-title-row">
           <span className="scene-title-icon" aria-hidden="true">
-            <SceneIcon sceneType={card.sceneType} />
+            <ActivityIcon sceneType={card.sceneType} worldScene={card.worldSceneOverride} size={22} />
           </span>
           <h3>{card.title}</h3>
         </span>
@@ -31,13 +31,6 @@ export function SceneCard({ card, onSelect }: SceneCardProps) {
       <span className="scene-card-action">进入</span>
     </button>
   );
-}
-
-function SceneIcon({ sceneType }: { sceneType: SceneCardType['sceneType'] }) {
-  if (sceneType === 'fitness') return <FitnessIcon size={24} />;
-  if (sceneType === 'study') return <StudyIcon size={24} />;
-  if (sceneType === 'watch') return <MovieIcon size={24} />;
-  return <ParkIcon size={24} />;
 }
 
 function getSceneCardTag(card: SceneCardType) {

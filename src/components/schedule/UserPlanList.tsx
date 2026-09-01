@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import type { SceneType, UserPlan } from '../../types/che';
-import { ChatSoftIcon, ClockSoftIcon, DumbbellSoftIcon, MovieIcon, PlanCardIcon, SproutIcon, TodayBubbleIcon } from '../icons';
+import type { UserPlan } from '../../types/che';
+import { ActivityIcon, ClockSoftIcon } from '../icons';
 
 interface UserPlanListProps {
   plans: UserPlan[];
@@ -89,7 +89,7 @@ export function UserPlanList({ plans, selectedDateKey, onAddPlan, onInvite, onSe
               }}
             >
               <span className="plan-icon my-plan-icon" aria-hidden="true">
-                <PlanIcon sceneType={plan.sceneType} />
+                <ActivityIcon className="activity-glyph" sceneType={plan.sceneType} worldScene={plan.worldScene} size={22} />
               </span>
               <div className="schedule-item-main my-plan-main">
                 <div className="my-plan-meta">
@@ -134,15 +134,6 @@ function getScheduleTimeLabel(plan: UserPlan): string {
 function getScheduleDurationLabel(plan: UserPlan): string {
   if (plan.durationMinutes) return `${plan.durationMinutes} 分钟`;
   return '';
-}
-
-function PlanIcon({ sceneType }: { sceneType: SceneType }) {
-  if (sceneType === 'fitness') return <DumbbellSoftIcon size={24} />;
-  if (sceneType === 'study') return <PlanCardIcon size={24} />;
-  if (sceneType === 'watch') return <MovieIcon size={24} />;
-  if (sceneType === 'meal') return <TodayBubbleIcon size={24} />;
-  if (sceneType === 'gaming') return <ChatSoftIcon size={24} />;
-  return <SproutIcon size={24} />;
 }
 
 function getPlanAction(plan: UserPlan): { label: string; kind: 'invite' | 'accepted' | 'active' | 'done' } {

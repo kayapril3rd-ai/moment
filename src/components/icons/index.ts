@@ -34,3 +34,21 @@ export {
   TodayBubbleIcon,
   UserSoftIcon,
 } from './SoftIcons';
+
+export {
+  ActivityIcon,
+  CatHeadIcon,
+  CompanionBubbleIcon,
+  DogHeadIcon,
+  FitnessActivityIcon,
+  GamingActivityIcon,
+  MealIcon,
+  MovieActivityIcon,
+  PlanClipboardIcon,
+  QuietChatCatBubbleIcon,
+  SleepIcon,
+  StudyActivityIcon,
+  TodaySproutIcon,
+  WalkPawIcon,
+  type HomeActivityIconProps,
+} from './HomeActivityIcons';

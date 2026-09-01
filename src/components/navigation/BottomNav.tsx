@@ -1,7 +1,7 @@
 // BottomNav keeps the MVP to three main entrances: Today, Arrange, Mine.
 // Icons use the local Che vector system so the app avoids mixed icon styles.
 import type { ReactElement, SVGProps } from 'react';
-import { CalendarSoftIcon, TodayBubbleIcon, UserSoftIcon } from '../icons';
+import { CalendarSoftIcon, TodaySproutIcon, UserSoftIcon } from '../icons';
 
 export type MainTab = 'today' | 'arrange' | 'mine';
 
@@ -11,7 +11,7 @@ interface BottomNavProps {
 }
 
 const tabs = [
-  { id: 'today', label: '今天', Icon: TodayBubbleIcon },
+  { id: 'today', label: '今天', Icon: TodaySproutIcon },
   { id: 'arrange', label: '安排', Icon: CalendarSoftIcon },
   { id: 'mine', label: '我的', Icon: UserSoftIcon },
 ] satisfies Array<{ id: MainTab; label: string; Icon: (props: SVGProps<SVGSVGElement> & { size?: number }) => ReactElement }>;

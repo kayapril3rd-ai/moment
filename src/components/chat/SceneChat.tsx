@@ -62,7 +62,7 @@ export function SceneChat({ scene, cheCurrentState, userContext, activeStartedAt
         {!isChatOpen ? (
           <div className="chat-launcher">
             <button className="chat-launcher-button" type="button" aria-label="打开聊天" onClick={() => setIsChatOpen(true)}>
-              <ChatSoftIcon size={28} aria-hidden="true" />
+              <ChatSoftIcon className="scene-chat-launcher-glyph" size={24} aria-hidden="true" />
             </button>
           </div>
         ) : (

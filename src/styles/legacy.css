@@ -2961,8 +2961,8 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: var(--color-brand-soft);
-  color: var(--color-brand-deep);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
 }
 
 .scene-copy h3 {
@@ -3651,13 +3651,13 @@ body,
   width: 42px;
   height: 42px;
   border-radius: 14px;
-  background: #DDE7DF;
-  color: #34483C;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
 }
 
 .quiet-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
 }
 
 .quiet-title-row {

@@ -1,7 +1,4 @@
-import { PlanCardIcon, SproutIcon, TodayBubbleIcon } from '../icons';
-
-const deepTalkCatIconUrl = new URL('../../assets/deep-talk-cat-cropped.png', import.meta.url).href;
-const dogFaceIconUrl = new URL('../../assets/dog-face.png', import.meta.url).href;
+import { CatHeadIcon, CompanionBubbleIcon, DogHeadIcon, PlanClipboardIcon, SproutIcon } from '../icons';
 
 interface CompanionOverviewGridProps {
   companionshipTitle: string;
@@ -19,10 +16,10 @@ interface CompanionOverviewGridProps {
 }
 
 const overviewCards = [
-  { key: 'companionship', label: '今日相伴', Icon: TodayBubbleIcon, imageUrl: null, imageClass: '' },
-  { key: 'deep', label: '安静聊聊', Icon: null, imageUrl: deepTalkCatIconUrl, imageClass: 'deep-talk-cat-icon' },
-  { key: 'user', label: '我的计划', Icon: PlanCardIcon, imageUrl: null, imageClass: '' },
-  { key: 'che', label: '澈的状态', Icon: null, imageUrl: dogFaceIconUrl, imageClass: 'dog-soft-icon' },
+  { key: 'companionship', label: '今日相伴', Icon: CompanionBubbleIcon },
+  { key: 'deep', label: '安静聊聊', Icon: CatHeadIcon },
+  { key: 'user', label: '我的计划', Icon: PlanClipboardIcon },
+  { key: 'che', label: '澈的状态', Icon: DogHeadIcon },
 ] as const;
 
 function toShortHint(text: string) {
@@ -58,11 +55,11 @@ export function CompanionOverviewGrid({
       </div>
 
       <div className="companion-grid">
-        {overviewCards.map(({ key, label, Icon, imageUrl, imageClass }) => (
+        {overviewCards.map(({ key, label, Icon }) => (
           <button className="companion-grid-card" type="button" key={key} onClick={data[key].onClick}>
             <span className="summary-card-header">
               <span className="overview-icon summary-card-icon" aria-hidden="true">
-                {Icon ? <Icon size={24} /> : <img className={imageClass} src={imageUrl ?? ''} alt="" />}
+                <Icon size={22} />
               </span>
               <span className="card-label summary-card-title">{label}</span>
             </span>
